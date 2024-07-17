@@ -25,11 +25,15 @@
             </NavLink>
         </div>
 
+        <hr style="background-color: white;" />
+
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="/dashboard">
                 Dashboard
             </NavLink>
         </div>
+
+        <hr style="background-color: white;" />
 
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">
@@ -50,6 +54,8 @@
         </div>
         @if (IsSignedIn)
         {
+            <hr style="background-color: white;" />
+
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="javascript: void(0);" @onclick="__doClearSession">
                     SignOut

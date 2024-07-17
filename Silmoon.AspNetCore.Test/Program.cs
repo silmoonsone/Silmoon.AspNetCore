@@ -43,7 +43,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 
 // ** required NuGet package for Swashbuckle.AspNetCore
-//builder.Services.AddSwaggerGen(c => c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, $"{Configure.ProjectName}.xml"), true)).AddSwaggerGenNewtonsoftSupport();
+//builder.Services.AddSwaggerGen(c => c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, $"{ProjectName}.xml"), true)).AddSwaggerGenNewtonsoftSupport();
 
 // ** required NuGet package for Swashbuckle.AspNetCore.Newtonsoft
 //builder.Services.AddSwaggerGen().AddSwaggerGenNewtonsoftSupport();
@@ -58,15 +58,11 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 //builder.Services.AddSignalR().AddNewtonsoftJsonProtocol();
 
 // ** To add Blazor service
-builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+//builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 
 builder.Services.AddSilmoonConfigure<SilmoonConfigureServiceImpl>(o =>
 {
-#if DEBUG
-    o.DebugConfig();
-#else
     o.ReleaseConfig();
-#endif
 });
 builder.Services.AddSingleton<Core>();
 builder.Services.AddSilmoonAuth<SilmoonAuthServiceImpl>();
@@ -125,7 +121,7 @@ app.MapControllerRoute(
 //app.MapHub<ChatServiceHub>("/hubs/ChatServiceHub");
 
 // ** To enable Blazor server components
-app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
+//app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
 app.UseAntiforgery();
 

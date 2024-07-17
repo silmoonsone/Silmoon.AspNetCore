@@ -58,7 +58,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 //builder.Services.AddSignalR().AddNewtonsoftJsonProtocol();
 
 // ** To add Blazor service
-//builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 
 builder.Services.AddSilmoonConfigure<SilmoonConfigureServiceImpl>(o =>
 {
@@ -121,7 +121,7 @@ app.MapControllerRoute(
 //app.MapHub<ChatServiceHub>("/hubs/ChatServiceHub");
 
 // ** To enable Blazor server components
-//app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
+app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
 app.UseAntiforgery();
 

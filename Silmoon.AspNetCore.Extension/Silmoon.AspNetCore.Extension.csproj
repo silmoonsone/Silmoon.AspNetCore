@@ -7,6 +7,22 @@
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <PackageId>Silmoon.AspNetCore.Extension</PackageId>
+    <Version>1.4.0</Version>
+    <Authors>SILMOON</Authors>
+    <Company>SILMOON LLC</Company>
+    <Description>Silmoon SDK</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/silmoonsone/Silmoon.AspNetCore</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/silmoonsone/Silmoon.AspNetCore.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>silmoon</PackageTags>
+    <PackageIcon>logo.png</PackageIcon>
+    <PackageOutputPath>..\packages_out</PackageOutputPath>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <NoWarn>1701;1702;1591</NoWarn>
   </PropertyGroup>
@@ -21,22 +37,6 @@
       <PackagePath>\</PackagePath>
     </None>
   </ItemGroup>
-
-  <PropertyGroup>
-    <IsPackable>true</IsPackable>
-    <PackageId>Silmoon.AspNetCore.Extension</PackageId>
-    <Version>1.4.0</Version>
-    <Authors>SILMOON</Authors>
-    <Company>SILMOON LLC</Company>
-    <Description>Silmoon SDK</Description>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/silmoonsone/Silmoon</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/silmoonsone/Silmoon.git</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-    <PackageTags>silmoon</PackageTags>
-    <PackageIcon>logo.png</PackageIcon>
-    <PackageOutputPath>..\packages_out</PackageOutputPath>
-  </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="MongoDB.Driver" Version="2.27.0" />

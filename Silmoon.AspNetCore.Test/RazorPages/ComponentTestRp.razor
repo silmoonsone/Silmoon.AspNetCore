@@ -1,0 +1,29 @@
+﻿@page "/component-test"
+@rendermode InteractiveServer
+@using Silmoon.AspNetCore.Blazor
+@using Silmoon.AspNetCore.Blazor.Components
+
+<BackBarComponent Title="TestComponentRp"></BackBarComponent>
+
+<hr />
+
+<div>@enumValue</div>
+<div>@startDate</div>
+<div>@endDate</div>
+
+<hr />
+<DateSelectComponent @bind-StartDate="startDate" @bind-EndDate="endDate"></DateSelectComponent>
+<hr />
+<EnumFlagEditComponent @bind-Value="enumValue"></EnumFlagEditComponent>
+<BlazorReconnect></BlazorReconnect>
+
+@code {
+    IdentityRole enumValue = IdentityRole.Admin | IdentityRole.User;
+    DateTime startDate = DateTime.Now;
+    DateTime endDate = DateTime.Now;
+
+    protected override Task OnInitializedAsync()
+    {
+        return base.OnInitializedAsync();
+    }
+}

@@ -1,0 +1,71 @@
+﻿@{
+    ViewData["Title"] = "UploadFile";
+}
+
+<h1>UploadFile</h1>
+<hr />
+<div id="app">
+    <div id="fileList">
+        <div v-for="file in files" class="text-primary text-sm-left">
+            <a class="text-danger mr-1" href="javascript: void(0)" v-bind:onclick="'v.deleteImage(\'' + encodeURIComponent(file) + '\')'">删除</a>
+            <a v-bind:href="'../WebApi/ShowTempFile?fileName=' + encodeURIComponent(file)" target="_blank">{{file}}</a>
+        </div>
+    </div>
+    <input id="uploader" name="uploader" type="file" style="display: none;" onchange="v.uploadFile('uploader')" />
+    <button id="uploadButton" type="button" class="btn btn-primary" onclick="$('#uploader').click()">上传</button>
+</div>
+
+
+
+<script id="vue_js">
+    v = new Vue({
+        el: '#app',
+        data: {
+            files: []
+        },
+        methods: {
+            uploadFile: function(uploaderId) {
+                ajaxFileUploadPost("#" + uploaderId, "../WebApi/UploadFile", function(e) {
+                    if (e.Success) {
+                        v.getFiles();
+                    } else {
+                        toast("上传错误：" + e.Message);
+                    }
+                }, function(e) {
+                }, function(e) {
+                    $(".smm-uploader-statustext").html(e + "%");
+                });
+            },
+            getFiles: function() {
+                $.get("../WebApi/GetTempFileNames", function(e) {
+                    if (e.Success) {
+                        v.files = [];
+                        for (var i = 0; i < e.Data.length; i++) {
+                            v.files[i] = e.Data[i];
+                        }
+                    } else {
+                        // error
+                    }
+                });
+            },
+            deleteImage: function(fileName) {
+                if (confirm("删除图片？")) {
+                    $.get("../WebApi/DeleteTempFile?fileName=" + fileName, function(e) {
+                        if (e.Success) {
+                            v.getFiles();
+                        } else {
+                            // error
+                        }
+                    });
+                }
+            }
+        }
+    });
+    v.getFiles();
+</script>
+
+<script>
+    function upload(e, s) {
+
+    }
+</script>

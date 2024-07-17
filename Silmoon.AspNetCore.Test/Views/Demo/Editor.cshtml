@@ -1,0 +1,43 @@
+﻿@{
+    ViewData["Title"] = "Editor";
+}
+
+<h1>Editor</h1>
+<hr />
+<div>
+    <div id="editor_bar"><button class="btn" onclick="return setB()">B</button></div>
+    <div id="editor" contenteditable="true" style="outline: none; border: solid silver 1px;"></div>
+    <hr />
+    <input id="content" class="form-control" />
+</div>
+
+<script>
+    $(document).ready(function(){
+        $("#editor").on('focusin', function() {
+            $("#editor").html($("#content").val());
+        });
+
+        $("#editor").on("focusout", function() {
+            $("#content").val($("#editor").html());
+        });
+
+        $("#content").on("onchange", function() {
+            $("#editor").html($("#content").val());
+        });
+    });
+    function setB(){
+        var html = $("#editor").html();
+        var from = window.getSelection().focusOffset;
+        var to = window.getSelection().anchorOffset;
+        console.log("from:" + from);
+        console.log("to:" + to);
+        html = insertString(to, html, "</b>");
+        html = insertString(from, html, "<b>");
+        $("#editor").html(html);
+        $("#content").val($("#editor").html());
+    }
+
+    function insertString(index, source, insert){
+        return source.slice(0, index) + insert + source.slice(index);
+    }
+</script>

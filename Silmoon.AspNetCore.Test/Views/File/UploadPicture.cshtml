@@ -1,0 +1,83 @@
+﻿@{
+    ViewData["Title"] = "UploadPicture";
+}
+
+<h1>UploadPicture</h1>
+<hr />
+<div id="app" class="smm-uploader-body row" style="height: 100px;">
+    <div class="col-6">
+        <div id="fileCardImageFront" class="smm-uploader-block">
+            <div class="smm-uploader-block-content">
+                <div class="smm-uploader-block-text">
+                    <div class="smm-uploader-block-title">身份证<br />国徽面</div>
+                    <div class="smm-uploader-block-ok">上传成功</div>
+                    <div class="smm-uploader-block-status">0%</div>
+                    <input id="fileCardImageFrontUploader" type="file" class="smm-uploader-block-input" name="pic" onchange="v.uploadPic(this.id, 'fileCardImageFront', 'fileCardImageFront')" />
+                </div>
+            </div>
+            <div class="smm-uploader-block-delete" onclick="v.deletePic('fileCardImageFront', 'fileCardImageFront');"></div>
+        </div>
+    </div>
+    <div class="col-6">
+        <div id="fileCardImageBack" class="smm-uploader-block">
+            <div class="smm-uploader-block-content">
+                <div class="smm-uploader-block-text">
+                    <div class="smm-uploader-block-title">身份证<br />头像面</div>
+                    <div class="smm-uploader-block-ok">上传成功</div>
+                    <div class="smm-uploader-block-status">0%</div>
+                    <input id="fileCardImageBackUploader" type="file" class="smm-uploader-block-input" name="pic" onchange="v.uploadPic(this.id, 'fileCardImageBack', 'fileCardImageBack')" />
+                </div>
+            </div>
+            <div class="smm-uploader-block-delete" onclick="v.deletePic('fileCardImageBack', 'fileCardImageBack');"></div>
+        </div>
+
+    </div>
+</div>
+
+<script id="vue_js">
+    v = new Vue({
+        el: '#app',
+        data: {
+            images: [],
+        },
+        methods: {
+            uploadPic: function (uploaderId, blockId, fileName) {
+                ajaxFileUploadPost("#" + uploaderId, "../WebApi/UploadTempImage?FileName=" + fileName + "&UserId=@(Model.Username)", function (e) {
+                    if (e.Success) {
+                        $("#" + blockId + " .smm-uploader-block-title").hide();
+                        $("#" + blockId + " .smm-uploader-block-ok").show();
+                        $("#" + blockId + " .smm-uploader-block-status").hide();
+                        $("#" + blockId + " .smm-uploader-block-delete").show();
+                        smUploadSetBackgroundImage("#" + blockId, "../WebApi/ShowTempImage?UserId=@(Model.Username)&fileName=" + fileName + "&rnd=" + Math.random())
+                    } else {
+                        // error
+                        $("#" + blockId + " .smm-uploader-block-title").show();
+                        $("#" + blockId + " .smm-uploader-block-status").hide();;
+                    }
+                }, function (e) {
+                    $("#" + blockId + " .smm-uploader-block-title").show();
+                    $("#" + blockId + " .smm-uploader-block-status").hide();
+                }, function (e) {
+                    $("#" + blockId + " .smm-uploader-block-title").hide();
+                    $("#" + blockId + " .smm-uploader-block-status").show();;
+                    $("#" + blockId + " .smm-uploader-block-status").html(e + "%")
+                });
+            },
+
+            deletePic: function (fileName, blockId) {
+                if (confirm("删除图片？")) {
+                    $.get("../WebApi/DeleteTempImage?UserId=@Model.Username&fileName=" + fileName, function (e) {
+                        if (e.Success) {
+                            $("#" + blockId + " .smm-uploader-block-title").show();
+                            $("#" + blockId + " .smm-uploader-block-ok").hide();
+                            $("#" + blockId + " .smm-uploader-block-delete").hide();
+                            smUploadSetBackgroundImage("#" + blockId, "")
+                        } else {
+                            // error
+                        }
+                    });
+                }
+            },
+        }
+    });
+</script>

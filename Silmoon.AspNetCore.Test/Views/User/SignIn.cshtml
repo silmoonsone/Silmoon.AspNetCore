@@ -1,0 +1,49 @@
+﻿@{
+    ViewData["Title"] = "SignIn";
+}
+
+<h1>用户登录</h1>
+<hr />
+<div class="jumbotron">
+    <form asp-controller="WebApi" asp-action="CreateSession" data-ajax="true" data-ajax-complete="signin_OnComplete" data-ajax-begin="signin_OnBegin">
+        <div>
+            @Html.Hidden("Url")
+            <div class="form-group">
+                <label for="Username">用户名：</label>
+                <input id="Username" name="Username" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label for="Password">密码：</label>
+                <input type="password" id="Password" name="Password" class="form-control" />
+            </div>
+            <div class="form-group">
+                <button class="btn btn-primary float-left" id="signinSubmit">登录</button>
+                <a class="btn float-right" href="SignUp">注册</a>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+    function signin_OnBegin(e, status) {
+        var btn = $("#signinSubmit");
+        btn[0].disabled = true;
+    }
+    function signin_OnComplete(e, status) {
+        var btn = $("#signinSubmit");
+        if (e.responseJSON.Success) {
+            btn[0].innerText = "稍等...";
+            if (e.responseJSON.StateCode == 10000 || e.responseJSON.Code == 10000) {
+                //sso_signin_success
+                toast("成功，转跳中...", 1000);
+                setTimeout(function () { location.href = e.responseJSON.Data }, 1000);
+            } else {
+                toast("成功", 1000);
+                setTimeout(function () { location.href = e.responseJSON.Data }, 1000);
+            }
+        } else {
+            toast("失败：" + e.responseJSON.Message, 3000);
+            btn[0].disabled = false;
+        }
+    }
+</script>

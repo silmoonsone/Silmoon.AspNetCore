@@ -1,0 +1,90 @@
+﻿@{
+    ViewData["Title"] = "UploadImage";
+}
+
+<h1>UploadImage</h1>
+<hr />
+<div id="app">
+    <div id="uploader1">
+        <div class="smm-uploader-header">
+            <p class="smm-uploader-title">图片上传</p>
+            <div class="smm-uploader-count"><span id="uploadCount">0</span>/10</div>
+        </div>
+        <div class="smm-uploader-body" style="width: 100%">
+            <ul class="smm-uploader-files" id="uploaderFiles">
+                <li class="smm-uploader-file"
+                    :style="{ backgroundImage: 'url(../WebApi/ShowTempImage?UserId=@Model.Username&fileName=' + image + ')' }"
+                    :onclick="'v.deleteImage(\'' + image + '\')'" v-for="image in images" />
+
+            </ul>
+            <div class="smm-uploader-file smm-uploader-status" style="display: none;">
+                <div class="smm-uploader-statustext">50%</div>
+            </div>
+            <div class="smm-uploader-new">
+                <input id="File1" class="smm-uploader-input" type="file" name="pic" accept="image/*" onchange="v.uploadImage(this.id)">
+            </div>
+        </div>
+    </div>
+</div>
+<script id="vue_js">
+    v = new Vue({
+        el: '#app',
+        data: {
+            images: []
+        },
+        methods: {
+            uploadImage: function (uploaderId, fileName) {
+                ajaxFileUploadPost("#" + uploaderId, "../WebApi/UploadTempImage?UserId=@Model.Username", function (e) {
+                    if (e.Success) {
+                        v.getImages();
+                        $(".smm-uploader-status").hide();
+                        $(".smm-uploader-new").show();
+                    } else {
+                        // error
+                        $(".smm-uploader-status").hide();
+                        $(".smm-uploader-new").show();
+                    }
+                }, function (e) {
+                    $(".smm-uploader-status").hide();
+                    $(".smm-uploader-new").show();
+                }, function (e) {
+                    $(".smm-uploader-status").show();
+                    $(".smm-uploader-statustext").html(e + "%");
+                    $(".smm-uploader-new").hide();
+                });
+            },
+            getImages: function () {
+                $.get("../WebApi/GetTempImageNames?UserId=@Model.Username", function (e) {
+                    if (e.Success) {
+                        v.images = [];
+                        for (var i = 0; i < e.Data.length; i++) {
+                            v.images[i] = e.Data[i];
+                        }
+                    } else {
+                        // error
+                    }
+                });
+            },
+            deleteImage: function (fileName) {
+                if (confirm("删除图片？")) {
+                    $.get("../WebApi/DeleteTempImage?UserId=@Model.Username&fileName=" + fileName, function (e) {
+                        if (e.Success) {
+                            v.getImages();
+                        } else {
+                            // error
+                        }
+                    });
+                }
+            },
+            showAgentInfo: function () {
+                var isAgent = $("#isAgentCheckbox")[0].checked;
+                if (isAgent) {
+                    $("#agentInfo").fadeIn();
+                } else {
+                    $("#agentInfo").fadeOut();
+                }
+            }
+        }
+    });
+    v.getImages();
+</script>

@@ -1,0 +1,3 @@
+﻿{
+  "mongodb": "mongodb://user:pwd@mongodb0-internal.silmoon.host/dbname"
+}

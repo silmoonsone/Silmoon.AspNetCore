@@ -1,0 +1,32 @@
+﻿@{
+    ViewData["Title"] = "AppMenuItem";
+    Layout = "~/Views/Shared/_AppLayout.cshtml";
+}
+
+<div>
+    <div class="smm-content-block-top container-fluid">
+        <div class="display-6">Title</div>
+    </div>
+    <div class="smm-content-block pb-0">
+        <div class="smm-menu-item">
+            <a class="smm-menu-item-inner" onclick="pushWebPage('Item1')">
+                <div>
+                    Item1
+                </div>
+            </a>
+        </div>
+        <div class="smm-menu-item">
+            <a class="smm-menu-item-inner" onclick="pushWebPage('Item2')">
+                <div>
+                    Item2
+                </div>
+            </a>
+        </div>
+        <div class="smm-menu-item">
+            <a class="smm-menu-item-inner" onclick="pushWebPage('Item3')">
+                <div class="float-start">Item3</div>
+                <div class="float-end">Append</div>
+            </a>
+        </div>
+    </div>
+</div>

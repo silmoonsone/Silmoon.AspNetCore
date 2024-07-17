@@ -1,0 +1,12 @@
+﻿<div id="components-reconnect-modal" style="position: fixed; left: 0px; right: 0px; top: 0px; bottom: 0px; z-index: 9999; ">
+    <div class="bg-danger text-white ps-3 crm_show" style="line-height: 50px;">
+        连接问题 (正在尝试连接: <span id="components-reconnect-current-attempt"></span> / <span id="components-reconnect-max-retries"></span>)
+    </div>
+    <div class="bg-danger text-white ps-3 crm_failed" style="line-height: 50px;">
+        尝试连接失败（Failed）。 <a href="javascript:location.reload()">点击这里</a> 重新加载。
+    </div>
+    <div class="bg-danger text-white ps-3 crm_rejected" style="line-height: 50px;">
+        尝试连接失败（Rejected）。 <a href="javascript:location.reload()">点击这里</a> 重新加载。
+    </div>
+    <div style="width: 100%; height: 100%; background-color: white; opacity: 0.5"></div>
+</div>

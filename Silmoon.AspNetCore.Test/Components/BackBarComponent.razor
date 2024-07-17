@@ -1,0 +1,28 @@
+﻿@using Silmoon.AspNetCore.Html;
+<div class="d-grid mb-2" style="display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);">
+    <NavLink class="text-start" style="cursor: default" href="@BackLink">
+        @if (BackButtonIsBlack)
+        {
+            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABcAAAAoCAYAAAAVBmHYAAAABHNCSVQICAgIfAhkiAAAAaBJREFUSEvFl7FOwzAQhnGExMYLIF4pyQYzC6IgFTbahXaAdAMh0XZoxwrGJI+EeAM2EAr/RThKXcfy2Y6wFFWt0u8/3/l+22Iv0EiSZCCEGFZV9Y0nK8tyI0KwAR4DfC9ZgH8WRXHoDU/TdATogxLkT57n+15wRHyLiDPN7MeAZ85wA3gC8JQEneBIxTX++6hGjFzPkGtKUz3YcFswG84Bs+BcsDXcBWwFB/gCL841y+0Jq+LG1ITGgvqAjZH7gjvhIcBaeCjwDjyO47MoitaaIi1QvAHXQZuCEhgmtMKjFtkJ3ETeB7iGw91OEOybxoTmMKFLbira7xP8HfDj9o9wtxeAr3zAMvIPwI8U+BJw6kyvIZDvU6yQ11ArZCst9KW3gkqlPgS21nRvTSRnYGh/djNpLTeUv3T6eQiB/9ksLGrgt821BKwOQWojWh+KXE4A1nCKiivAgnMF2HASMJxwp9gOJzL3TnCTAPaCEex61mxzrqatXlckBwJDCDw7Ry5BHQJfSM+BN/yvyHf4bHId7MLVmgHdj+obHeDnSMvqF+awAjjOYaS0AAAAAElFTkSuQmCC" style="width: 13px; height: 22px; " />
+        }
+        else
+        {
+            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABcAAAAoCAYAAAAVBmHYAAAABHNCSVQICAgIfAhkiAAAAYNJREFUSEvF181KxDAQwHEDgjdfQHwuPXsRP2D15u7F3YPu3hRhVw/rUfS5xDfwpkj9p6QlxrRmMikGypbS/U2Saaap2SjUqqo6hhpxfHLMjTFPpoQNPMG58qx38G01DjwGvQ46+QW+qcKBL+wUREY/AZ9n4z3wFHhmA2bhwGf89ybS4wWwnaa6ifFUWIxLYBEuhZPxHDgJBz7ixlUkebck77xvEfYmVAP39lwLd+Il4CheCv6FAx9w8TGSpHuSZ0uqqLUJdfA6smqz4LbnQ8A1DrzH70tkvCum4kQ0D8HNFn/l2m5wfQl8qoGbnr9xshNAD+B2Zaqa7fk+wnOpJ8R36qdlsIQ2kYYI8KNwDbaIvBF0lVjxYoqW3FL1pbOelwjwPy+LhBzoXnNegKRNULgQkzdFOTuAZNytZNEIRLg0gBh3Abq2zjOq6bSZ+yz8jwBjAizqeq4p2JHPlYYbEeBOhbsRhN9D9vIH+JYadwEu+W3nmvMyH1zeQrNJbr7oDun5+hsaZMkpim+72gAAAABJRU5ErkJggg==" style="width: 13px; height: 22px; " />
+        }
+    </NavLink>
+    <div class="text-center"><span class="p-1 b" style="font-size: 18px; color: @TitleColor.ToString()">@Title</span></div>
+    <div class="text-end"><span class="p-1">@ChildContent</span></div>
+</div>
+
+@code {
+    [Parameter]
+    public string Title { get; set; }
+    [Parameter]
+    public HtmlColor TitleColor { get; set; } = HtmlColor.Black;
+    [Parameter]
+    public string BackLink { get; set; } = "javascript:history.back();";
+    [Parameter]
+    public bool BackButtonIsBlack { get; set; } = true;
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+}

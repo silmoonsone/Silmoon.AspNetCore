@@ -1,0 +1,38 @@
+﻿#components-reconnect-modal {
+    display: none;
+}
+
+    #components-reconnect-modal.components-reconnect-show,
+    #components-reconnect-modal.components-reconnect-failed,
+    #components-reconnect-modal.components-reconnect-rejected {
+        display: block;
+    }
+
+        #components-reconnect-modal.components-reconnect-show .crm_show {
+            display: block;
+        }
+
+        #components-reconnect-modal.components-reconnect-show .crm_failed,
+        #components-reconnect-modal.components-reconnect-show .crm_rejected {
+            display: none;
+        }
+
+
+        #components-reconnect-modal.components-reconnect-failed .crm_failed {
+            display: block;
+        }
+
+        #components-reconnect-modal.components-reconnect-failed .crm_show,
+        #components-reconnect-modal.components-reconnect-failed .crm_rejected {
+            display: none;
+        }
+
+
+        #components-reconnect-modal.components-reconnect-rejected .crm_rejected {
+            display: block;
+        }
+
+        #components-reconnect-modal.components-reconnect-rejected .crm_failed,
+        #components-reconnect-modal.components-reconnect-rejected .crm_show {
+            display: none;
+        }

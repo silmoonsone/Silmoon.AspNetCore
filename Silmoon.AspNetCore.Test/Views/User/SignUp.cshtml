@@ -1,0 +1,82 @@
+﻿@{
+    ViewData["Title"] = "SignUp";
+}
+
+<h1>用户注册</h1>
+<hr />
+<div class="jumbotron">
+    <form asp-controller="WebApi" asp-action="CreateUser" data-ajax="true" data-ajax-complete="signUp_OnComplete" data-ajax-begin="signUp_OnBegin">
+        <div class="form-group">
+            <label for="Username">用户名</label>
+            <input id="Username" name="Username" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label for="Password">密码</label>
+            <input type="password" id="Password" name="Password" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label for="Repassword">重复密码</label>
+            <input type="password" id="Repassword" name="Repassword" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label for="VerifyCode">移动电话验证码</label>
+            <div class="input-group">
+                <input id="VerifyCode" name="VerifyCode" class="form-control" />
+                <button type="button" id="ValiCodeSendButton" onclick="return valiCodeLink_onClick(this);" class="btn btn-primary input-group-append">发送验证码</button>
+            </div>
+        </div>
+        <div class="form-group">
+            <button class="btn btn-primary float-left" id="signInSubmit">注册</button>
+            <a class="btn float-right" href="SignIn">返回登录</a>
+            <div class="clearfix"></div>
+        </div>
+    </form>
+</div>
+<script>
+    function signUp_OnBegin(e, s) {
+        var btn = $("#signInSubmit");
+        btn[0].disabled = true;
+    }
+    function signUp_OnComplete(e, s) {
+        var btn = $("#signInSubmit");
+        if (e.responseJSON.Success) {
+            btn[0].innerText = "稍等...";
+            toast("成功", 1000);
+            setTimeout(function () {
+                location.href = "SignIn";
+            }, 1000);
+        } else {
+            toast("失败：" + e.responseJSON.Message, 3000);
+            btn[0].disabled = false;
+        }
+    }
+    function valiCodeLink_onClick(e) {
+        let phoneNumber = $("#Username").val();
+
+        //let g_recaptcha_response = grecaptcha.getResponse();
+        //if (phoneNumber == "" || g_recaptcha_response == "") {
+        //    toast("手机号未填写，或者没有进行人机身份验证。", 3000);
+        //    return;
+        //}
+
+        if (phoneNumber == "") {
+            toast("手机号未填写。", 3000);
+            return;
+        }
+
+        $.ajax({
+            url: "../WebApi/SendMobilePhoneVerificationCode?Username=" + phoneNumber + "&g-recaptcha-response=" + g_recaptcha_response,
+            success: function (e) {
+                if (e.Success) {
+                    toast("验证码发送成功，注意查收。", 3000);
+                } else {
+                    toast("发送错误：" + e.Message, 3000)
+                }
+            },
+            error: function () {
+                toast("服务器错误", 3000);
+            }
+        })
+        setDisableCountdown(e, "等待{0}秒", 60);
+    }
+</script>

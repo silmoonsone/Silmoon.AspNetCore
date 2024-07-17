@@ -1,0 +1,64 @@
+﻿<div class="text-end">
+    <button class="@TodayClass" @onclick="()=>SetDateRange(DateTime.Today, DateTime.Today)">今天</button>
+    <button class="@YesterdayClass" @onclick="()=>SetDateRange(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(-1))">昨天</button>
+    <button class="@Last7DaysClass" @onclick="()=>SetDateRange(DateTime.Today.AddDays(-6), DateTime.Today)">近七天</button>
+    <button class="@ThisMonthClass" @onclick="()=>SetDateRange(new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1), DateTime.Today)">本月</button>
+    <button class="@Last30DaysClass" @onclick="()=>SetDateRange(DateTime.Today.AddDays(-29), DateTime.Today)">近30天</button>
+    <button class="@Last90DaysClass" @onclick="()=>SetDateRange(DateTime.Today.AddDays(-89), DateTime.Today)">近90天</button>
+    <button class="@AllClass" @onclick="()=>SetDateRange(DateTime.MinValue.Date, DateTime.Now.Date)">全部</button>
+    <InputDate class="form-control d-inline" style="width: auto;" Value="@StartDate" ValueChanged="(DateTime e) => onStartDateChanged(e)" ValueExpression="()=>StartDate" />
+    <InputDate class="form-control d-inline" style="width: auto;" Value="@EndDate" ValueChanged="(DateTime e)=>onEndDateChanged(e)" ValueExpression="()=>EndDate" />
+</div>
+
+@code {
+    [Parameter]
+    public DateTime StartDate { get; set; }
+
+    [Parameter]
+    public EventCallback<DateTime> StartDateChanged { get; set; }
+
+    [Parameter]
+    public DateTime EndDate { get; set; }
+
+    [Parameter]
+    public EventCallback<DateTime> EndDateChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<(DateTime StartDate, DateTime EndDate)> DateChanged { get; set; }
+
+    private string selectedClass = "btn btn-sm text-primary";
+    private string unselectedClass = "btn-sm btn";
+
+    private string TodayClass => IsDateRange(DateTime.Today, DateTime.Today) ? selectedClass : unselectedClass;
+    private string YesterdayClass => IsDateRange(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(-1)) ? selectedClass : unselectedClass;
+    private string Last7DaysClass => IsDateRange(DateTime.Today.AddDays(-6), DateTime.Today) ? selectedClass : unselectedClass;
+    private string ThisMonthClass => IsDateRange(new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1), DateTime.Today) ? selectedClass : unselectedClass;
+    private string Last30DaysClass => IsDateRange(DateTime.Today.AddDays(-29), DateTime.Today) ? selectedClass : unselectedClass;
+    private string Last90DaysClass => IsDateRange(DateTime.Today.AddDays(-89), DateTime.Today) ? selectedClass : unselectedClass;
+    private string AllClass => StartDate == DateTime.MinValue.Date && EndDate == DateTime.Now.Date ? selectedClass : unselectedClass;
+
+    private bool IsDateRange(DateTime start, DateTime end) => StartDate.Date == start.Date && EndDate.Date == end.Date;
+
+    private void SetDateRange(DateTime start, DateTime end)
+    {
+        if (StartDate != start || EndDate != end)
+        {
+            StartDate = start;
+            EndDate = end;
+            StartDateChanged.InvokeAsync(StartDate);
+            EndDateChanged.InvokeAsync(EndDate);
+            if (DateChanged.HasDelegate) DateChanged.InvokeAsync((StartDate, EndDate));
+        }
+    }
+
+    void onStartDateChanged(DateTime newDate)
+    {
+        StartDateChanged.InvokeAsync(newDate);
+        if (DateChanged.HasDelegate) DateChanged.InvokeAsync((newDate, EndDate));
+    }
+    void onEndDateChanged(DateTime newDate)
+    {
+        EndDateChanged.InvokeAsync(newDate);
+        if (DateChanged.HasDelegate) DateChanged.InvokeAsync((StartDate, newDate));
+    }
+}

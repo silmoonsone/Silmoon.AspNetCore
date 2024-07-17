@@ -1,0 +1,147 @@
+﻿@{
+    ViewData["Title"] = "SignalR Chat";
+}
+
+<h1>SignalR Chat</h1>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    Chat Room
+                </div>
+                <div class="card-body">
+                    <div id="messagesList" class="overflow-auto" style="height: 300px;"></div>
+                </div>
+                <div class="card-footer">
+                    <input type="text" id="messageInput" class="form-control" placeholder="Enter message..." />
+                    <button id="sendButton" class="btn btn-primary mt-2">Send</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    User Info
+                </div>
+                <div class="card-body">
+                    <input type="text" id="usernameInput" class="form-control" placeholder="Enter username..." />
+                    <button id="signinButton" class="btn btn-success mt-2">Sign In</button>
+                    <button id="signoutButton" class="btn btn-danger mt-2">Sign Out</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/lib/microsoft/signalr/dist/browser/signalr.js"></script>
+<script>
+    var connection = new signalR.HubConnectionBuilder()
+        .withUrl("/hubs/ChatHub")
+        .withAutomaticReconnect()
+        .build();
+
+    function appendMessage(content, color = "black") {
+        var msg = document.createElement("div");
+        msg.textContent = content;
+        msg.style.color = color;
+        document.getElementById("messagesList").appendChild(msg);
+        scrollToBottom();
+    }
+
+    function scrollToBottom() {
+        var messagesList = document.getElementById("messagesList");
+        messagesList.scrollTop = messagesList.scrollHeight;
+    }
+
+    connection.on("ReceiveMessage", function (timestamp, sender, message, isPrivate = false, targetUser = null) {
+        var content;
+        if (isPrivate && sender === connection.connectionId) {
+            content = `${timestamp} [Me -> @@${targetUser}]: ${message}`;
+            appendMessage(content, "purple");
+        } else if (isPrivate) {
+            content = `${timestamp} [${sender} -> Me]: ${message}`;
+            appendMessage(content, "blue");
+        } else {
+            content = `${timestamp} [${sender}]: ${message}`;
+            appendMessage(content);
+        }
+    });
+
+    connection.on("ErrorMessage", function (message) {
+        appendMessage(">> Error: " + message, "red");
+    });
+
+    connection.on("UserSignedIn", function (username) {
+        appendMessage("> " + username + " signed in.");
+    });
+
+    connection.on("UserSignedOut", function (username) {
+        appendMessage("> " + username + " signed out.");
+    });
+
+    connection.onreconnecting(function (error) {
+        appendMessage(">> Connection lost due to error. Reconnecting...", "orange");
+    });
+
+    connection.onreconnected(function (connectionId) {
+        appendMessage(">> Connection reestablished. Connected with connectionId " + connectionId, "green");
+    });
+
+    connection.onclose(function (error) {
+        appendMessage(">> Connection closed.", "red");
+    });
+
+    connection.start().then(function () {
+        appendMessage(">> Connected to server. ConnectionId: " + connection.connectionId, "green");
+    }).catch(function (err) {
+        appendMessage(">> Error connecting to server: " + err.toString(), "red");
+        console.error(err.toString());
+    });
+
+    document.getElementById("sendButton").addEventListener("click", function (event) {
+        var message = document.getElementById("messageInput").value;
+
+        if (message.startsWith("@@")) {
+            var spaceIndex = message.indexOf(" ");
+            if (spaceIndex > 1) {
+                var username = message.substring(1, spaceIndex);
+                var userMessage = message.substring(spaceIndex + 1);
+                connection.invoke("SendToUser", username, userMessage).then(() => {
+                    appendMessage(`${new Date().toLocaleTimeString()} [Me -> @@${username}]: ${userMessage}`, "purple");
+                }).catch(function (err) {
+                    console.error(err.toString());
+                });
+            }
+        } else if (message.startsWith("/me ")) {
+            var myMessage = message.substring(4);
+            connection.invoke("SendToMe", myMessage).catch(function (err) {
+                console.error(err.toString());
+            });
+        } else {
+            connection.invoke("SendToAll", message).catch(function (err) {
+                console.error(err.toString());
+            });
+        }
+
+        document.getElementById("messageInput").value = "";
+        event.preventDefault();
+    });
+
+    document.getElementById("signinButton").addEventListener("click", function (event) {
+        var username = document.getElementById("usernameInput").value;
+        connection.invoke("UserSignin", username).catch(function (err) {
+            console.error(err.toString());
+        });
+        event.preventDefault();
+    });
+
+    document.getElementById("signoutButton").addEventListener("click", function (event) {
+        var username = document.getElementById("usernameInput").value;
+        connection.invoke("UserSignout", username).catch(function (err) {
+            console.error(err.toString());
+        });
+        event.preventDefault();
+    });
+</script>

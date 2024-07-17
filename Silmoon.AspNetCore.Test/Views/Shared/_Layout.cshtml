@@ -1,0 +1,115 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>@ViewData["Title"] - Silmoon.AspNetCore.Test</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Silmoon.AspNetCore.Test.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/sm-mobile-test.css" asp-append-version="true" />
+    <link rel="stylesheet" href="//static.silmoon.com/lib/sm-upload/sm-upload.css" />
+    <link rel="stylesheet" href="//static.silmoon.com/lib/metroui-confirm/metroui-confirm.css" />
+    <script src="~/lib/jquery/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/jquery-ajax-unobtrusive/jquery.unobtrusive-ajax.min.js"></script>
+    <script src="~/lib/vue/vue.min.js"></script>
+    <script src="//static.silmoon.com/scripts/silmoon/toast.js"></script>
+    <script src="//static.silmoon.com/scripts/silmoon/common.js"></script>
+    <script src="//static.silmoon.com/lib/sm-upload/sm-upload.js"></script>
+    <script src="//static.silmoon.com/lib/metroui-confirm/metroui-confirm.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <component type="typeof(Microsoft.AspNetCore.Components.Web.HeadOutlet)" render-mode="Server" />
+</head>
+<body style="margin-bottom: 60px;">
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Silmoon.AspNetCore.Test</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link text-dark" href="javascript:void(0);" data-bs-toggle="dropdown">示例</a>
+                            <div class="dropdown-menu shadow">
+                                <a href="~/File/UploadImage" class="dropdown-item">图片上传</a>
+                                <a href="~/File/UploadPicture" class="dropdown-item">证件上传</a>
+                                <a href="~/File/UploadFile" class="dropdown-item">文件上传</a>
+                                <div class="dropdown-divider"></div>
+                                <a href="~/Demo/SignalR" class="dropdown-item">SignalR</a>
+                            </div>
+                        </li>
+                        @if (await SilmoonAuthService.IsSignIn())
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link text-dark" href="javascript:void(0);" id="userMenuLink" data-bs-toggle="dropdown">@((await SilmoonAuthService.GetUser<User>()).Username)</a>
+                                <div class="dropdown-menu dropdown-menu-right shadow">
+                                    <a href="~/WebApi/ClearSession" class="dropdown-item" data-ajax="true" data-ajax-begin="signOut_OnBegin" data-ajax-complete="signOut_OnComplete">退出登录</a>
+                                </div>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="SignIn">登录</a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2022 - Silmoon.AspNetCore.Test - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+    <script>
+        function signOut_OnBegin(e, s) {
+            $("#userMenuLink").html("退出中");
+        }
+        function signOut_OnComplete(e, s) {
+            $("#userMenuLink").html("退出中");
+            if (e.responseJSON.Success) {
+                $("#userMenuLink").html("已退出");
+                setTimeout(function () { location.reload(); }, 1000);
+            }
+        }
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+    @*<script src="~/_framework/blazor.server.js"></script>*@
+    @*<script src="~/lib/microsoft/signalr/dist/browser/signalr.js"></script>*@
+    @*    <script>
+    // 等待直到出现“重新加载”按钮
+    new MutationObserver((mutations, observer) => {
+    if (document.querySelector('#components-reconnect-modal h5 a')) {
+    console.log("重新加载");
+    // 现在，每隔10秒，查看服务器是否返回，如果返回，则重新加载
+    async function attemptReload() {
+    await fetch(''); // 检查服务器是否真的返回
+    location.reload();
+    }
+    observer.disconnect();
+    attemptReload();
+    setInterval(attemptReload, 10000);
+    }
+    }).observe(document.body, { childList: true, subtree: true });
+    </script>
+    *@
+</body>
+</html>

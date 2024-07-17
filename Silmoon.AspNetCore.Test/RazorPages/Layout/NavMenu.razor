@@ -1,0 +1,90 @@
+﻿@rendermode InteractiveServer
+@inject IJSRuntime Js
+@inject NavigationManager NavigationManager
+@inject ISilmoonAuthService SilmoonAuthService
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">Silmoon.AspNetCore.Test</a>
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/signin">
+                SignIn
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/signup">
+                SignUp
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/dashboard">
+                Dashboard
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/counter">
+                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/weather">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
+            </NavLink>
+        </div>
+        @if (IsSignedIn)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="javascript: void(0);" @onclick="__doClearSession">
+                    SignOut
+                </NavLink>
+            </div>
+        }
+        else
+        {
+
+        }
+    </nav>
+</div>
+
+@code {
+    bool IsSignedIn { get; set; } = false;
+    User User { get; set; }
+    async void __doClearSession()
+    {
+        var result = await Js.InvokeAsync<object>("doClearSession");
+        if (result is not null)
+        {
+            JObject jObject = JObject.Parse(result?.ToString());
+            NavigationManager.Refresh(true);
+            StateHasChanged();
+        }
+        else
+        {
+            await Js.InvokeVoidAsync("alert", "error: JsInvoke doClearSession result is null");
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        IsSignedIn = await SilmoonAuthService.IsSignIn();
+        if (IsSignedIn) User = await SilmoonAuthService.GetUser<User>();
+        await base.OnInitializedAsync();
+    }
+}

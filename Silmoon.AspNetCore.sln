@@ -1,0 +1,46 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35027.167
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Silmoon.AspNetCore", "Silmoon.AspNetCore\Silmoon.AspNetCore.csproj", "{BB8846F3-F31A-4384-9C21-F425DA5CBCDC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Silmoon.AspNetCore.Extension", "Silmoon.AspNetCore.Extension\Silmoon.AspNetCore.Extension.csproj", "{2B5499E9-E331-4286-92FB-1B5E318946BC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Silmoon.AspNetCore.Test", "Silmoon.AspNetCore.Test\Silmoon.AspNetCore.Test.csproj", "{64FCD5BC-29B3-4F43-BAEA-C4B76EC61A36}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "解决方案项", "解决方案项", "{14AE8DC4-8C4C-481E-B206-B09AC3BAB215}"
+	ProjectSection(SolutionItems) = preProject
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
+		LICENSE = LICENSE
+		logo.png = logo.png
+		README.md = README.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BB8846F3-F31A-4384-9C21-F425DA5CBCDC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BB8846F3-F31A-4384-9C21-F425DA5CBCDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BB8846F3-F31A-4384-9C21-F425DA5CBCDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BB8846F3-F31A-4384-9C21-F425DA5CBCDC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B5499E9-E331-4286-92FB-1B5E318946BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B5499E9-E331-4286-92FB-1B5E318946BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B5499E9-E331-4286-92FB-1B5E318946BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B5499E9-E331-4286-92FB-1B5E318946BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{64FCD5BC-29B3-4F43-BAEA-C4B76EC61A36}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64FCD5BC-29B3-4F43-BAEA-C4B76EC61A36}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64FCD5BC-29B3-4F43-BAEA-C4B76EC61A36}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64FCD5BC-29B3-4F43-BAEA-C4B76EC61A36}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2983254E-27A8-4A4F-90FF-2F7EFC42A5E9}
+	EndGlobalSection
+EndGlobal

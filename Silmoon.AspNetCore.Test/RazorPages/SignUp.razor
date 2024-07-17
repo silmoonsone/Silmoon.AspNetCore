@@ -1,0 +1,50 @@
+﻿@page "/signup"
+@rendermode InteractiveServer
+@inject Core Core
+
+<h3>SignUp</h3>
+<hr />
+<div>
+    <div class="form-group">
+        <label for="Username">Username</label>
+        <InputText class="form-control" @bind-Value="Username"></InputText>
+    </div>
+    <div class="form-group">
+        <label for="Password">Password</label>
+        <InputText class="form-control" type="password" @bind-Value="Password"></InputText>
+    </div>
+    <div class="form-group">
+        <label for="RepeatPassword">RepeatPassword</label>
+        <InputText class="form-control" type="password" @bind-Value="RepeatPassword"></InputText>
+    </div>
+    <div class="form-group">
+        <button class="btn btn-primary" @onclick="SubmitSignUp">Sign Up</button>
+        <a class="btn btn-secoundary" href="/signin">Sign In</a>
+    </div>
+    <div class="form-group">
+        @Message
+    </div>
+</div>
+
+@code {
+    public string Username { get; set; }
+    public string Password { get; set; }
+    public string RepeatPassword { get; set; }
+    public string Message { get; set; }
+
+    protected override Task OnInitializedAsync()
+    {
+        return base.OnInitializedAsync();
+    }
+    void SubmitSignUp()
+    {
+        var user = new User()
+            {
+                Username = Username,
+                Password = Password,
+            };
+        var result = Core.NewUser(user);
+
+        Message = result.Message;
+    }
+}

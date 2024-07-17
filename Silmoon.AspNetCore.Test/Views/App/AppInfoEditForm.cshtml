@@ -1,0 +1,94 @@
+﻿@{
+    ViewData["Title"] = "AppInfoEditForm";
+    Layout = "~/Views/Shared/_AppLayout.cshtml";
+}
+
+<div>
+    <div class="smm-content-block-top">
+        <div class="smm-input-block">
+            <div class="mb-3 text-center">
+                <img src="" width="100" height="100" style="border-radius: 10px; -webkit-border-radius: 10px; -moz-border-radius: 10px; " />
+            </div>
+        </div>
+
+        <div class="smm-input-block">
+            <label>手机号</label>
+            <input class="smm-input-nooutline" id="Telephone" name="Telephone" value="" />
+        </div>
+        <div class="smm-row-line"></div>
+
+        <div class="smm-input-block">
+            <label>昵称</label>
+            <input class="smm-input-nooutline" id="Nickname" name="Nickname" value="" />
+        </div>
+        <div class="smm-row-line"></div>
+
+        <div class="smm-input-block">
+            <label>姓名</label>
+            <input class="smm-input-nooutline" id="Name" name="Name" value="" />
+        </div>
+        <div class="smm-row-line"></div>
+        <div class="smm-input-block">
+            <label>扣费（实付余额：0，赠送余额：0）</label>
+            <input class="smm-input-nooutline b" autocomplete="off" placeholder="这里填写扣费金额" onfocus="this.placeholder = '宝，这里写金额鸭~'" onblur="this.placeholder = '这里填写扣费金额'" style="font-size: 22px; color: red;" id="TotalAmount" name="TotalAmount" value="" onkeydown="return totalAmount_OnChange();" onkeyup="return totalAmount_OnChange();" onkeypress="return totalAmount_OnChange();" onchange="return totalAmount_OnChange();" />
+        </div>
+        <div class="smm-row-line"></div>
+        <div class="smm-input-block">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" checked id="UseOffer" name="UseOffer" value="1" onchange="">
+                <label class="custom-control-label" for="UseOffer">使用 % 折扣进行扣费，最终价格<span class="text-danger b" id="finPrice">0</span>。</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="NotificationToUser" name="NotificationToUser" value="true">
+                <label class="custom-control-label" for="NotificationToUser">将此次消费信息使用微信通知到用户。</label>
+            </div>
+        </div>
+        <div class="smm-input-block">
+            <label>备注</label>
+            <input class="smm-input-nooutline" id="Note" name="Note" value="" placeholder="填写备注，可为空。" />
+        </div>
+        <div class="smm-row-line"></div>
+
+        <div class="smm-input-block d-grid">
+            <button class="btn btn-danger" id="checkSubmit" type="button" onclick="return check();">扣款</button>
+            <button class="btn btn-danger" id="ac" name="ac" value="submit" style="display: none; margin-top: 0px;">点击再次确认扣款</button>
+            <button class="btn btn-secondary mt-3" id="cancelSubmit" type="button" onclick="return cancel();" style="display: none;">取消</button>
+        </div>
+        <div class="smm-input-block">
+            <div class="text-primary b" id="Message" style="margin-bottom: 50px;">@(ViewBag.Message ?? "扣费规则：先从余额中扣除，不足部分从赠送余额扣除。")</div>
+        </div>
+    </div>
+</div>
+<script>
+    function on_completed(sender, e) {
+        if (e.Data.Success) {
+            MetroUIConfirm("结果", e.Data.Message, false, function(e) {
+                location.reload();
+            })
+        } else {
+            MetroUIConfirm("结果", "失败：" + e.Data.Message, false, function() {
+                cancel();
+            })
+        }
+    }
+    function totalAmount_OnChange() {
+        var offer = 1;
+        var price = parseInt($("#TotalAmount").val());
+
+        $("#finPrice").html(price * offer);
+    }
+    function check() {
+        $("#checkSubmit").fadeOut(function() {
+            $("#ac").fadeIn();
+            $("#cancelSubmit").fadeIn();
+        })
+    }
+    function cancel() {
+        $("#checkSubmit").fadeOut(function() {
+            $("#ac").fadeOut();
+            $("#cancelSubmit").fadeOut(function() {
+                $("#checkSubmit").fadeIn();
+            });
+        })
+    }
+</script>

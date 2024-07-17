@@ -1,0 +1,53 @@
+﻿@typeparam T where T : struct, Enum
+
+<div>
+    @foreach (var item in EnumValues)
+    {
+        if (!ExcludedValues.Contains(item) && (Convert.ToInt64(item) != 0 || IncludeZeroValue))
+        {
+            <label class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox"
+                       value="@item"
+                       checked="@Value.HasFlag(item)"
+                       @onchange="(() => HandleFlagChange(item))" />
+                <span class="form-check-label">@item.GetDisplayName()</span>
+            </label>
+        }
+    }
+</div>
+
+@code {
+    [Parameter]
+    public T Value { get; set; }
+
+    [Parameter]
+    public EventCallback<T> ValueChanged { get; set; }
+
+    [Parameter]
+    public bool IncludeZeroValue { get; set; } = false;  // 默认不包括值为0的枚举
+
+    [Parameter]
+    public IEnumerable<T> ExcludedValues { get; set; } = Enumerable.Empty<T>();  // 默认不排除任何枚举
+
+    private T[] EnumValues { get; set; }
+
+    protected override Task OnInitializedAsync()
+    {
+        EnumValues = Enum.GetValues(typeof(T)).Cast<T>().ToArray();
+        return base.OnInitializedAsync();
+    }
+
+    private async Task HandleFlagChange(T flag)
+    {
+        if (Value.HasFlag(flag))
+        {
+            Value = (T)Enum.ToObject(typeof(T), Convert.ToInt64(Value) & ~Convert.ToInt64(flag));
+        }
+        else
+        {
+            Value = (T)Enum.ToObject(typeof(T), Convert.ToInt64(Value) | Convert.ToInt64(flag));
+        }
+
+        await ValueChanged.InvokeAsync(Value);  // 通知外部Value已更改
+    }
+}

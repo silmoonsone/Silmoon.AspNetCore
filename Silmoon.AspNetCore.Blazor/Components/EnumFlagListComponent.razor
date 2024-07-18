@@ -1,0 +1,54 @@
+﻿@typeparam T where T : struct, Enum
+
+<div>
+    @foreach (var item in EnumValues)
+    {
+        @ChildContent(item)
+    }
+</div>
+
+@code {
+    [Parameter]
+    public T Value { get; set; }
+
+    [Parameter]
+    public EventCallback<T> ValueChanged { get; set; }
+
+    [Parameter]
+    public RenderFragment<EnumFlag<T>> ChildContent { get; set; }
+
+    [Parameter]
+    public EventCallback<ChangeEventArgs> OnSelectChanged { get; set; }
+
+    private List<EnumFlag<T>> EnumValues { get; set; } = [];
+
+    protected override Task OnInitializedAsync()
+    {
+        var enums = Enum.GetValues(typeof(T)).Cast<T>().ToArray();
+        foreach (var item in enums)
+        {
+            EnumValues.Add(new EnumFlag<T> { Enum = item, IsSelected = Value.HasFlag(item) });
+        }
+        return base.OnInitializedAsync();
+    }
+
+    public async Task ValueChangeHandler(T flag)
+    {
+        if (Value.HasFlag(flag))
+        {
+            Value = (T)Enum.ToObject(typeof(T), Convert.ToInt64(Value) & ~Convert.ToInt64(flag));
+        }
+        else
+        {
+            Value = (T)Enum.ToObject(typeof(T), Convert.ToInt64(Value) | Convert.ToInt64(flag));
+        }
+
+        await ValueChanged.InvokeAsync(Value);  // 通知外部Value已更改
+    }
+
+    public class EnumFlag<TEnum> where TEnum : Enum
+    {
+        public T Enum { get; set; }
+        public bool IsSelected { get; set; }
+    }
+}

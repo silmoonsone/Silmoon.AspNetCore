@@ -14,13 +14,25 @@
 <hr />
 <DateSelectComponent @bind-StartDate="startDate" @bind-EndDate="endDate"></DateSelectComponent>
 <hr />
-<EnumFlagEditComponent @bind-Value="enumValue"></EnumFlagEditComponent>
+<EnumFlagSimpleComponent @bind-Value="enumValue" IncludeZeroValue="true"></EnumFlagSimpleComponent>
+<hr />
+<EnumFlagListComponent @ref="flist" @bind-Value="enumValue">
+    <label class="form-check form-check-inline">
+        <input class="form-check-input"
+               type="checkbox"
+               value="@context.Enum"
+               @onchange="() => flist.ValueChangeHandler(context.Enum)"
+               checked="@enumValue.HasFlag(context.Enum)" />
+        <span class="form-check-label">@context.Enum.GetDisplayName()</span>
+    </label>
+</EnumFlagListComponent>
 <BlazorReconnect></BlazorReconnect>
 
 @code {
     IdentityRole enumValue = IdentityRole.Admin | IdentityRole.User;
     DateTime startDate = DateTime.Now;
     DateTime endDate = DateTime.Now;
+    EnumFlagListComponent<IdentityRole> flist;
 
     protected override Task OnInitializedAsync()
     {

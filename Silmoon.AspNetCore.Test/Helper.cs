@@ -48,4 +48,12 @@ public class Helper
         logger?.Log(logLevel, s);
         //Net.SocketHelper.UdpSendTo("[" + Configure.ProjectName + "] " + s);
     }
+
+#if DEBUG
+    public static string CloudflareTurnstileSiteKey = "1x00000000000000000000AA";
+    public static string CloudflareTurnstileSecretKey = "1x0000000000000000000000000000000AA";
+#else
+    public static string CloudflareTurnstileSiteKey = "1x00000000000000000000AA";
+    public static string CloudflareTurnstileSecretKey = "1x0000000000000000000000000000000AA";
+#endif
 }

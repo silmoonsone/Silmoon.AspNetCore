@@ -1,0 +1,55 @@
+﻿@using Microsoft.JSInterop
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<div class="cf-turnstile" data-sitekey="@SiteKey" data-callback="____turnstile_callback"></div>
+
+<script>
+    var ____turnstile_response;
+    var ____dotNetInvokeObj;
+    function ____turnstile_callback(token) {
+        ____turnstile_response = token;
+        ____dotNetInvokeObj.invokeMethodAsync("__on_response_received", token);
+        console.log(____turnstile_response);
+    }
+    function injectDotNetInvokeObj(obj) {
+        ____dotNetInvokeObj = obj;
+    }
+</script>
+
+@code
+{
+    [Parameter] public string Response { get; set; }
+    [Parameter] public EventCallback<string> ResponseChanged { get; set; }
+    [Parameter] public string SiteKey { get; set; }
+    [Inject] IJSRuntime Js { get; set; }
+
+    [JSInvokable]
+    public void __on_response_received(string response)
+    {
+        Response = response;
+        ResponseChanged.InvokeAsync(response);
+    }
+
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        var jsInvokeObj = DotNetObjectReference.Create(this);
+        await Js.InvokeVoidAsync("injectDotNetInvokeObj", jsInvokeObj);
+        await base.OnAfterRenderAsync(firstRender);
+    }
+}
+
+
+<!--
+    调用此控件的时候不得使用Server预渲染模式，如果上级Blazor页面使用了预渲染模式，就要在渲染完成后再显示本控件。
+    可以再上级Blazor页面中利用重写OnAfterRenderAsync方法进行处理，如：
+
+    bool showTurnstile = false;
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!showTurnstile)
+        {
+            showTurnstile = true;
+            StateHasChanged();
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+-->

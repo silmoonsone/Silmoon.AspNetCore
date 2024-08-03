@@ -97,6 +97,8 @@ app.UseStaticFiles();
 //}
 
 //app.UseApiDecrypt();
+app.UseCors(builder => builder.WithHosts("localhost"));
+
 app.UseSession();
 app.UseRouting();
 

@@ -1,17 +1,48 @@
 ﻿@using Microsoft.JSInterop
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-<div class="cf-turnstile" data-sitekey="@SiteKey" data-callback="____turnstile_callback"></div>
-
+@if (showScriptTag)
+{
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=____turnstileRender" async defer></script>
+}
+<div id="____turnstile"></div>
+<div id="____turnstileWaitingMessage">@WaitingMessage</div>
 <script>
-    var ____turnstile_response;
+    var ____turnstileResponse;
     var ____dotNetInvokeObj;
-    function ____turnstile_callback(token) {
-        ____turnstile_response = token;
+    var ____turnstileRendered = false;
+
+    function ____turnstileRender() {
+        ____turnstileLoaded = true;
+        ____turnstileRendered = true;
+        turnstile.render('#____turnstile', {
+            sitekey: '1x00000000000000000000AA',
+            callback: function (token) {
+                document.getElementById("____turnstileWaitingMessage").style.display = "none";
+                ____turnstileResultCallback(token);
+            },
+        });
+    };
+
+    function ____turnstileResultCallback(token) {
+        ____turnstileResponse = token;
         ____dotNetInvokeObj.invokeMethodAsync("__on_response_received", token);
-        console.log(____turnstile_response);
     }
     function injectDotNetInvokeObj(obj) {
         ____dotNetInvokeObj = obj;
+    }
+
+    // window.onload = function () {
+    //     if (typeof (____turnstileLoaded) != "undefined" && ____turnstileLoaded) {
+    //         ____turnstileRender();
+    //     }
+    // }
+
+    function ____turnstileIsLoaded() {
+        if (typeof (____turnstileLoaded) == "undefined") return false;
+        else return ____turnstileLoaded;
+    }
+
+    function ____turnstileIsRendered() {
+        return ____turnstileRendered;
     }
 </script>
 
@@ -20,7 +51,10 @@
     [Parameter] public string Response { get; set; }
     [Parameter] public EventCallback<string> ResponseChanged { get; set; }
     [Parameter] public string SiteKey { get; set; }
+    [Parameter] public string WaitingMessage { get; set; } = "等待人机测试结果...";
     [Inject] IJSRuntime Js { get; set; }
+
+    bool showScriptTag = false;
 
     [JSInvokable]
     public void __on_response_received(string response)
@@ -31,6 +65,23 @@
 
     protected async override Task OnAfterRenderAsync(bool firstRender)
     {
+        var isLoaded = await Js.InvokeAsync<bool>("____turnstileIsLoaded");
+
+        if (!isLoaded && !showScriptTag)
+        {
+            showScriptTag = true;
+            StateHasChanged();
+        }
+
+        if (!showScriptTag)
+        {
+            var isRendered = await Js.InvokeAsync<bool>("____turnstileIsRendered");
+            if (!isRendered)
+            {
+                await Js.InvokeVoidAsync("____turnstileRender");
+            }
+        }
+
         var jsInvokeObj = DotNetObjectReference.Create(this);
         await Js.InvokeVoidAsync("injectDotNetInvokeObj", jsInvokeObj);
         await base.OnAfterRenderAsync(firstRender);

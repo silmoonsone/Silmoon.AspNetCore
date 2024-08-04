@@ -15,6 +15,17 @@
         <InputText id="PasswordText" class="form-control" @bind-Value="Password"></InputText>
     </div>
     <div class="form-group">
+        @if (showTurnstile)
+        {
+            <Turnstile SiteKey="@Helper.CloudflareTurnstileSiteKey" @bind-Response="TurnstileResponse"></Turnstile>
+        }
+        else
+        {
+            <div>等待人机测试组件...</div>
+        }
+    </div>
+
+    <div class="form-group">
         <button class="btn btn-primary" @onclick="doSignIn">Sign In</button>
         <a class="btn" href="signup">Sign Up</a>
     </div>
@@ -27,6 +38,7 @@
     public string Username { get; set; }
     public string Password { get; set; }
     public string Message { get; set; }
+    string TurnstileResponse { get; set; }
 
     protected override Task OnInitializedAsync()
     {
@@ -46,5 +58,16 @@
             Message = jObject["Message"].Value<string>();
         }
         StateHasChanged();
+    }
+
+    bool showTurnstile = false;
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!showTurnstile)
+        {
+            showTurnstile = true;
+            StateHasChanged();
+        }
+        await base.OnAfterRenderAsync(firstRender);
     }
 }

@@ -6,6 +6,8 @@ using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
 using Newtonsoft.Json.Linq;
 using Silmoon.AspNetCore.Binders;
+using Silmoon.AspNetCore.Blazor;
+using Silmoon.AspNetCore.Blazor.Extensions;
 using Silmoon.AspNetCore.Extension.Binders;
 using Silmoon.AspNetCore.Extensions;
 using Silmoon.AspNetCore.Test;
@@ -66,6 +68,7 @@ builder.Services.AddSilmoonConfigure<SilmoonConfigureServiceImpl>(o =>
 });
 builder.Services.AddSingleton<Core>();
 builder.Services.AddSilmoonAuth<SilmoonAuthServiceImpl>();
+builder.Services.AddJsComponentInterop();
 
 //builder.Services.AddSilmoonDevApp<SilmoonDevAppServiceImpl>();
 

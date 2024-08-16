@@ -16,11 +16,11 @@ using System.Threading.Tasks;
 
 namespace Silmoon.AspNetCore.Middlewares
 {
+    /// <summary>
+    /// 基于 SilmoonDevApp 请求的API解密中间件，需要 ISilmoonDevAppService 服务
+    /// </summary>
     public class ApiDecryptMiddleware
     {
-        /// <summary>
-        /// 基于 SilmoonDevApp 请求的API解密中间件，需要 ISilmoonDevAppService 服务
-        /// </summary>
         private RequestDelegate _next;
         public string AppId { get; set; }
         public int KeyCacheSecound { get; set; } = 3600;

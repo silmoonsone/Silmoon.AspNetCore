@@ -1,0 +1,101 @@
+﻿@charset "utf-8";
+/* CSS Document */
+
+#metroUIConfirm {
+    position: fixed;
+    background-color: rgba(0, 0, 0, 0.5);
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    z-index: 100000;
+    font-family: "Microsoft Yahei", Verdana, Simsun, "Segoe UI", "Segoe UI Web Regular", "Segoe UI Symbol", "Helvetica Neue", "BBAlpha Sans", "S60 Sans", Arial, "sans-serif";
+}
+
+#metroUIConfirmOuter {
+    box-shadow: 1px 0px 100px 20px rgb(0 0 0 / 30%);
+    top: 35%;
+    width: 100%;
+    height: 230px;
+    background-color: #FFF;
+    position: fixed;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+@media (max-width: 768px) {
+    #metroUIConfirmOuter {
+        padding-left: 30px;
+        padding-right: 30px;
+        height: 175px !important;
+    }
+}
+
+#metroUIConfirmInner {
+    max-width: 768px;
+    margin: auto;
+    height: 100%;
+}
+
+#metroUIConfirmOKButton {
+    background-color: #1269ED;
+    color: #FFF;
+    cursor: default;
+}
+
+#metroUIConfirmCancelButton {
+    margin-left: 15px;
+    background-color: #999;
+    color: #FFF;
+    cursor: default;
+}
+
+.metroUIConfirmButton {
+    font-size: 14px;
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
+    padding-left: 50px !important;
+    padding-right: 50px !important;
+    font-weight: bold;
+    cursor: default;
+    display: inline-block;
+    border-style: none;
+}
+
+    .metroUIConfirmButton:focus {
+        background-color: #1269ED !important;
+    }
+
+#metroUIConfirmController {
+    position: relative;
+    top: 15px;
+    text-align: right;
+}
+
+.metroUIConfirmButton:hover {
+    color: white !important;
+    background-color: #bcd1f2 !important;
+}
+
+.metroUIConfirmButton:active {
+    color: white !important;
+    background-color: #000 !important;
+}
+
+#metroUIConfirmTitle {
+    font-weight: bold;
+    font-size: 24px;
+}
+
+#metroUIConfirmMsg {
+    margin-left: 30px;
+    margin-top: 10px;
+    height: 115px;
+    overflow: auto;
+}
+
+@media (max-width: 768px) {
+    #metroUIConfirmMsg {
+        height: 60px;
+    }
+}

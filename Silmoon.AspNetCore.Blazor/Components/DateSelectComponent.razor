@@ -45,20 +45,22 @@
         {
             StartDate = start;
             EndDate = end;
-            StartDateChanged.InvokeAsync(StartDate);
-            EndDateChanged.InvokeAsync(EndDate);
+            if (StartDateChanged.HasDelegate) StartDateChanged.InvokeAsync(StartDate);
+            if (EndDateChanged.HasDelegate) EndDateChanged.InvokeAsync(EndDate);
             if (DateChanged.HasDelegate) DateChanged.InvokeAsync((StartDate, EndDate));
         }
     }
 
     void onStartDateChanged(DateTime newDate)
     {
-        StartDateChanged.InvokeAsync(newDate);
+        StartDate = newDate;
+        if (StartDateChanged.HasDelegate) StartDateChanged.InvokeAsync(newDate);
         if (DateChanged.HasDelegate) DateChanged.InvokeAsync((newDate, EndDate));
     }
     void onEndDateChanged(DateTime newDate)
     {
-        EndDateChanged.InvokeAsync(newDate);
+        EndDate = newDate;
+        if (EndDateChanged.HasDelegate) EndDateChanged.InvokeAsync(newDate);
         if (DateChanged.HasDelegate) DateChanged.InvokeAsync((StartDate, newDate));
     }
 }

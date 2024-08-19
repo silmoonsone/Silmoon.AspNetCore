@@ -17,7 +17,7 @@ namespace Silmoon.AspNetCore.Blazor
         public JsComponentInterop(IJSRuntime jsRuntime)
         {
             moduleTask = new(() => jsRuntime.InvokeAsync<IJSObjectReference>(
-                "import", "./_content/Silmoon.AspNetCore.Blazor/jsComponentInterop.js").AsTask());
+                "import", "./_content/Silmoon.AspNetCore.Blazor/js/jsComponentInterop.js").AsTask());
         }
 
         public async ValueTask<string> Prompt(string message)

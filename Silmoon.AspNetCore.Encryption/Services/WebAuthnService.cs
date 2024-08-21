@@ -38,7 +38,7 @@ namespace Silmoon.AspNetCore.Encryption.Services
                 result.Success = true;
                 result.Data = new ClientWebAuthnOptions()
                 {
-                    Challenge = Convert.FromBase64String(Convert.ToBase64String(Guid.NewGuid().ToByteArray())),
+                    Challenge = Guid.NewGuid().ToByteArray(),
                     Rp = new ClientWebAuthnOptions.ClientWebAuthnRp() { Id = Options.Host, Name = Options.AppName },
                     User = user,
                     AuthenticatorSelection = new ClientWebAuthnOptions.ClientWebAuthnAuthenticatorSelection() { UserVerification = "preferred" },
@@ -53,10 +53,8 @@ namespace Silmoon.AspNetCore.Encryption.Services
         {
             StateFlag<ClientWebAuthnAssertionOptions> result = new StateFlag<ClientWebAuthnAssertionOptions>();
 
-            var challenge = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
-
+            var challenge = Guid.NewGuid().ToByteArray();
             string userId = httpContext.Request.Query["UserId"];
-
             var allowUserCredential = await GetAllowCredentials(httpContext, userId);
 
             if (allowUserCredential is null)
@@ -72,21 +70,21 @@ namespace Silmoon.AspNetCore.Encryption.Services
                     RpId = Options.Host,
                     AllowCredentials = allowUserCredential.Credentials,
                 };
-                ObjectCache<string, string>.Set("______passkey_challenge:" + challenge, allowUserCredential.UserId, TimeSpan.FromSeconds(300));
+                ObjectCache<string, string>.Set("______passkey_challenge:" + challenge.GetBase64String(), allowUserCredential.UserId, TimeSpan.FromSeconds(300));
             }
             httpContext.Response.ContentType = "application/json";
             await httpContext.Response.WriteAsync(result.ToJsonString());
         }
         public async Task CreateWebAuthn(HttpContext httpContext, RequestDelegate requestDelegate)
         {
-            JObject credential = JObject.Parse(await httpContext.Request.GetBodyString());
+            var bodyStr = await httpContext.Request.GetBodyString();
+            CreateWebAuthnKeyResponse createWebAuthnKeyResponse = JsonConvert.DeserializeObject<CreateWebAuthnKeyResponse>(bodyStr);
 
-            var attestationObjectByteArray = credential["response"]["attestationObject"].ToObject<byte[]>();
-            var clientDataJSON = credential["response"]["clientDataJSON"].ToObject<byte[]>().GetString();
+            var attestationObjectByteArray = createWebAuthnKeyResponse.Response.AttestationObject;
+            var clientDataJSON = createWebAuthnKeyResponse.Response.ClientDataJson;
             var attestationData = WebAuthnParser.ParseAttestationObject(attestationObjectByteArray);
 
-            var createResult = await OnCreateWebAuthn(httpContext, attestationData, clientDataJSON, attestationObjectByteArray, credential["authenticatorAttachment"].Value<string>());
-
+            var createResult = await OnCreateWebAuthn(httpContext, attestationData, clientDataJSON.GetString(), attestationObjectByteArray, createWebAuthnKeyResponse.AuthenticatorAttachment);
 
             StateFlag<bool> result = new StateFlag<bool>();
             if (createResult.State)
@@ -135,18 +133,20 @@ namespace Silmoon.AspNetCore.Encryption.Services
         }
         public async Task VerifyWebAuthn(HttpContext httpContext, RequestDelegate requestDelegate)
         {
-            JObject assertion = JObject.Parse(await httpContext.Request.GetBodyString());
-            StateFlag result = new StateFlag();
+            var bodyStr = await httpContext.Request.GetBodyString();
+            VerifyWebAuthnResponse verifyWebAuthnResponse = JsonConvert.DeserializeObject<VerifyWebAuthnResponse>(bodyStr);
 
-            byte[] rawId = assertion["rawId"].ToObject<byte[]>();
-            byte[] clientDataJSON = assertion["response"]["clientDataJSON"].ToObject<byte[]>();
-            byte[] authenticatorData = assertion["response"]["authenticatorData"].ToObject<byte[]>();
-            byte[] signature = assertion["response"]["signature"].ToObject<byte[]>();
+            byte[] rawId = verifyWebAuthnResponse.RawId;
+            byte[] clientDataJSON = verifyWebAuthnResponse.Response.ClientDataJSON;
+            byte[] authenticatorData = verifyWebAuthnResponse.Response.AuthenticatorData;
+            byte[] signature = verifyWebAuthnResponse.Response.Signature;
 
             var clientDataString = Encoding.UTF8.GetString(clientDataJSON);
             var clientData = JsonConvert.DeserializeObject<JObject>(clientDataString);
 
             var userIdResult = ObjectCache<string, string>.Get("______passkey_challenge:" + clientData["challenge"].Value<string>().Base64UrlToBase64());
+
+            StateFlag result = new StateFlag();
 
             if (!userIdResult.Matched)
             {

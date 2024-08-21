@@ -2,6 +2,9 @@
 
 namespace Silmoon.AspNetCore.Encryption.Models
 {
+    /// <summary>
+    /// 从客户端返回的AttestationObject经过解析后的数据
+    /// </summary>
     public class AttestationObjectData
     {
         public byte[] AuthenticatorData { get; set; }

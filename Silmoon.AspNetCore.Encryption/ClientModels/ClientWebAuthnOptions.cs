@@ -36,7 +36,7 @@ namespace Silmoon.AspNetCore.Encryption.ClientModels
         public class ClientWebAuthnUser
         {
             [JsonProperty("id")]
-            public string Id { get; set; }
+            public byte[] Id { get; set; }
             [JsonProperty("name")]
             public string Name { get; set; }
             [JsonProperty("displayName")]

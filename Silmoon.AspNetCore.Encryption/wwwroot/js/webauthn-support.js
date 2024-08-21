@@ -11,13 +11,11 @@ async function createWebAuthn() {
         const response = await fetch(webAuthnClientOptions.getWebAuthnOptionsUrl);
         const options = (await response.json()).Data;
 
-        console.log("s: " + options.challenge);
 
         // 2. 将 challenge 和 user.id 转换为 Uint8Array
-        options.challenge = Uint8Array.from(atob(options.challenge), c => c.charCodeAt(0));
-        options.user.id = Uint8Array.from(atob(options.user.id), c => c.charCodeAt(0));
+        options.challenge = base64ToUint8Array(options.challenge);
+        options.user.id = base64ToUint8Array(options.user.id);
         options.timeout = 120000;
-        console.log("e: " + options.challenge);
         // 3. 创建密钥对
         const credential = await navigator.credentials.create({
             publicKey: options
@@ -26,15 +24,16 @@ async function createWebAuthn() {
         // 4. 获取相关信息
         const attestationObject = new Uint8Array(credential.response.attestationObject);
         const clientDataJSON = new Uint8Array(credential.response.clientDataJSON);
-        const rawId = new Uint8Array(credential.rawId);
+        const rawId = arrayBufferToBase64(new Uint8Array(credential.rawId));
 
+        // 5. 将数据发送到服务器进行验证
         const data = {
-            rawId: Array.from(rawId),
+            rawId: rawId,
             type: credential.type,
             authenticatorAttachment: credential.authenticatorAttachment,
             response: {
-                attestationObject: Array.from(attestationObject),
-                clientDataJSON: Array.from(clientDataJSON),
+                attestationObject: arrayBufferToBase64(attestationObject),
+                clientDataJSON: arrayBufferToBase64(clientDataJSON),
             },
         };
 
@@ -99,11 +98,11 @@ async function authenticateWebAuthn(userId) {
         const options = (await response.json()).Data;
 
         // 2. 将 challenge 和允许的凭证ID (allowedCredentials.id) 转换为 Uint8Array
-        options.challenge = Uint8Array.from(atob(options.challenge), c => c.charCodeAt(0));
+        options.challenge = base64ToUint8Array(options.challenge);
         options.allowCredentials = options.allowCredentials.map(cred => {
             return {
                 ...cred,
-                id: Uint8Array.from(atob(cred.id), c => c.charCodeAt(0))
+                id: base64ToUint8Array(cred.id)
             };
         });
 
@@ -120,12 +119,12 @@ async function authenticateWebAuthn(userId) {
 
         // 5. 将数据发送到服务器进行验证
         const data = {
-            rawId: Array.from(rawId),
+            rawId: arrayBufferToBase64(rawId),
             type: assertion.type,
             response: {
-                authenticatorData: Array.from(authenticatorData),
-                clientDataJSON: Array.from(clientDataJSON),
-                signature: Array.from(signature),
+                authenticatorData: arrayBufferToBase64(authenticatorData),
+                clientDataJSON: arrayBufferToBase64(clientDataJSON),
+                signature: arrayBufferToBase64(signature),
             },
         };
 
@@ -151,4 +150,52 @@ async function authenticateWebAuthn(userId) {
         console.error(err);
         alert('登录过程中出错');
     }
+}
+
+
+function arrayBufferToBase64(buffer) {
+    // 创建一个 Uint8Array 视图，表示原始 ArrayBuffer 的字节内容
+    const uint8Array = new Uint8Array(buffer);
+
+    // 将每个字节转换为字符，并将它们连接成一个字符串
+    let binaryString = '';
+    for (let i = 0; i < uint8Array.length; i++) {
+        binaryString += String.fromCharCode(uint8Array[i]);
+    }
+
+    // 使用 btoa() 将二进制字符串转换为 Base64 编码
+    return btoa(binaryString);
+}
+function base64ToArrayBuffer(base64) {
+    // 使用 atob() 将 Base64 字符串解码为二进制字符串
+    const binaryString = atob(base64);
+
+    // 创建一个与二进制字符串长度相同的 ArrayBuffer
+    const buffer = new ArrayBuffer(binaryString.length);
+
+    // 创建一个 Uint8Array 视图，表示这个 ArrayBuffer
+    const uint8Array = new Uint8Array(buffer);
+
+    // 将二进制字符串的每个字符转换为对应的字节值
+    for (let i = 0; i < binaryString.length; i++) {
+        uint8Array[i] = binaryString.charCodeAt(i);
+    }
+
+    // 返回最终的 ArrayBuffer
+    return buffer;
+}
+function uint8ArrayToBase64(uint8Array) {
+    let binaryString = '';
+    for (let i = 0; i < uint8Array.length; i++) {
+        binaryString += String.fromCharCode(uint8Array[i]);
+    }
+    return btoa(binaryString);
+}
+function base64ToUint8Array(base64) {
+    const binaryString = atob(base64);
+    const uint8Array = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+        uint8Array[i] = binaryString.charCodeAt(i);
+    }
+    return uint8Array;
 }

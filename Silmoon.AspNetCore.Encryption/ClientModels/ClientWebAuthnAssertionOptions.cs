@@ -5,7 +5,7 @@ namespace Silmoon.AspNetCore.Encryption.ClientModels
     public class ClientWebAuthnAssertionOptions
     {
         [JsonProperty("challenge")]
-        public string Challenge { get; set; }
+        public byte[] Challenge { get; set; }
         [JsonProperty("rpId")]
         public string RpId { get; set; }
         [JsonProperty("allowCredentials")]

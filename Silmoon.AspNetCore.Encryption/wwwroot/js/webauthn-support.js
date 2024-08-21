@@ -1,8 +1,10 @@
 ﻿// WebAuthn support script
 let webAuthnClientOptions = {
-    getWebAuthnOptionsUrl: '/getWebAuthnOptions',
-    createWebAuthnUrl: '/createWebAuthn',
-    deleteWebAuthnUrl: '/deleteWebAuthn'
+    getWebAuthnOptionsUrl: '/_webAuthn/getWebAuthnOptions',
+    createWebAuthnUrl: '/_webAuthn/createWebAuthn',
+    deleteWebAuthnUrl: '/_webAuthn/deleteWebAuthn',
+    getAuthenticateWebAuthn: '/_webAuthn/getAuthenticateWebAuthn',
+    authenticateWebAuthnUrl: '/_webAuthn/authenticateWebAuthn'
 }
 
 async function createWebAuthn() {
@@ -62,7 +64,6 @@ async function createWebAuthn() {
         alert('注册过程中出错');
     }
 }
-
 async function deleteWebAuthn(credentialId) {
     if (confirm('确定删除？')) {
         try {
@@ -90,11 +91,10 @@ async function deleteWebAuthn(credentialId) {
         }
     }
 }
-
 async function authenticateWebAuthn(userId) {
     try {
         // 1. 向服务器请求挑战 (challenge) 和其他验证选项
-        const response = await fetch('/getWebAuthnAssertionOptions?UserId=' + userId);
+        const response = await fetch(webAuthnClientOptions.getAuthenticateWebAuthn + '?UserId=' + userId);
         const options = (await response.json()).Data;
 
         // 2. 将 challenge 和允许的凭证ID (allowedCredentials.id) 转换为 Uint8Array
@@ -128,7 +128,7 @@ async function authenticateWebAuthn(userId) {
             },
         };
 
-        const verificationResponse = await fetch('/verifyWebAuthn', {
+        const verificationResponse = await fetch(webAuthnClientOptions.authenticateWebAuthnUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

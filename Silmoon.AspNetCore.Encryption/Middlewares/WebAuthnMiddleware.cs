@@ -30,11 +30,11 @@ namespace Silmoon.AspNetCore.Encryption.Middlewares
             {
                 await WebAuthnService.DeleteWebAuthn(context, _next);
             }
-            else if (context.Request.Path == WebAuthnService.Options.GetWebAuthnAssertionOptions)
+            else if (context.Request.Path == WebAuthnService.Options.GetAuthenticateWebAuthn)
             {
                 await WebAuthnService.GetWebAuthnAssertionOptions(context, _next);
             }
-            else if (context.Request.Path == WebAuthnService.Options.VerifyWebAuthnUrl)
+            else if (context.Request.Path == WebAuthnService.Options.AuthenticateWebAuthn)
             {
                 await WebAuthnService.VerifyWebAuthn(context, _next);
             }

@@ -6,7 +6,6 @@ export async function createWebAuthn(optionDotNetObjRef, createDotNetObjRef) {
     const response = await optionDotNetObjRef.invokeMethodAsync('InvokeCallback');
     if (response.success) {
         try {
-
             const options = response.data;
             // 2. 将 challenge 和 user.id 转换为 Uint8Array
             options.challenge = base64ToUint8Array(options.challenge);
@@ -34,97 +33,55 @@ export async function createWebAuthn(optionDotNetObjRef, createDotNetObjRef) {
             };
 
             // 6. 将数据发送到服务器进行注册
-            const createResponse = await createDotNetObjRef.invokeMethodAsync('InvokeCallback', data);
+            await createDotNetObjRef.invokeMethodAsync('InvokeCallback', data);
         } catch (err) {
             console.error(err);
         }
     }
 }
-export async function deleteWebAuthn(credentialId) {
-    if (confirm('确定删除？')) {
+export async function authenticateWebAuthn(optionDotNetObjRef, authenticateDotNetObjRef) {
+    // 1. 向服务器请求挑战 (challenge) 和其他验证选项
+    const response = await optionDotNetObjRef.invokeMethodAsync('InvokeCallback');
+    if (response.success) {
         try {
-            const data = new FormData();
-            data.append("CredentialId", credentialId);
-            const response = await fetch(webAuthnClientOptions.deleteWebAuthnUrl, {
-                method: "POST",
-                body: data
+            const options = response.data;
+            // 2. 将 challenge 和允许的凭证ID (allowedCredentials.id) 转换为 Uint8Array
+            options.challenge = base64ToUint8Array(options.challenge);
+            options.allowCredentials = options.allowCredentials.map(cred => {
+                return {
+                    ...cred,
+                    id: base64ToUint8Array(cred.id)
+                };
             });
 
-            if (response.ok) {
-                const responseData = await response.json();
-                if (responseData.Success) {
-                    alert("SUCCESS!");
-                    window.location.href = "/User";
-                } else {
-                    alert("Failed:\r\n" + responseData.Message);
-                }
-            } else {
-                alert("Delete error");
-            }
+            // 3. 调用 navigator.credentials.get() 获取签名
+            const assertion = await navigator.credentials.get({
+                publicKey: options
+            });
+
+            // 4. 获取相关信息
+            const authenticatorData = new Uint8Array(assertion.response.authenticatorData);
+            const clientDataJSON = new Uint8Array(assertion.response.clientDataJSON);
+            const signature = new Uint8Array(assertion.response.signature);
+            const rawId = new Uint8Array(assertion.rawId);
+
+            // 5. 将数据发送到服务器进行验证
+            const data = {
+                rawId: arrayBufferToBase64(rawId),
+                type: assertion.type,
+                response: {
+                    authenticatorData: arrayBufferToBase64(authenticatorData),
+                    clientDataJSON: arrayBufferToBase64(clientDataJSON),
+                    signature: arrayBufferToBase64(signature),
+                },
+            };
+
+            // 6. 将数据发送到服务器进行验证
+            await authenticateDotNetObjRef.invokeMethodAsync('InvokeCallback', data);
         } catch (err) {
             console.error(err);
-            alert("删除过程中出错");
+            alert('登录过程中出错');
         }
-    }
-}
-export async function authenticateWebAuthn(userId) {
-    try {
-        // 1. 向服务器请求挑战 (challenge) 和其他验证选项
-        const response = await fetch(webAuthnClientOptions.getAuthenticateWebAuthn + '?UserId=' + userId);
-        const options = (await response.json()).Data;
-
-        // 2. 将 challenge 和允许的凭证ID (allowedCredentials.id) 转换为 Uint8Array
-        options.challenge = base64ToUint8Array(options.challenge);
-        options.allowCredentials = options.allowCredentials.map(cred => {
-            return {
-                ...cred,
-                id: base64ToUint8Array(cred.id)
-            };
-        });
-
-        // 3. 调用 navigator.credentials.get() 获取签名
-        const assertion = await navigator.credentials.get({
-            publicKey: options
-        });
-
-        // 4. 获取相关信息
-        const authenticatorData = new Uint8Array(assertion.response.authenticatorData);
-        const clientDataJSON = new Uint8Array(assertion.response.clientDataJSON);
-        const signature = new Uint8Array(assertion.response.signature);
-        const rawId = new Uint8Array(assertion.rawId);
-
-        // 5. 将数据发送到服务器进行验证
-        const data = {
-            rawId: arrayBufferToBase64(rawId),
-            type: assertion.type,
-            response: {
-                authenticatorData: arrayBufferToBase64(authenticatorData),
-                clientDataJSON: arrayBufferToBase64(clientDataJSON),
-                signature: arrayBufferToBase64(signature),
-            },
-        };
-
-        const verificationResponse = await fetch(webAuthnClientOptions.authenticateWebAuthnUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        });
-
-        if (verificationResponse.ok) {
-            const result = await verificationResponse.json();
-            if (result.Success) {
-                alert('认证成功');
-            } else {
-                alert('认证失败: ' + result.Message);
-            }
-        } else {
-            alert('登录失败');
-        }
-    } catch (err) {
-        console.error(err);
-        alert('登录过程中出错');
     }
 }
 

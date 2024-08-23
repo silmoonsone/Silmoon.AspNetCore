@@ -41,7 +41,7 @@ namespace Silmoon.AspNetCore.Test.Services
                 return null;
             }
         }
-        public override Task<StateSet<bool>> OnCreateWebAuthn(HttpContext httpContext, AttestationObjectData attestationObjectData, string clientDataJSON, byte[] attestationObjectByteArray, string authenticatorAttachment)
+        public override Task<StateSet<bool>> OnCreate(HttpContext httpContext, AttestationObjectData attestationObjectData, string clientDataJSON, byte[] attestationObjectByteArray, string authenticatorAttachment)
         {
             var sessionUserObjectId = ObjectId.Parse(httpContext.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier).Value);
             var user = Core.GetUser(sessionUserObjectId);
@@ -64,7 +64,7 @@ namespace Silmoon.AspNetCore.Test.Services
                 return Task.FromResult(result);
             }
         }
-        public override Task<StateSet<bool>> OnDeleteWebAuthn(HttpContext httpContext, byte[] credentialId)
+        public override Task<StateSet<bool>> OnDelete(HttpContext httpContext, byte[] credentialId)
         {
             var sessionUserObjectId = ObjectId.Parse(httpContext.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier).Value);
             var user = Core.GetUser(sessionUserObjectId);

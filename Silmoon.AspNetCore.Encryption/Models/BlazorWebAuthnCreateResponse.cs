@@ -3,7 +3,7 @@ using Silmoon.Extension;
 
 namespace Silmoon.AspNetCore.Encryption.Models
 {
-    public class BlazorCreateWebAuthnKeyResponse : CreateWebAuthnKeyResponse
+    public class BlazorWebAuthnCreateResponse : WebAuthnCreateResponse
     {
         [JsonIgnore]
         public AttestationObjectData AttestationObjectData { get; set; }

@@ -72,7 +72,6 @@ builder.Services.AddSingleton<Core>();
 builder.Services.AddSilmoonAuth<SilmoonAuthServiceImpl>();
 builder.Services.AddJsComponentInterop();
 builder.Services.AddWebAuthnJsInterop();
-builder.Services.AddWebAuthn<WebAuthnServiceImpl>();
 
 //builder.Services.AddSilmoonDevApp<SilmoonDevAppServiceImpl>();
 
@@ -111,8 +110,6 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
-
-app.UseWebAuthn();
 
 app.MapControllerRoute(
     name: "default",

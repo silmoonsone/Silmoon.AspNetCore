@@ -4,6 +4,7 @@
 @using Silmoon.AspNetCore.Encryption.Models
 @using Silmoon.AspNetCore.Test.Models.SubModels
 @using Silmoon.Models
+@using System.Security.Cryptography
 @rendermode InteractiveServer
 @attribute [Authorize]
 @inject Core Core
@@ -22,7 +23,7 @@
         </div>
         <div>
             <button class="btn btn-primary btn-sm" id="enroll" @onclick="CreateWebAuthn">Add passkey</button>
-            <button class="btn btn-primary btn-sm" id="signout" onclick="authenticateWebAuthn('@CurrentUser._id')">Verify</button>
+            <button class="btn btn-primary btn-sm" id="signout" @onclick="AuthenticateWebAuthn">Verify</button>
             <button class="btn btn-danger btn-sm" id="signout" onclick="signout()">Signout</button>
         </div>
     </div>
@@ -74,7 +75,7 @@
     }
     async void CreateWebAuthn()
     {
-        await Wac.CreateWebAuthn(
+        await Wac.Create(
             async () =>
             {
                 ClientBlazorWebAuthnOptions clientBlazorWebAuthnOptions = new ClientBlazorWebAuthnOptions()
@@ -91,27 +92,85 @@
                     };
                 return await Task.FromResult(StateFlag<ClientBlazorWebAuthnOptions>.Create(true, clientBlazorWebAuthnOptions));
             },
-            async blazorCreateWebAuthnKeyResponse =>
+            async blazorWebAuthnCreateResponse =>
             {
                 var userWebAuthInfo = new Models.SubModels.UserWebAuthnInfo()
                     {
-                        AAGuid = blazorCreateWebAuthnKeyResponse.AttestationObjectData.AAGUID,
-                        AttestationFormat = blazorCreateWebAuthnKeyResponse.AttestationObjectData.AttestationFormat,
-                        CredentialId = blazorCreateWebAuthnKeyResponse.AttestationObjectData.CredentialId,
-                        PublicKey = blazorCreateWebAuthnKeyResponse.AttestationObjectData.PublicKey,
-                        PublicKeyAlgorithm = blazorCreateWebAuthnKeyResponse.AttestationObjectData.PublicKeyAlgorithm,
-                        SignCount = blazorCreateWebAuthnKeyResponse.AttestationObjectData.SignCount,
-                        UserVerified = blazorCreateWebAuthnKeyResponse.AttestationObjectData.UserVerified,
-                        AttestationObject = blazorCreateWebAuthnKeyResponse.Response.AttestationObject,
-                        AuthenticatorAttachment = blazorCreateWebAuthnKeyResponse.AuthenticatorAttachment,
+                        AAGuid = blazorWebAuthnCreateResponse.AttestationObjectData.AAGUID,
+                        AttestationFormat = blazorWebAuthnCreateResponse.AttestationObjectData.AttestationFormat,
+                        CredentialId = blazorWebAuthnCreateResponse.AttestationObjectData.CredentialId,
+                        PublicKey = blazorWebAuthnCreateResponse.AttestationObjectData.PublicKey,
+                        PublicKeyAlgorithm = blazorWebAuthnCreateResponse.AttestationObjectData.PublicKeyAlgorithm,
+                        SignCount = blazorWebAuthnCreateResponse.AttestationObjectData.SignCount,
+                        UserVerified = blazorWebAuthnCreateResponse.AttestationObjectData.UserVerified,
+                        AttestationObject = blazorWebAuthnCreateResponse.Response.AttestationObject,
+                        AuthenticatorAttachment = blazorWebAuthnCreateResponse.AuthenticatorAttachment,
                     };
                 var result = Core.AddUserWebAuthnInfo(CurrentUser._id, userWebAuthInfo);
-
-
                 await Jsc.Toast("注册Passkey成功");
-
                 Load();
-                return StateFlag.Create(true);
+            }
+        );
+    }
+    async void AuthenticateWebAuthn()
+    {
+        var challenge = Guid.NewGuid().ToByteArray().GetBase64String();
+
+        await Wac.Authenticate(
+            async () =>
+            {
+                ClientBlazorWebAuthnAuthenticateOptions options = new ClientBlazorWebAuthnAuthenticateOptions()
+                    {
+                        Challenge = challenge,
+                        RpId = "localhost",
+                        AllowCredentials = UserWebAuthnInfos.Select(x => new Credential() { Id = x.CredentialId.GetBase64String() }).ToArray(),
+                    };
+                return await Task.FromResult(StateFlag<ClientBlazorWebAuthnAuthenticateOptions>.Create(true, options));
+            },
+            async authenticateWebAuthnResponse =>
+            {
+                var clientJson = authenticateWebAuthnResponse.Response.GetClientJson();
+                if (clientJson["challenge"].Value<string>().Base64UrlToBase64() == challenge)
+                {
+                    var signedData = authenticateWebAuthnResponse.Response.AuthenticatorData.Concat(SHA256.HashData(authenticateWebAuthnResponse.Response.ClientDataJSON)).ToArray();
+
+                    var userWebAuthnInfos = Core.GetUserWebAuthnInfos(CurrentUser._id);
+                    var credential = userWebAuthnInfos.FirstOrDefault(c => c.CredentialId.SequenceEqual(authenticateWebAuthnResponse.RawId));
+                    PublicKeyInfo publicKeyInfo = new PublicKeyInfo()
+                        {
+                            PublicKey = credential.PublicKey,
+                            PublicKeyAlgorithm = credential.PublicKeyAlgorithm,
+                        };
+
+                    bool isValidSignature = false;
+
+                    if (publicKeyInfo.PublicKeyAlgorithm == "ES256")
+                    {
+                        byte[] publicKey = publicKeyInfo.PublicKey;  // 直接使用提取和存储的公钥
+                        using var ecdsa = ECDsa.Create();
+                        ecdsa.ImportSubjectPublicKeyInfo(publicKey, out _);
+                        isValidSignature = ecdsa.VerifyData(signedData, WebAuthnParser.ConvertDerToRS(authenticateWebAuthnResponse.Response.Signature), HashAlgorithmName.SHA256);
+                    }
+                    else if (publicKeyInfo.PublicKeyAlgorithm == "RS256")
+                    {
+                        var rsa = RSA.Create();
+                        rsa.ImportRSAPublicKey(publicKeyInfo.PublicKey, out _);
+                        isValidSignature = rsa.VerifyData(signedData, authenticateWebAuthnResponse.Response.Signature, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+                    }
+
+                    if (isValidSignature)
+                    {
+                        await Jsc.MetroUIConfirm("Result", "Success!");
+                    }
+                    else
+                    {
+                        await Jsc.MetroUIConfirm("Result", "Signature error");
+                    }
+                }
+                else
+                {
+                    await Jsc.Toast("Challenge not found");
+                }
             }
         );
     }

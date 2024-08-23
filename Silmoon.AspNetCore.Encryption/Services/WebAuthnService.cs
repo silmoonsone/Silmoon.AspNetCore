@@ -23,7 +23,7 @@ namespace Silmoon.AspNetCore.Encryption.Services
     {
         public WebAuthnServiceOptions Options { get; set; }
         public WebAuthnService(IOptions<WebAuthnServiceOptions> options) => Options = options.Value is null ? new WebAuthnServiceOptions() : options.Value;
-        public async Task GetWebAuthnOptions(HttpContext httpContext, RequestDelegate requestDelegate)
+        public async Task GetCreateOptions(HttpContext httpContext, RequestDelegate requestDelegate)
         {
             var user = await GetClientOptionsWebAuthnUser(httpContext);
             StateFlag<ClientWebAuthnOptions> result = new StateFlag<ClientWebAuthnOptions>();
@@ -49,7 +49,7 @@ namespace Silmoon.AspNetCore.Encryption.Services
             httpContext.Response.ContentType = "application/json";
             await httpContext.Response.WriteAsync(result.ToJsonString());
         }
-        public async Task GetWebAuthnAuthenticateOptions(HttpContext httpContext, RequestDelegate requestDelegate)
+        public async Task GetAuthenticateOptions(HttpContext httpContext, RequestDelegate requestDelegate)
         {
             StateFlag<ClientWebAuthnAuthenticateOptions> result = new StateFlag<ClientWebAuthnAuthenticateOptions>();
 
@@ -75,16 +75,16 @@ namespace Silmoon.AspNetCore.Encryption.Services
             httpContext.Response.ContentType = "application/json";
             await httpContext.Response.WriteAsync(result.ToJsonString());
         }
-        public async Task CreateWebAuthn(HttpContext httpContext, RequestDelegate requestDelegate)
+        public async Task Create(HttpContext httpContext, RequestDelegate requestDelegate)
         {
             var bodyStr = await httpContext.Request.GetBodyString();
-            CreateWebAuthnKeyResponse createWebAuthnKeyResponse = JsonConvert.DeserializeObject<CreateWebAuthnKeyResponse>(bodyStr);
+            WebAuthnCreateResponse createWebAuthnKeyResponse = JsonConvert.DeserializeObject<WebAuthnCreateResponse>(bodyStr);
 
             var attestationObjectByteArray = createWebAuthnKeyResponse.Response.AttestationObject;
             var clientDataJSON = createWebAuthnKeyResponse.Response.ClientDataJson;
             var attestationData = WebAuthnParser.ParseAttestationObject(attestationObjectByteArray);
 
-            var createResult = await OnCreateWebAuthn(httpContext, attestationData, clientDataJSON.GetString(), attestationObjectByteArray, createWebAuthnKeyResponse.AuthenticatorAttachment);
+            var createResult = await OnCreate(httpContext, attestationData, clientDataJSON.GetString(), attestationObjectByteArray, createWebAuthnKeyResponse.AuthenticatorAttachment);
 
             StateFlag<bool> result = new StateFlag<bool>();
             if (createResult.State)
@@ -99,7 +99,7 @@ namespace Silmoon.AspNetCore.Encryption.Services
             httpContext.Response.ContentType = "application/json";
             await httpContext.Response.WriteAsync(result.ToJsonString());
         }
-        public async Task DeleteWebAuthn(HttpContext httpContext, RequestDelegate requestDelegate)
+        public async Task Delete(HttpContext httpContext, RequestDelegate requestDelegate)
         {
             string credentialId = httpContext.Request.Form["CredentialId"];
             if (credentialId.IsNullOrEmpty()) credentialId = httpContext.Request.Query["CredentialId"];
@@ -116,7 +116,7 @@ namespace Silmoon.AspNetCore.Encryption.Services
             }
             else
             {
-                var deleteResult = await OnDeleteWebAuthn(httpContext, Convert.FromBase64String(credentialId));
+                var deleteResult = await OnDelete(httpContext, Convert.FromBase64String(credentialId));
                 if (deleteResult.State)
                 {
                     result.Success = true;
@@ -131,18 +131,17 @@ namespace Silmoon.AspNetCore.Encryption.Services
 
             }
         }
-        public async Task VerifyWebAuthn(HttpContext httpContext, RequestDelegate requestDelegate)
+        public async Task Authenticate(HttpContext httpContext, RequestDelegate requestDelegate)
         {
             var bodyStr = await httpContext.Request.GetBodyString();
-            VerifyWebAuthnResponse verifyWebAuthnResponse = JsonConvert.DeserializeObject<VerifyWebAuthnResponse>(bodyStr);
+            WebAuthnAuthenticateResponse verifyWebAuthnResponse = JsonConvert.DeserializeObject<WebAuthnAuthenticateResponse>(bodyStr);
 
             byte[] rawId = verifyWebAuthnResponse.RawId;
             byte[] clientDataJSON = verifyWebAuthnResponse.Response.ClientDataJSON;
             byte[] authenticatorData = verifyWebAuthnResponse.Response.AuthenticatorData;
             byte[] signature = verifyWebAuthnResponse.Response.Signature;
 
-            var clientDataString = Encoding.UTF8.GetString(clientDataJSON);
-            var clientData = JsonConvert.DeserializeObject<JObject>(clientDataString);
+            var clientData = verifyWebAuthnResponse.Response.GetClientJson();
 
             var userIdResult = ObjectCache<string, string>.Get("______passkey_challenge:" + clientData["challenge"].Value<string>().Base64UrlToBase64());
 
@@ -206,8 +205,8 @@ namespace Silmoon.AspNetCore.Encryption.Services
 
         public abstract Task<ClientWebAuthnOptions.ClientWebAuthnUser> GetClientOptionsWebAuthnUser(HttpContext httpContext);
         public abstract Task<AllowUserCredential> GetAllowCredentials(HttpContext httpContext, string userId);
-        public abstract Task<StateSet<bool>> OnCreateWebAuthn(HttpContext httpContext, AttestationObjectData attestationObjectData, string clientDataJSON, byte[] attestationObjectByteArray, string authenticatorAttachment);
-        public abstract Task<StateSet<bool>> OnDeleteWebAuthn(HttpContext httpContext, byte[] credentialId);
+        public abstract Task<StateSet<bool>> OnCreate(HttpContext httpContext, AttestationObjectData attestationObjectData, string clientDataJSON, byte[] attestationObjectByteArray, string authenticatorAttachment);
+        public abstract Task<StateSet<bool>> OnDelete(HttpContext httpContext, byte[] credentialId);
         public abstract Task<PublicKeyInfo> OnGetPublicKeyInfo(HttpContext httpContext, byte[] rawId, string userId);
     }
 }

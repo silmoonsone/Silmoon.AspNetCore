@@ -5,7 +5,7 @@ namespace Silmoon.AspNetCore.Encryption.Models
     /// <summary>
     /// 在创建过程中客户端返回的创建WebAuthn的响应经过Json解析后的对象
     /// </summary>
-    public class CreateWebAuthnKeyResponse
+    public class WebAuthnCreateResponse
     {
         [JsonProperty("rawId")]
         public byte[] RawId { get; set; }

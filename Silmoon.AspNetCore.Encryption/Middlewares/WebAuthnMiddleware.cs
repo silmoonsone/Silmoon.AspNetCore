@@ -20,23 +20,23 @@ namespace Silmoon.AspNetCore.Encryption.Middlewares
         {
             if (context.Request.Path == WebAuthnService.Options.GetWebAuthnOptionsUrl)
             {
-                await WebAuthnService.GetWebAuthnOptions(context, _next);
+                await WebAuthnService.GetCreateOptions(context, _next);
             }
             else if (context.Request.Path == WebAuthnService.Options.CreateWebAuthnUrl)
             {
-                await WebAuthnService.CreateWebAuthn(context, _next);
+                await WebAuthnService.Create(context, _next);
             }
             else if (context.Request.Path == WebAuthnService.Options.DeleteWebAuthnUrl)
             {
-                await WebAuthnService.DeleteWebAuthn(context, _next);
+                await WebAuthnService.Delete(context, _next);
             }
             else if (context.Request.Path == WebAuthnService.Options.GetWebAuthnAuthenticateOptions)
             {
-                await WebAuthnService.GetWebAuthnAuthenticateOptions(context, _next);
+                await WebAuthnService.GetAuthenticateOptions(context, _next);
             }
             else if (context.Request.Path == WebAuthnService.Options.AuthenticateWebAuthn)
             {
-                await WebAuthnService.VerifyWebAuthn(context, _next);
+                await WebAuthnService.Authenticate(context, _next);
             }
             else
                 await _next(context);

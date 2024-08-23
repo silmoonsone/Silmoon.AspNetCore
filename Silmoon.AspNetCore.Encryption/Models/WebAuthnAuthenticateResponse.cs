@@ -1,8 +1,10 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Silmoon.Extension;
 
 namespace Silmoon.AspNetCore.Encryption.Models
 {
-    public class VerifyWebAuthnResponse
+    public class WebAuthnAuthenticateResponse
     {
         [JsonProperty("rawId")]
         public byte[] RawId { get; set; }
@@ -19,6 +21,7 @@ namespace Silmoon.AspNetCore.Encryption.Models
             public byte[] ClientDataJSON { get; set; }
             [JsonProperty("signature")]
             public byte[] Signature { get; set; }
+            public JObject GetClientJson() => JObject.Parse(ClientDataJSON.GetString());
         }
     }
 }

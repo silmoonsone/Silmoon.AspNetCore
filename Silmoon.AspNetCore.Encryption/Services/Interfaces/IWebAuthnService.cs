@@ -10,16 +10,16 @@ namespace Silmoon.AspNetCore.Encryption.Services.Interfaces
     public interface IWebAuthnService
     {
         WebAuthnServiceOptions Options { get; set; }
-        Task GetWebAuthnOptions(HttpContext httpContext, RequestDelegate requestDelegate);
-        Task GetWebAuthnAuthenticateOptions(HttpContext httpContext, RequestDelegate requestDelegate);
-        Task CreateWebAuthn(HttpContext httpContext, RequestDelegate requestDelegate);
-        Task DeleteWebAuthn(HttpContext httpContext, RequestDelegate requestDelegate);
-        Task VerifyWebAuthn(HttpContext httpContext, RequestDelegate requestDelegate);
+        Task GetCreateOptions(HttpContext httpContext, RequestDelegate requestDelegate);
+        Task GetAuthenticateOptions(HttpContext httpContext, RequestDelegate requestDelegate);
+        Task Create(HttpContext httpContext, RequestDelegate requestDelegate);
+        Task Delete(HttpContext httpContext, RequestDelegate requestDelegate);
+        Task Authenticate(HttpContext httpContext, RequestDelegate requestDelegate);
 
         Task<ClientWebAuthnOptions.ClientWebAuthnUser> GetClientOptionsWebAuthnUser(HttpContext httpContext);
         Task<AllowUserCredential> GetAllowCredentials(HttpContext httpContext, string userId);
-        Task<StateSet<bool>> OnCreateWebAuthn(HttpContext httpContext, AttestationObjectData attestationObjectData, string clientDataJSON, byte[] attestationObjectByteArray, string authenticatorAttachment);
-        Task<StateSet<bool>> OnDeleteWebAuthn(HttpContext httpContext, byte[] credentialId);
+        Task<StateSet<bool>> OnCreate(HttpContext httpContext, AttestationObjectData attestationObjectData, string clientDataJSON, byte[] attestationObjectByteArray, string authenticatorAttachment);
+        Task<StateSet<bool>> OnDelete(HttpContext httpContext, byte[] credentialId);
 
         Task<PublicKeyInfo> OnGetPublicKeyInfo(HttpContext httpContext, byte[] rawId, string userId);
     }

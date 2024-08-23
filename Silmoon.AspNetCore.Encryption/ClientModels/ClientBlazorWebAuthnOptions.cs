@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Silmoon.AspNetCore.Encryption.ClientModels
 {
-    public class BlazorClientWebAuthnOptions
+    public class ClientBlazorWebAuthnOptions
     {
         /// <summary>
         /// 将byte[]转换成Base64字符串。

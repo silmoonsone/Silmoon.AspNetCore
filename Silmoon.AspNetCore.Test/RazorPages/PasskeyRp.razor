@@ -77,19 +77,19 @@
         await Wac.CreateWebAuthn(
             async () =>
             {
-                BlazorClientWebAuthnOptions clientWebAuthnOptions = new BlazorClientWebAuthnOptions()
+                ClientBlazorWebAuthnOptions clientBlazorWebAuthnOptions = new ClientBlazorWebAuthnOptions()
                     {
                         Challenge = Guid.NewGuid().ToByteArray().GetBase64String(),
-                        Rp = new BlazorClientWebAuthnOptions.ClientWebAuthnRp() { Id = "localhost", Name = "LocalhostTest" },
-                        User = new BlazorClientWebAuthnOptions.ClientWebAuthnUser()
+                        Rp = new ClientBlazorWebAuthnOptions.ClientWebAuthnRp() { Id = "localhost", Name = "LocalhostTest" },
+                        User = new ClientBlazorWebAuthnOptions.ClientWebAuthnUser()
                         {
                             Name = CurrentUser.Username,
                             DisplayName = $"{CurrentUser.Username}({CurrentUser.Nickname})",
                             Id = CurrentUser._id.ToByteArray().GetBase64String(),
                         },
-                        AuthenticatorSelection = new BlazorClientWebAuthnOptions.ClientWebAuthnAuthenticatorSelection() { UserVerification = "preferred" },
+                        AuthenticatorSelection = new ClientBlazorWebAuthnOptions.ClientWebAuthnAuthenticatorSelection() { UserVerification = "preferred" },
                     };
-                return await Task.FromResult(StateFlag<BlazorClientWebAuthnOptions>.Create(true, clientWebAuthnOptions));
+                return await Task.FromResult(StateFlag<ClientBlazorWebAuthnOptions>.Create(true, clientBlazorWebAuthnOptions));
             },
             async blazorCreateWebAuthnKeyResponse =>
             {

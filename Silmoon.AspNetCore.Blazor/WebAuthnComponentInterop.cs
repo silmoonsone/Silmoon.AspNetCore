@@ -15,7 +15,7 @@ namespace Silmoon.AspNetCore.Blazor
     public class WebAuthnComponentInterop
     {
         private readonly Lazy<Task<IJSObjectReference>> moduleTask;
-        private DotNetObjectReference<JsInvokeObjectHandlerDelegate<Task<StateFlag<BlazorClientWebAuthnOptions>>>> getCreateWebAuthnOptionsCallbackDotNetObjectRef;
+        private DotNetObjectReference<JsInvokeObjectHandlerDelegate<Task<StateFlag<ClientBlazorWebAuthnOptions>>>> getCreateWebAuthnOptionsCallbackDotNetObjectRef;
         private DotNetObjectReference<JsInvokeCreateWebAuthnHandlerDelegate> createWebAuthnCallbackDotNetObjectRef;
 
         public WebAuthnComponentInterop(IJSRuntime jsRuntime)
@@ -24,14 +24,14 @@ namespace Silmoon.AspNetCore.Blazor
                 "import", "./_content/Silmoon.AspNetCore.Blazor/js/webAuthnComponentInterop.js").AsTask());
         }
 
-        public async ValueTask CreateWebAuthn(Func<Task<StateFlag<BlazorClientWebAuthnOptions>>> callback, Func<BlazorCreateWebAuthnKeyResponse, Task<StateFlag>> createCallback)
+        public async ValueTask CreateWebAuthn(Func<Task<StateFlag<ClientBlazorWebAuthnOptions>>> callback, Func<BlazorCreateWebAuthnKeyResponse, Task<StateFlag>> createCallback)
         {
             var module = await moduleTask.Value;
 
             getCreateWebAuthnOptionsCallbackDotNetObjectRef?.Dispose();
             createWebAuthnCallbackDotNetObjectRef?.Dispose();
 
-            getCreateWebAuthnOptionsCallbackDotNetObjectRef = DotNetObjectReference.Create(new JsInvokeObjectHandlerDelegate<Task<StateFlag<BlazorClientWebAuthnOptions>>>(callback));
+            getCreateWebAuthnOptionsCallbackDotNetObjectRef = DotNetObjectReference.Create(new JsInvokeObjectHandlerDelegate<Task<StateFlag<ClientBlazorWebAuthnOptions>>>(callback));
             createWebAuthnCallbackDotNetObjectRef = DotNetObjectReference.Create(new JsInvokeCreateWebAuthnHandlerDelegate(createCallback));
             await module.InvokeVoidAsync("createWebAuthn", getCreateWebAuthnOptionsCallbackDotNetObjectRef, createWebAuthnCallbackDotNetObjectRef);
         }

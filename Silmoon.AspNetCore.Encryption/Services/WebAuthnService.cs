@@ -49,9 +49,9 @@ namespace Silmoon.AspNetCore.Encryption.Services
             httpContext.Response.ContentType = "application/json";
             await httpContext.Response.WriteAsync(result.ToJsonString());
         }
-        public async Task GetWebAuthnAssertionOptions(HttpContext httpContext, RequestDelegate requestDelegate)
+        public async Task GetWebAuthnAuthenticateOptions(HttpContext httpContext, RequestDelegate requestDelegate)
         {
-            StateFlag<ClientWebAuthnAssertionOptions> result = new StateFlag<ClientWebAuthnAssertionOptions>();
+            StateFlag<ClientWebAuthnAuthenticateOptions> result = new StateFlag<ClientWebAuthnAuthenticateOptions>();
 
             var challenge = Guid.NewGuid().ToByteArray();
             string userId = httpContext.Request.Query["UserId"];
@@ -64,7 +64,7 @@ namespace Silmoon.AspNetCore.Encryption.Services
             }
             else
             {
-                result.Data = new ClientWebAuthnAssertionOptions
+                result.Data = new ClientWebAuthnAuthenticateOptions
                 {
                     Challenge = challenge,
                     RpId = Options.Host,

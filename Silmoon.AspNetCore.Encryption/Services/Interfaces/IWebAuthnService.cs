@@ -11,7 +11,7 @@ namespace Silmoon.AspNetCore.Encryption.Services.Interfaces
     {
         WebAuthnServiceOptions Options { get; set; }
         Task GetWebAuthnOptions(HttpContext httpContext, RequestDelegate requestDelegate);
-        Task GetWebAuthnAssertionOptions(HttpContext httpContext, RequestDelegate requestDelegate);
+        Task GetWebAuthnAuthenticateOptions(HttpContext httpContext, RequestDelegate requestDelegate);
         Task CreateWebAuthn(HttpContext httpContext, RequestDelegate requestDelegate);
         Task DeleteWebAuthn(HttpContext httpContext, RequestDelegate requestDelegate);
         Task VerifyWebAuthn(HttpContext httpContext, RequestDelegate requestDelegate);

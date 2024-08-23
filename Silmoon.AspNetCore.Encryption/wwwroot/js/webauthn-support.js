@@ -3,7 +3,7 @@ let webAuthnClientOptions = {
     getWebAuthnOptionsUrl: '/_webAuthn/getWebAuthnOptions',
     createWebAuthnUrl: '/_webAuthn/createWebAuthn',
     deleteWebAuthnUrl: '/_webAuthn/deleteWebAuthn',
-    getAuthenticateWebAuthn: '/_webAuthn/getAuthenticateWebAuthn',
+    getWebAuthnAuthenticateOptions: '/_webAuthn/getWebAuthnAuthenticateOptions',
     authenticateWebAuthnUrl: '/_webAuthn/authenticateWebAuthn'
 }
 
@@ -94,7 +94,7 @@ async function deleteWebAuthn(credentialId) {
 async function authenticateWebAuthn(userId) {
     try {
         // 1. 向服务器请求挑战 (challenge) 和其他验证选项
-        const response = await fetch(webAuthnClientOptions.getAuthenticateWebAuthn + '?UserId=' + userId);
+        const response = await fetch(webAuthnClientOptions.getWebAuthnAuthenticateOptions + '?UserId=' + userId);
         const options = (await response.json()).Data;
 
         // 2. 将 challenge 和允许的凭证ID (allowedCredentials.id) 转换为 Uint8Array

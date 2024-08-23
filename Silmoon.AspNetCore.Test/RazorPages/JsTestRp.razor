@@ -1,32 +1,34 @@
 ﻿@page "/js-test"
 @rendermode InteractiveServer
+@inject JsComponentInterop Jsc
+@inject IJSRuntime Js
 <h3>JsTestRp</h3>
 
 <div>
     <button @onclick="Toast">Toast</button>
-    <button @onclick="MetroUIConfirm">MetroUIConfirm</button>
+    <button @onclick="() => MetroUIConfirm(DateTime.Now.ToString())">MetroUIConfirm</button>
 </div>
 
 @code {
-    [Inject] JsComponentInterop Jsc { get; set; }
-
     private async Task Toast()
     {
         await Jsc.Toast("hello");
     }
-    private async Task MetroUIConfirm()
+    private async Task MetroUIConfirm(string msg)
     {
-        await Jsc.MetroUIConfirm("title", "msg", true, OnConfirm);
-    }
-    private async void OnConfirm(bool confirmed)
-    {
-        if (confirmed)
+        Console.WriteLine("传入：" + msg);
+
+        await Jsc.MetroUIConfirm("title", "msg", true, async result =>
         {
-            await Jsc.Toast("confirmed is true");
-        }
-        else
-        {
-            await Jsc.Toast("confirmed is false");
-        }
+            if (result)
+            {
+                Console.WriteLine("确认回调传入：" + msg);
+                await Jsc.Toast("confirm is true(" + msg + ")");
+            }
+            else
+            {
+                await Jsc.Toast("confirm is false");
+            }
+        });
     }
 }

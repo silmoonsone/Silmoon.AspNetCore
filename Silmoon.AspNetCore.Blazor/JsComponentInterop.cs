@@ -12,7 +12,7 @@ namespace Silmoon.AspNetCore.Blazor
     public class JsComponentInterop : IAsyncDisposable
     {
         private readonly Lazy<Task<IJSObjectReference>> moduleTask;
-        private DotNetObjectReference<JsCallbackHelper> metroUIConfirmCallbackDotNetObjectRef;
+        private DotNetObjectReference<JsInvokeStateSetHandlerDelegate> metroUIConfirmCallbackDotNetObjectRef;
 
         public JsComponentInterop(IJSRuntime jsRuntime)
         {
@@ -30,17 +30,20 @@ namespace Silmoon.AspNetCore.Blazor
             var module = await moduleTask.Value;
             await module.InvokeVoidAsync("toast", message, delay);
         }
-        public async ValueTask MetroUIConfirm(string title, string msg, bool isConfirm = false, Action<bool> callback = null)
+        public async ValueTask MetroUIConfirm(string title, string msg, bool isConfirmDialog = false, Action<bool> callback = null)
         {
             var module = await moduleTask.Value;
             if (callback is not null)
             {
-                if (metroUIConfirmCallbackDotNetObjectRef is null) metroUIConfirmCallbackDotNetObjectRef = DotNetObjectReference.Create(new JsCallbackHelper(callback));
-                await module.InvokeVoidAsync("metroUIConfirm", title, msg, isConfirm, metroUIConfirmCallbackDotNetObjectRef);
+                metroUIConfirmCallbackDotNetObjectRef?.Dispose();
+                metroUIConfirmCallbackDotNetObjectRef = DotNetObjectReference.Create(new JsInvokeStateSetHandlerDelegate(callback));
+                await module.InvokeVoidAsync("metroUIConfirm", title, msg, isConfirmDialog, metroUIConfirmCallbackDotNetObjectRef);
             }
             else
             {
-                await module.InvokeVoidAsync("metroUIConfirm", title, msg, isConfirm);
+                await module.InvokeVoidAsync("metroUIConfirm", title, msg, isConfirmDialog);
+                metroUIConfirmCallbackDotNetObjectRef?.Dispose();
+                metroUIConfirmCallbackDotNetObjectRef = null;
             }
         }
         public async ValueTask DisposeAsync()
@@ -50,18 +53,8 @@ namespace Silmoon.AspNetCore.Blazor
                 var module = await moduleTask.Value;
                 await module.DisposeAsync();
             }
-            if (metroUIConfirmCallbackDotNetObjectRef is not null)
-            {
-                metroUIConfirmCallbackDotNetObjectRef?.Dispose();
-                metroUIConfirmCallbackDotNetObjectRef = null;
-            }
+            metroUIConfirmCallbackDotNetObjectRef?.Dispose();
+            metroUIConfirmCallbackDotNetObjectRef = null;
         }
-    }
-
-    public class JsCallbackHelper(Action<bool> callback)
-    {
-        private readonly Action<bool> _callback = callback;
-        [JSInvokable]
-        public void InvokeCallback(bool result) => _callback?.Invoke(result);
     }
 }

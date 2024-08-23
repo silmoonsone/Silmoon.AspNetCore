@@ -5,7 +5,7 @@ export function showPrompt(message) {
     return prompt(message, 'Type anything here');
 }
 
-export function metroUIConfirm(title, msg, isConfirm, dotNetObjRef) {
+export function metroUIConfirm(title, msg, isConfirmDialog, dotNetObjRef) {
     var a = $("<div id='metroUIConfirm' style='display:none;'>" +
         "<div id='metroUIConfirmOuter'>" +
         "<div id='metroUIConfirmInner'>" +
@@ -19,17 +19,17 @@ export function metroUIConfirm(title, msg, isConfirm, dotNetObjRef) {
         "</div>").appendTo("body");
     $("#metroUIConfirm").fadeIn(200);
 
-    if (!isConfirm) $("#metroUIConfirmCancelButton").hide();
+    if (!isConfirmDialog) $("#metroUIConfirmCancelButton").hide();
 
     $("#metroUIConfirmOKButton").click(function (e) {
         a.fadeOut(function () {
-            if (typeof dotNetObjRef != "undefined" || dotNetObjRef != null) dotNetObjRef.invokeMethodAsync('InvokeCallback', true); // 调用C#回调
+            if (typeof dotNetObjRef != "undefined" || dotNetObjRef != null) dotNetObjRef.invokeMethodAsync('InvokeCallback', true);
             a.remove();
         });
     }).focus();
     $("#metroUIConfirmCancelButton").click(function (e) {
         a.fadeOut(function () {
-            if (typeof dotNetObjRef != "undefined" || dotNetObjRef != null) dotNetObjRef.invokeMethodAsync('InvokeCallback', false); // 调用C#回调
+            if (typeof dotNetObjRef != "undefined" || dotNetObjRef != null) dotNetObjRef.invokeMethodAsync('InvokeCallback', false);
             a.remove();
         });
     });

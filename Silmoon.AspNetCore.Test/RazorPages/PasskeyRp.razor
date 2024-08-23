@@ -75,12 +75,14 @@
     }
     async void CreateWebAuthn()
     {
+        var challenge = Guid.NewGuid().ToByteArray().GetBase64String();
+
         await Wac.Create(
             async () =>
             {
                 ClientBlazorWebAuthnOptions clientBlazorWebAuthnOptions = new ClientBlazorWebAuthnOptions()
                     {
-                        Challenge = Guid.NewGuid().ToByteArray().GetBase64String(),
+                        Challenge = challenge,
                         Rp = new ClientBlazorWebAuthnOptions.ClientWebAuthnRp() { Id = "localhost", Name = "LocalhostTest" },
                         User = new ClientBlazorWebAuthnOptions.ClientWebAuthnUser()
                         {
@@ -94,21 +96,29 @@
             },
             async blazorWebAuthnCreateResponse =>
             {
-                var userWebAuthInfo = new Models.SubModels.UserWebAuthnInfo()
-                    {
-                        AAGuid = blazorWebAuthnCreateResponse.AttestationObjectData.AAGUID,
-                        AttestationFormat = blazorWebAuthnCreateResponse.AttestationObjectData.AttestationFormat,
-                        CredentialId = blazorWebAuthnCreateResponse.AttestationObjectData.CredentialId,
-                        PublicKey = blazorWebAuthnCreateResponse.AttestationObjectData.PublicKey,
-                        PublicKeyAlgorithm = blazorWebAuthnCreateResponse.AttestationObjectData.PublicKeyAlgorithm,
-                        SignCount = blazorWebAuthnCreateResponse.AttestationObjectData.SignCount,
-                        UserVerified = blazorWebAuthnCreateResponse.AttestationObjectData.UserVerified,
-                        AttestationObject = blazorWebAuthnCreateResponse.Response.AttestationObject,
-                        AuthenticatorAttachment = blazorWebAuthnCreateResponse.AuthenticatorAttachment,
-                    };
-                var result = Core.AddUserWebAuthnInfo(CurrentUser._id, userWebAuthInfo);
-                await Jsc.Toast("注册Passkey成功");
-                Load();
+                if (blazorWebAuthnCreateResponse.Response.GetClientJson()["challenge"].Value<string>().Base64UrlToBase64() == challenge)
+                {
+
+                    var userWebAuthInfo = new Models.SubModels.UserWebAuthnInfo()
+                        {
+                            AAGuid = blazorWebAuthnCreateResponse.AttestationObjectData.AAGUID,
+                            AttestationFormat = blazorWebAuthnCreateResponse.AttestationObjectData.AttestationFormat,
+                            CredentialId = blazorWebAuthnCreateResponse.AttestationObjectData.CredentialId,
+                            PublicKey = blazorWebAuthnCreateResponse.AttestationObjectData.PublicKey,
+                            PublicKeyAlgorithm = blazorWebAuthnCreateResponse.AttestationObjectData.PublicKeyAlgorithm,
+                            SignCount = blazorWebAuthnCreateResponse.AttestationObjectData.SignCount,
+                            UserVerified = blazorWebAuthnCreateResponse.AttestationObjectData.UserVerified,
+                            AttestationObject = blazorWebAuthnCreateResponse.Response.AttestationObject,
+                            AuthenticatorAttachment = blazorWebAuthnCreateResponse.AuthenticatorAttachment,
+                        };
+                    var result = Core.AddUserWebAuthnInfo(CurrentUser._id, userWebAuthInfo);
+                    await Jsc.Toast("注册Passkey成功");
+                    Load();
+                }
+                else
+                {
+                    await Jsc.Toast("Challenge not found");
+                }
             }
         );
     }
@@ -132,15 +142,11 @@
                 var clientJson = authenticateWebAuthnResponse.Response.GetClientJson();
                 if (clientJson["challenge"].Value<string>().Base64UrlToBase64() == challenge)
                 {
-                    var signedData = authenticateWebAuthnResponse.Response.AuthenticatorData.Concat(SHA256.HashData(authenticateWebAuthnResponse.Response.ClientDataJSON)).ToArray();
+                    var signedData = authenticateWebAuthnResponse.Response.AuthenticatorData.Concat(SHA256.HashData(authenticateWebAuthnResponse.Response.ClientDataJson)).ToArray();
 
                     var userWebAuthnInfos = Core.GetUserWebAuthnInfos(CurrentUser._id);
                     var credential = userWebAuthnInfos.FirstOrDefault(c => c.CredentialId.SequenceEqual(authenticateWebAuthnResponse.RawId));
-                    PublicKeyInfo publicKeyInfo = new PublicKeyInfo()
-                        {
-                            PublicKey = credential.PublicKey,
-                            PublicKeyAlgorithm = credential.PublicKeyAlgorithm,
-                        };
+                    PublicKeyInfo publicKeyInfo = new PublicKeyInfo() { PublicKey = credential.PublicKey, PublicKeyAlgorithm = credential.PublicKeyAlgorithm, };
 
                     bool isValidSignature = false;
 
@@ -159,18 +165,12 @@
                     }
 
                     if (isValidSignature)
-                    {
                         await Jsc.MetroUIConfirm("Result", "Success!");
-                    }
                     else
-                    {
                         await Jsc.MetroUIConfirm("Result", "Signature error");
-                    }
                 }
                 else
-                {
                     await Jsc.Toast("Challenge not found");
-                }
             }
         );
     }

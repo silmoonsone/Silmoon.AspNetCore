@@ -80,8 +80,6 @@ namespace Silmoon.AspNetCore.Encryption
                 // 提取 EC2 公钥（适用于 ES256）
                 byte[] x = cborKey[CBORObject.FromObject(-2)].GetByteString();  // X coordinate
                 byte[] y = cborKey[CBORObject.FromObject(-3)].GetByteString();  // Y coordinate
-                Console.WriteLine(x.ToHexString());
-                Console.WriteLine(y.ToHexString());
                 // Create the EC point format (0x04 || X || Y) for uncompressed format
                 byte[] ecPoint = new byte[1 + x.Length + y.Length];
                 ecPoint[0] = 0x04; // Uncompressed point indicator

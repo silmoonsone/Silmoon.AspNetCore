@@ -16,13 +16,10 @@
     }
     private async Task MetroUIConfirm(string msg)
     {
-        Console.WriteLine("传入：" + msg);
-
         await Jsc.MetroUIConfirm("title", "msg", true, async result =>
         {
             if (result)
             {
-                Console.WriteLine("确认回调传入：" + msg);
                 await Jsc.Toast("confirm is true(" + msg + ")");
             }
             else

@@ -18,10 +18,10 @@ namespace Silmoon.AspNetCore.Encryption.Models
             [JsonProperty("authenticatorData")]
             public byte[] AuthenticatorData { get; set; }
             [JsonProperty("clientDataJSON")]
-            public byte[] ClientDataJSON { get; set; }
+            public byte[] ClientDataJson { get; set; }
             [JsonProperty("signature")]
             public byte[] Signature { get; set; }
-            public JObject GetClientJson() => JObject.Parse(ClientDataJSON.GetString());
+            public JObject GetClientJson() => JObject.Parse(ClientDataJson.GetString());
         }
     }
 }

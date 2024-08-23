@@ -44,7 +44,7 @@ namespace Silmoon.AspNetCore.Encryption.Services
                     AuthenticatorSelection = new ClientWebAuthnOptions.ClientWebAuthnAuthenticatorSelection() { UserVerification = "preferred" },
                     Timeout = 60000
                 };
-                ObjectCache<string, string>.Set("______passkey_challenge:" + user.Id, Convert.ToBase64String(result.Data.Challenge), TimeSpan.FromSeconds(300));
+                ObjectCache<string, string>.Set("______passkey_challenge:" + result.Data.Challenge.GetBase64String(), user.Id.GetBase64String(), TimeSpan.FromSeconds(300));
             }
             httpContext.Response.ContentType = "application/json";
             await httpContext.Response.WriteAsync(result.ToJsonString());
@@ -79,22 +79,33 @@ namespace Silmoon.AspNetCore.Encryption.Services
         {
             var bodyStr = await httpContext.Request.GetBodyString();
             WebAuthnCreateResponse createWebAuthnKeyResponse = JsonConvert.DeserializeObject<WebAuthnCreateResponse>(bodyStr);
+            var clientDataJSON = createWebAuthnKeyResponse.Response.ClientDataJson.GetString();
+            var clientJson = JObject.Parse(clientDataJSON);
 
-            var attestationObjectByteArray = createWebAuthnKeyResponse.Response.AttestationObject;
-            var clientDataJSON = createWebAuthnKeyResponse.Response.ClientDataJson;
-            var attestationData = WebAuthnParser.ParseAttestationObject(attestationObjectByteArray);
-
-            var createResult = await OnCreate(httpContext, attestationData, clientDataJSON.GetString(), attestationObjectByteArray, createWebAuthnKeyResponse.AuthenticatorAttachment);
+            var userIdResult = ObjectCache<string, string>.Get("______passkey_challenge:" + clientJson["challenge"].Value<string>().Base64UrlToBase64());
 
             StateFlag<bool> result = new StateFlag<bool>();
-            if (createResult.State)
+            if (!userIdResult.Matched)
             {
-                result.Success = true;
+                result.Success = false;
+                result.Message = "Challenge not found";
             }
             else
             {
-                result.Success = false;
-                result.Message = createResult.Message;
+                var attestationObjectByteArray = createWebAuthnKeyResponse.Response.AttestationObject;
+                var attestationData = WebAuthnParser.ParseAttestationObject(attestationObjectByteArray);
+
+                var createResult = await OnCreate(httpContext, attestationData, clientDataJSON, attestationObjectByteArray, createWebAuthnKeyResponse.AuthenticatorAttachment);
+
+                if (createResult.State)
+                {
+                    result.Success = true;
+                }
+                else
+                {
+                    result.Success = false;
+                    result.Message = createResult.Message;
+                }
             }
             httpContext.Response.ContentType = "application/json";
             await httpContext.Response.WriteAsync(result.ToJsonString());
@@ -137,7 +148,7 @@ namespace Silmoon.AspNetCore.Encryption.Services
             WebAuthnAuthenticateResponse verifyWebAuthnResponse = JsonConvert.DeserializeObject<WebAuthnAuthenticateResponse>(bodyStr);
 
             byte[] rawId = verifyWebAuthnResponse.RawId;
-            byte[] clientDataJSON = verifyWebAuthnResponse.Response.ClientDataJSON;
+            byte[] clientDataJSON = verifyWebAuthnResponse.Response.ClientDataJson;
             byte[] authenticatorData = verifyWebAuthnResponse.Response.AuthenticatorData;
             byte[] signature = verifyWebAuthnResponse.Response.Signature;
 

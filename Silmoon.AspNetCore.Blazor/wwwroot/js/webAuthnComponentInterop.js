@@ -97,7 +97,7 @@ export function arrayBufferToBase64(buffer) {
     }
 
     // 使用 btoa() 将二进制字符串转换为 Base64 编码
-    return btoa(binaryString);
+    return base64UrlToBase64(btoa(binaryString));
 }
 export function base64ToArrayBuffer(base64) {
     // 使用 atob() 将 Base64 字符串解码为二进制字符串
@@ -122,7 +122,7 @@ export function uint8ArrayToBase64(uint8Array) {
     for (let i = 0; i < uint8Array.length; i++) {
         binaryString += String.fromCharCode(uint8Array[i]);
     }
-    return btoa(binaryString);
+    return base64UrlToBase64(btoa(binaryString));
 }
 export function base64ToUint8Array(base64) {
     const binaryString = atob(base64);
@@ -131,4 +131,16 @@ export function base64ToUint8Array(base64) {
         uint8Array[i] = binaryString.charCodeAt(i);
     }
     return uint8Array;
+}
+export function base64UrlToBase64(base64Url) {
+    // 1. 替换Base64Url中的特殊字符
+    let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+
+    // 2. 计算需要填充的等号数量
+    const padding = 4 - (base64.length % 4);
+    if (padding !== 4) {
+        base64 += '='.repeat(padding);
+    }
+
+    return base64;
 }

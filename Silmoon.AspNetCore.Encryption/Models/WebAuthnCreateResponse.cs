@@ -1,4 +1,6 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Silmoon.Extension;
 
 namespace Silmoon.AspNetCore.Encryption.Models
 {
@@ -22,6 +24,7 @@ namespace Silmoon.AspNetCore.Encryption.Models
             public byte[] AttestationObject { get; set; }
             [JsonProperty("clientDataJSON")]
             public byte[] ClientDataJson { get; set; }
+            public JObject GetClientJson() => JObject.Parse(ClientDataJson.GetString());
         }
     }
 }

@@ -14,5 +14,10 @@ namespace Silmoon.AspNetCore.Blazor.Extensions
             ArgumentNullException.ThrowIfNull(services);
             services.AddScoped<JsComponentInterop>();
         }
+        public static void AddWebAuthnJsInterop(this IServiceCollection services)
+        {
+            ArgumentNullException.ThrowIfNull(services);
+            services.AddScoped<WebAuthnComponentInterop>();
+        }
     }
 }

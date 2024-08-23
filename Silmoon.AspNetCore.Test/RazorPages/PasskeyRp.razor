@@ -1,0 +1,135 @@
+﻿@page "/passkey"
+@using Silmoon.AspNetCore.Encryption
+@using Silmoon.AspNetCore.Encryption.ClientModels
+@using Silmoon.AspNetCore.Encryption.Models
+@using Silmoon.AspNetCore.Test.Models.SubModels
+@using Silmoon.Models
+@rendermode InteractiveServer
+@attribute [Authorize]
+@inject Core Core
+@inject WebAuthnComponentInterop Wac
+@inject JsComponentInterop Jsc
+@inject ISilmoonAuthService SilmoonAuthService
+
+<h3>PasskeyRp</h3>
+
+<hr />
+<div>
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <div class="small text-secondary">username</div>
+            <div class="text-primary fw-bold">@CurrentUser.Username</div>
+        </div>
+        <div>
+            <button class="btn btn-primary btn-sm" id="enroll" @onclick="CreateWebAuthn">Add passkey</button>
+            <button class="btn btn-primary btn-sm" id="signout" onclick="authenticateWebAuthn('@CurrentUser._id')">Verify</button>
+            <button class="btn btn-danger btn-sm" id="signout" onclick="signout()">Signout</button>
+        </div>
+    </div>
+    <hr />
+    <div>
+        @if (UserWebAuthnInfos.IsNullOrEmpty())
+        {
+            <div class="small text-secondary">No any passkey.</div>
+        }
+        else
+        {
+            @foreach (var item in UserWebAuthnInfos)
+            {
+                <div class="card shadow p-3 my-3">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <span class="mark">[@item.PublicKeyAlgorithm]</span>
+                            <span class="mark">[@item.AuthenticatorAttachment]</span>
+                            <span>@item.CredentialId.GetBase64String()</span>
+                        </div>
+                        <div>
+                            <button class="btn btn-sm btn-danger deleteButton" @onclick="() => DeleteWebAuthn(item.CredentialId)">DELETE</button>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+</div>
+
+
+@code {
+    byte[] tmp { get; set; }
+    List<UserWebAuthnInfo> UserWebAuthnInfos = [];
+
+    User CurrentUser { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        CurrentUser = await SilmoonAuthService.GetUser<User>();
+        Load();
+        await base.OnInitializedAsync();
+    }
+    void Load()
+    {
+        UserWebAuthnInfos.Clear();
+        UserWebAuthnInfos.AddRange(Core.GetUserWebAuthnInfos(CurrentUser._id));
+        StateHasChanged();
+    }
+    async void CreateWebAuthn()
+    {
+        await Wac.CreateWebAuthn(
+            async () =>
+            {
+                BlazorClientWebAuthnOptions clientWebAuthnOptions = new BlazorClientWebAuthnOptions()
+                    {
+                        Challenge = Guid.NewGuid().ToByteArray().GetBase64String(),
+                        Rp = new BlazorClientWebAuthnOptions.ClientWebAuthnRp() { Id = "localhost", Name = "LocalhostTest" },
+                        User = new BlazorClientWebAuthnOptions.ClientWebAuthnUser()
+                        {
+                            Name = CurrentUser.Username,
+                            DisplayName = $"{CurrentUser.Username}({CurrentUser.Nickname})",
+                            Id = CurrentUser._id.ToByteArray().GetBase64String(),
+                        },
+                        AuthenticatorSelection = new BlazorClientWebAuthnOptions.ClientWebAuthnAuthenticatorSelection() { UserVerification = "preferred" },
+                    };
+                return await Task.FromResult(StateFlag<BlazorClientWebAuthnOptions>.Create(true, clientWebAuthnOptions));
+            },
+            async blazorCreateWebAuthnKeyResponse =>
+            {
+                var userWebAuthInfo = new Models.SubModels.UserWebAuthnInfo()
+                    {
+                        AAGuid = blazorCreateWebAuthnKeyResponse.AttestationObjectData.AAGUID,
+                        AttestationFormat = blazorCreateWebAuthnKeyResponse.AttestationObjectData.AttestationFormat,
+                        CredentialId = blazorCreateWebAuthnKeyResponse.AttestationObjectData.CredentialId,
+                        PublicKey = blazorCreateWebAuthnKeyResponse.AttestationObjectData.PublicKey,
+                        PublicKeyAlgorithm = blazorCreateWebAuthnKeyResponse.AttestationObjectData.PublicKeyAlgorithm,
+                        SignCount = blazorCreateWebAuthnKeyResponse.AttestationObjectData.SignCount,
+                        UserVerified = blazorCreateWebAuthnKeyResponse.AttestationObjectData.UserVerified,
+                        AttestationObject = blazorCreateWebAuthnKeyResponse.Response.AttestationObject,
+                        AuthenticatorAttachment = blazorCreateWebAuthnKeyResponse.AuthenticatorAttachment,
+                    };
+                var result = Core.AddUserWebAuthnInfo(CurrentUser._id, userWebAuthInfo);
+
+
+                await Jsc.Toast("注册Passkey成功");
+
+                Load();
+                return StateFlag.Create(true);
+            }
+        );
+    }
+    async void DeleteWebAuthn(byte[] credentialId)
+    {
+        tmp = credentialId;
+        await Jsc.MetroUIConfirm("确认", "确认删除(" + credentialId.GetBase64String() + ")？", true, async confirmd =>
+        {
+            if (confirmd)
+            {
+                var result = Core.DeleteUserWebAuthnInfo(CurrentUser._id, tmp);
+                if (result.State)
+                {
+                    Load();
+                    await Jsc.Toast("删除成功");
+                }
+                else await Jsc.Toast("删除失败(" + result.Message + ")", 3000);
+            }
+        });
+    }
+}

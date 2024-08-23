@@ -8,6 +8,8 @@ using Newtonsoft.Json.Linq;
 using Silmoon.AspNetCore.Binders;
 using Silmoon.AspNetCore.Blazor;
 using Silmoon.AspNetCore.Blazor.Extensions;
+using Silmoon.AspNetCore.Encryption.Extensions;
+using Silmoon.AspNetCore.Encryption.Services;
 using Silmoon.AspNetCore.Extension.Binders;
 using Silmoon.AspNetCore.Extensions;
 using Silmoon.AspNetCore.Test;
@@ -57,10 +59,10 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 //builder.Services.AddSignalR();
 
 // ** required NuGet package for Microsoft.AspNetCore.SignalR.Protocols.NewtonsoftJson
-//builder.Services.AddSignalR().AddNewtonsoftJsonProtocol();
+builder.Services.AddSignalR().AddNewtonsoftJsonProtocol();
 
 // ** To add Blazor service
-builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+builder.Services.AddRazorComponents().AddInteractiveServerComponents().AddCircuitOptions(options => options.DetailedErrors = true);
 
 builder.Services.AddSilmoonConfigure<SilmoonConfigureServiceImpl>(o =>
 {
@@ -69,6 +71,8 @@ builder.Services.AddSilmoonConfigure<SilmoonConfigureServiceImpl>(o =>
 builder.Services.AddSingleton<Core>();
 builder.Services.AddSilmoonAuth<SilmoonAuthServiceImpl>();
 builder.Services.AddJsComponentInterop();
+builder.Services.AddWebAuthnJsInterop();
+builder.Services.AddWebAuthn<WebAuthnServiceImpl>();
 
 //builder.Services.AddSilmoonDevApp<SilmoonDevAppServiceImpl>();
 
@@ -107,6 +111,8 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseWebAuthn();
 
 app.MapControllerRoute(
     name: "default",

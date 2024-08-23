@@ -25,14 +25,27 @@
             </NavLink>
         </div>
 
-        <hr style="background-color: white;" />
-
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/dashboard">
-                Dashboard
+            <NavLink class="nav-link" href="/js-test">
+                JsTest
             </NavLink>
         </div>
 
+        <hr style="background-color: white;" />
+
+        @if (IsSignedIn)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/dashboard">
+                    Dashboard
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/passkey">
+                    Passkey
+                </NavLink>
+            </div>
+        }
         <hr style="background-color: white;" />
 
         <div class="nav-item px-3">

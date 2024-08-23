@@ -1,70 +1,46 @@
-﻿// WebAuthn support script
-let webAuthnClientOptions = {
-    getWebAuthnOptionsUrl: '/_webAuthn/getWebAuthnOptions',
-    createWebAuthnUrl: '/_webAuthn/createWebAuthn',
-    deleteWebAuthnUrl: '/_webAuthn/deleteWebAuthn',
-    getAuthenticateWebAuthn: '/_webAuthn/getAuthenticateWebAuthn',
-    authenticateWebAuthnUrl: '/_webAuthn/authenticateWebAuthn'
-}
+// WebAuthn support script
+export async function createWebAuthn(optionDotNetObjRef, createDotNetObjRef) {
+    //try {
+    // 1. 向服务器请求创建挑战 (challenge) 和 RP 信息
+    //const response = await fetch(webAuthnClientOptions.getWebAuthnOptionsUrl);
+    const response = await optionDotNetObjRef.invokeMethodAsync('InvokeCallback');
+    if (response.success) {
+        try {
 
-async function createWebAuthn() {
-    try {
-        // 1. 向服务器请求创建挑战 (challenge) 和 RP 信息
-        const response = await fetch(webAuthnClientOptions.getWebAuthnOptionsUrl);
-        const options = (await response.json()).Data;
+            const options = response.data;
+            // 2. 将 challenge 和 user.id 转换为 Uint8Array
+            options.challenge = base64ToUint8Array(options.challenge);
+            options.user.id = base64ToUint8Array(options.user.id);
 
+            // 3. 创建密钥对
+            const credential = await navigator.credentials.create({
+                publicKey: options
+            });
 
-        // 2. 将 challenge 和 user.id 转换为 Uint8Array
-        options.challenge = base64ToUint8Array(options.challenge);
-        options.user.id = base64ToUint8Array(options.user.id);
+            // 4. 获取相关信息
+            const attestationObject = new Uint8Array(credential.response.attestationObject);
+            const clientDataJSON = new Uint8Array(credential.response.clientDataJSON);
+            const rawId = arrayBufferToBase64(new Uint8Array(credential.rawId));
 
-        // 3. 创建密钥对
-        const credential = await navigator.credentials.create({
-            publicKey: options
-        });
+            // 5. 将数据发送到服务器进行验证
+            const data = {
+                rawId: rawId,
+                type: credential.type,
+                authenticatorAttachment: credential.authenticatorAttachment,
+                response: {
+                    attestationObject: arrayBufferToBase64(attestationObject),
+                    clientDataJSON: arrayBufferToBase64(clientDataJSON),
+                },
+            };
 
-        // 4. 获取相关信息
-        const attestationObject = new Uint8Array(credential.response.attestationObject);
-        const clientDataJSON = new Uint8Array(credential.response.clientDataJSON);
-        const rawId = arrayBufferToBase64(new Uint8Array(credential.rawId));
-
-        // 5. 将数据发送到服务器进行验证
-        const data = {
-            rawId: rawId,
-            type: credential.type,
-            authenticatorAttachment: credential.authenticatorAttachment,
-            response: {
-                attestationObject: arrayBufferToBase64(attestationObject),
-                clientDataJSON: arrayBufferToBase64(clientDataJSON),
-            },
-        };
-
-        // 6. 将数据发送到服务器进行注册
-        const createResponse = await fetch(webAuthnClientOptions.createWebAuthnUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        });
-
-        if (createResponse.ok) {
-            const responseData = await createResponse.json();
-            if (responseData.Success) {
-                alert('注册成功');
-                location.reload();
-            } else {
-                alert('注册失败 ' + responseData.Message);
-            }
-        } else {
-            alert('注册失败 ERR');
+            // 6. 将数据发送到服务器进行注册
+            const createResponse = await createDotNetObjRef.invokeMethodAsync('InvokeCallback', data);
+        } catch (err) {
+            console.error(err);
         }
-    } catch (err) {
-        console.error(err);
-        alert('注册过程中出错');
     }
 }
-async function deleteWebAuthn(credentialId) {
+export async function deleteWebAuthn(credentialId) {
     if (confirm('确定删除？')) {
         try {
             const data = new FormData();
@@ -91,7 +67,7 @@ async function deleteWebAuthn(credentialId) {
         }
     }
 }
-async function authenticateWebAuthn(userId) {
+export async function authenticateWebAuthn(userId) {
     try {
         // 1. 向服务器请求挑战 (challenge) 和其他验证选项
         const response = await fetch(webAuthnClientOptions.getAuthenticateWebAuthn + '?UserId=' + userId);
@@ -153,7 +129,7 @@ async function authenticateWebAuthn(userId) {
 }
 
 
-function arrayBufferToBase64(buffer) {
+export function arrayBufferToBase64(buffer) {
     // 创建一个 Uint8Array 视图，表示原始 ArrayBuffer 的字节内容
     const uint8Array = new Uint8Array(buffer);
 
@@ -166,7 +142,7 @@ function arrayBufferToBase64(buffer) {
     // 使用 btoa() 将二进制字符串转换为 Base64 编码
     return btoa(binaryString);
 }
-function base64ToArrayBuffer(base64) {
+export function base64ToArrayBuffer(base64) {
     // 使用 atob() 将 Base64 字符串解码为二进制字符串
     const binaryString = atob(base64);
 
@@ -184,14 +160,14 @@ function base64ToArrayBuffer(base64) {
     // 返回最终的 ArrayBuffer
     return buffer;
 }
-function uint8ArrayToBase64(uint8Array) {
+export function uint8ArrayToBase64(uint8Array) {
     let binaryString = '';
     for (let i = 0; i < uint8Array.length; i++) {
         binaryString += String.fromCharCode(uint8Array[i]);
     }
     return btoa(binaryString);
 }
-function base64ToUint8Array(base64) {
+export function base64ToUint8Array(base64) {
     const binaryString = atob(base64);
     const uint8Array = new Uint8Array(binaryString.length);
     for (let i = 0; i < binaryString.length; i++) {

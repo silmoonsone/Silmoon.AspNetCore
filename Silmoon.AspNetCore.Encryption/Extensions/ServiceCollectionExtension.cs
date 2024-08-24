@@ -5,14 +5,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Silmoon.AspNetCore.Blazor.Extensions
+namespace Silmoon.AspNetCore.Encryption.Extensions
 {
     public static class ServiceCollectionExtension
     {
-        public static void AddJsComponentInterop(this IServiceCollection services)
+        public static void AddWebAuthnJsInterop(this IServiceCollection services)
         {
             ArgumentNullException.ThrowIfNull(services);
-            services.AddScoped<JsComponentInterop>();
+            services.AddScoped<WebAuthnComponentInterop>();
         }
     }
 }

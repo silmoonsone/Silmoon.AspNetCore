@@ -24,7 +24,7 @@ namespace Silmoon.AspNetCore.Encryption
         public WebAuthnComponentInterop(IJSRuntime jsRuntime)
         {
             moduleTask = new(() => jsRuntime.InvokeAsync<IJSObjectReference>(
-                "import", "./_content/Silmoon.AspNetCore.Blazor/js/webAuthnComponentInterop.js").AsTask());
+                "import", "./_content/Silmoon.AspNetCore.Encryption/js/webAuthnComponentInterop.js").AsTask());
         }
 
         public async ValueTask Create(Func<Task<StateFlag<ClientBlazorWebAuthnOptions>>> callback, Func<BlazorWebAuthnCreateResponse, Task> createCallback)

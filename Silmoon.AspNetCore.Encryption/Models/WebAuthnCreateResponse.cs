@@ -20,11 +20,16 @@ namespace Silmoon.AspNetCore.Encryption.Models
 
         public class CreateWebAuthnResponse
         {
+            JObject clientJson;
             [JsonProperty("attestationObject")]
             public byte[] AttestationObject { get; set; }
             [JsonProperty("clientDataJSON")]
             public byte[] ClientDataJson { get; set; }
-            public JObject GetClientJson() => JObject.Parse(ClientDataJson.GetString());
+            public JObject GetClientJson()
+            {
+                return clientJson ??= JObject.Parse(ClientDataJson.GetString());
+            }
+            public string Challenge => GetClientJson()["challenge"].Value<string>().Base64UrlToBase64();
         }
     }
 }

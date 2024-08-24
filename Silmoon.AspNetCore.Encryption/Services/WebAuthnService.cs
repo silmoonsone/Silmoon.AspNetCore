@@ -181,9 +181,8 @@ namespace Silmoon.AspNetCore.Encryption.Services
                 bool isValidSignature = false;
                 if (publicKeyInfo.PublicKeyAlgorithm == "ES256")
                 {
-                    byte[] publicKey = publicKeyInfo.PublicKey;  // 直接使用提取和存储的公钥
                     using var ecdsa = ECDsa.Create();
-                    ecdsa.ImportSubjectPublicKeyInfo(publicKey, out _);
+                    ecdsa.ImportSubjectPublicKeyInfo(publicKeyInfo.PublicKey, out _);
                     isValidSignature = ecdsa.VerifyData(signedData, WebAuthnParser.ConvertDerToRS(signature), HashAlgorithmName.SHA256);
                 }
                 else if (publicKeyInfo.PublicKeyAlgorithm == "RS256")

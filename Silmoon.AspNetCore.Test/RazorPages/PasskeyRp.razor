@@ -5,6 +5,7 @@
 @using Silmoon.AspNetCore.Test.Models.SubModels
 @using Silmoon.Models
 @using System.Security.Cryptography
+@using Silmoon.Secure
 @rendermode InteractiveServer
 @attribute [Authorize]
 @inject Core Core
@@ -74,7 +75,7 @@
     }
     async void CreateWebAuthn()
     {
-        var challenge = Guid.NewGuid().ToByteArray().GetBase64String();
+        var challenge = HashHelper.RandomNumbers(32);
         ClientBlazorWebAuthnOptions clientBlazorWebAuthnOptions = new ClientBlazorWebAuthnOptions()
             {
                 Challenge = challenge,
@@ -92,7 +93,6 @@
             {
                 if (blazorWebAuthnCreateResponse.State)
                 {
-
                     if (blazorWebAuthnCreateResponse.Data.Response.Challenge == challenge)
                     {
                         var userWebAuthInfo = new Models.SubModels.UserWebAuthnInfo()
@@ -108,7 +108,7 @@
                                 AuthenticatorAttachment = blazorWebAuthnCreateResponse.Data.AuthenticatorAttachment,
                             };
                         var result = Core.AddUserWebAuthnInfo(CurrentUser._id, userWebAuthInfo);
-                        await Jsc.Toast("Success");
+                        await Jsc.Toast("CreateWebAuthn success", 3000);
                         Load();
                     }
                     else await Jsc.Toast("Challenge not found");
@@ -120,7 +120,7 @@
     }
     async void AuthenticateWebAuthn()
     {
-        var challenge = Guid.NewGuid().ToByteArray().GetBase64String();
+        var challenge = HashHelper.RandomNumbers(32);
         ClientBlazorWebAuthnAuthenticateOptions options = new ClientBlazorWebAuthnAuthenticateOptions()
             {
                 Challenge = challenge,
@@ -138,7 +138,7 @@
 
                         if (credential is not null)
                         {
-                            var verifyResult = webAuthnAuthenticateResponse.Data.VerifySignal(credential.PublicKey, credential.PublicKeyAlgorithm);
+                            var verifyResult = webAuthnAuthenticateResponse.Data.VerifySignature(credential.PublicKey, credential.PublicKeyAlgorithm);
 
                             if (verifyResult.State)
                                 await Jsc.MetroUIConfirm("Result", "Success!");

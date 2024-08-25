@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using Silmoon.Extension;
 using Silmoon.Models;
 using System.Security.Cryptography;
+using System.Security.Cryptography.Xml;
 
 namespace Silmoon.AspNetCore.Encryption.Models
 {
@@ -37,24 +38,28 @@ namespace Silmoon.AspNetCore.Encryption.Models
         {
             get => [.. Response.AuthenticatorData, .. SHA256.HashData(Response.ClientDataJson)];
         }
-        public StateSet<bool> VerifySignal(PublicKeyInfo publicKeyInfo)
+        public StateSet<bool> VerifySignature(PublicKeyInfo publicKeyInfo)
         {
             if (publicKeyInfo.PublicKeyAlgorithm == "ES256")
             {
                 using var ecdsa = ECDsa.Create();
                 ecdsa.ImportSubjectPublicKeyInfo(publicKeyInfo.PublicKey, out _);
-                return true.ToStateSet();
+                var result = ecdsa.VerifyData(SignedData, WebAuthnParser.ConvertDerToRS(Response.Signature), HashAlgorithmName.SHA256);
+                if (result) return true.ToStateSet();
+                else return false.ToStateSet("Signature verification failed");
             }
             else if (publicKeyInfo.PublicKeyAlgorithm == "RS256")
             {
                 var rsa = RSA.Create();
                 rsa.ImportRSAPublicKey(publicKeyInfo.PublicKey, out _);
-                return true.ToStateSet();
+                var result = rsa.VerifyData(SignedData, Response.Signature, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+                if (result) return true.ToStateSet();
+                else return false.ToStateSet("Signature verification failed");
             }
             else
                 return false.ToStateSet("Unsupported public key algorithm");
         }
-        public StateSet<bool> VerifySignal(byte[] publicKey, string publicKeyAlgorithm)
+        public StateSet<bool> VerifySignature(byte[] publicKey, string publicKeyAlgorithm)
         {
             if (publicKeyAlgorithm == "ES256")
             {

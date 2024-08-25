@@ -178,7 +178,7 @@ namespace Silmoon.AspNetCore.Encryption.Services
                 var signedData = verifyWebAuthnResponse.SignedData;
 
                 // 验证签名
-                var validSignatureResult = verifyWebAuthnResponse.VerifySignal(publicKeyInfo);
+                var validSignatureResult = verifyWebAuthnResponse.VerifySignature(publicKeyInfo);
 
                 result.Success = validSignatureResult.State;
                 result.Message = validSignatureResult.Message;

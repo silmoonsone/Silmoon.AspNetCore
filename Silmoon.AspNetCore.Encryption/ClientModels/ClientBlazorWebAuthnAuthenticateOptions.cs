@@ -9,7 +9,7 @@ namespace Silmoon.AspNetCore.Encryption.ClientModels
         [JsonProperty("rpId")]
         public string RpId { get; set; }
         [JsonProperty("allowCredentials")]
-        public Credential[] AllowCredentials { get; set; }
+        public Credential[] AllowCredentials { get; set; } = [];
         [JsonProperty("timeout")]
         public int Timeout { get; set; } = 60000;
         [JsonProperty("userVerification")]

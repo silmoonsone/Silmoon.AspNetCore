@@ -1,87 +1,65 @@
 // WebAuthn support script
-export async function createWebAuthn(optionDotNetObjRef, createDotNetObjRef) {
-    //try {
-    // 1. 向服务器请求创建挑战 (challenge) 和 RP 信息
-    //const response = await fetch(webAuthnClientOptions.getWebAuthnOptionsUrl);
-    const response = await optionDotNetObjRef.invokeMethodAsync('InvokeCallback');
-    if (response.success) {
-        try {
-            const options = response.data;
-            // 2. 将 challenge 和 user.id 转换为 Uint8Array
-            options.challenge = base64ToUint8Array(options.challenge);
-            options.user.id = base64ToUint8Array(options.user.id);
+export async function createWebAuthn(options, createDotNetObjRef) {
+    try {
+        options.challenge = base64ToUint8Array(options.challenge);
+        options.user.id = base64ToUint8Array(options.user.id);
 
-            // 3. 创建密钥对
-            const credential = await navigator.credentials.create({
-                publicKey: options
-            });
+        const credential = await navigator.credentials.create({
+            publicKey: options
+        });
 
-            // 4. 获取相关信息
-            const attestationObject = new Uint8Array(credential.response.attestationObject);
-            const clientDataJSON = new Uint8Array(credential.response.clientDataJSON);
-            const rawId = arrayBufferToBase64(new Uint8Array(credential.rawId));
+        const attestationObject = new Uint8Array(credential.response.attestationObject);
+        const clientDataJSON = new Uint8Array(credential.response.clientDataJSON);
+        const rawId = arrayBufferToBase64(new Uint8Array(credential.rawId));
 
-            // 5. 将数据发送到服务器进行验证
-            const data = {
-                rawId: rawId,
-                type: credential.type,
-                authenticatorAttachment: credential.authenticatorAttachment,
-                response: {
-                    attestationObject: arrayBufferToBase64(attestationObject),
-                    clientDataJSON: arrayBufferToBase64(clientDataJSON),
-                },
-            };
+        const data = {
+            rawId: rawId,
+            type: credential.type,
+            authenticatorAttachment: credential.authenticatorAttachment,
+            response: {
+                attestationObject: arrayBufferToBase64(attestationObject),
+                clientDataJSON: arrayBufferToBase64(clientDataJSON),
+            },
+        };
 
-            // 6. 将数据发送到服务器进行注册
-            await createDotNetObjRef.invokeMethodAsync('InvokeCallback', data);
-        } catch (err) {
-            console.error(err);
-        }
+        await createDotNetObjRef.invokeMethodAsync('InvokeCallback', data);
+    } catch (err) {
+        console.error(err);
     }
 }
-export async function authenticateWebAuthn(optionDotNetObjRef, authenticateDotNetObjRef) {
-    // 1. 向服务器请求挑战 (challenge) 和其他验证选项
-    const response = await optionDotNetObjRef.invokeMethodAsync('InvokeCallback');
-    if (response.success) {
-        try {
-            const options = response.data;
-            // 2. 将 challenge 和允许的凭证ID (allowedCredentials.id) 转换为 Uint8Array
-            options.challenge = base64ToUint8Array(options.challenge);
-            options.allowCredentials = options.allowCredentials.map(cred => {
-                return {
-                    ...cred,
-                    id: base64ToUint8Array(cred.id)
-                };
-            });
-
-            // 3. 调用 navigator.credentials.get() 获取签名
-            const assertion = await navigator.credentials.get({
-                publicKey: options
-            });
-
-            // 4. 获取相关信息
-            const authenticatorData = new Uint8Array(assertion.response.authenticatorData);
-            const clientDataJSON = new Uint8Array(assertion.response.clientDataJSON);
-            const signature = new Uint8Array(assertion.response.signature);
-            const rawId = new Uint8Array(assertion.rawId);
-
-            // 5. 将数据发送到服务器进行验证
-            const data = {
-                rawId: arrayBufferToBase64(rawId),
-                type: assertion.type,
-                response: {
-                    authenticatorData: arrayBufferToBase64(authenticatorData),
-                    clientDataJSON: arrayBufferToBase64(clientDataJSON),
-                    signature: arrayBufferToBase64(signature),
-                },
+export async function authenticateWebAuthn(options, authenticateDotNetObjRef) {
+    try {
+        options.challenge = base64ToUint8Array(options.challenge);
+        options.allowCredentials = options.allowCredentials.map(cred => {
+            return {
+                ...cred,
+                id: base64ToUint8Array(cred.id)
             };
+        });
 
-            // 6. 将数据发送到服务器进行验证
-            await authenticateDotNetObjRef.invokeMethodAsync('InvokeCallback', data);
-        } catch (err) {
-            console.error(err);
-            alert('登录过程中出错');
-        }
+        const assertion = await navigator.credentials.get({
+            publicKey: options
+        });
+
+        const authenticatorData = new Uint8Array(assertion.response.authenticatorData);
+        const clientDataJSON = new Uint8Array(assertion.response.clientDataJSON);
+        const signature = new Uint8Array(assertion.response.signature);
+        const rawId = new Uint8Array(assertion.rawId);
+
+        const data = {
+            rawId: arrayBufferToBase64(rawId),
+            type: assertion.type,
+            response: {
+                authenticatorData: arrayBufferToBase64(authenticatorData),
+                clientDataJSON: arrayBufferToBase64(clientDataJSON),
+                signature: arrayBufferToBase64(signature),
+            },
+        };
+
+        await authenticateDotNetObjRef.invokeMethodAsync('InvokeCallback', data);
+    } catch (err) {
+        console.error(err);
+        alert('登录过程中出错');
     }
 }
 

@@ -15,10 +15,7 @@ namespace Silmoon.AspNetCore.Encryption
     public class WebAuthnComponentInterop
     {
         private readonly Lazy<Task<IJSObjectReference>> moduleTask;
-        private DotNetObjectReference<JsInvokeResponseHandlerDelegate<Task<StateFlag<ClientBlazorWebAuthnOptions>>>> getCreateWebAuthnOptionsCallbackDotNetObjectRef;
         private DotNetObjectReference<JsInvokeCreateWebAuthnHandlerDelegate> createWebAuthnCallbackDotNetObjectRef;
-
-        private DotNetObjectReference<JsInvokeResponseHandlerDelegate<Task<StateFlag<ClientBlazorWebAuthnAuthenticateOptions>>>> getAuthenticateWebAuthnOptionsCallbackDotNetObjectRef;
         private DotNetObjectReference<JsInvokeAuthenticateWebAuthnHandlerDelegate> authenticateWebAuthnCallbackDotNetObjectRef;
 
         public WebAuthnComponentInterop(IJSRuntime jsRuntime)
@@ -27,27 +24,19 @@ namespace Silmoon.AspNetCore.Encryption
                 "import", "./_content/Silmoon.AspNetCore.Encryption/js/webAuthnComponentInterop.js").AsTask());
         }
 
-        public async ValueTask Create(Func<Task<StateFlag<ClientBlazorWebAuthnOptions>>> callback, Func<BlazorWebAuthnCreateResponse, Task> createCallback)
+        public async ValueTask Create(ClientBlazorWebAuthnOptions options, Func<BlazorWebAuthnCreateResponse, Task> createCallback)
         {
             var module = await moduleTask.Value;
-
-            getCreateWebAuthnOptionsCallbackDotNetObjectRef?.Dispose();
             createWebAuthnCallbackDotNetObjectRef?.Dispose();
-
-            getCreateWebAuthnOptionsCallbackDotNetObjectRef = DotNetObjectReference.Create(new JsInvokeResponseHandlerDelegate<Task<StateFlag<ClientBlazorWebAuthnOptions>>>(callback));
             createWebAuthnCallbackDotNetObjectRef = DotNetObjectReference.Create(new JsInvokeCreateWebAuthnHandlerDelegate(createCallback));
-            await module.InvokeVoidAsync("createWebAuthn", getCreateWebAuthnOptionsCallbackDotNetObjectRef, createWebAuthnCallbackDotNetObjectRef);
+            await module.InvokeVoidAsync("createWebAuthn", options, createWebAuthnCallbackDotNetObjectRef);
         }
-        public async ValueTask Authenticate(Func<Task<StateFlag<ClientBlazorWebAuthnAuthenticateOptions>>> callback, Func<BlazorWebAuthnAuthenticateResponse, Task> authenticateCallback)
+        public async ValueTask Authenticate(ClientBlazorWebAuthnAuthenticateOptions options, Func<BlazorWebAuthnAuthenticateResponse, Task> authenticateCallback)
         {
             var module = await moduleTask.Value;
-
-            getAuthenticateWebAuthnOptionsCallbackDotNetObjectRef?.Dispose();
             authenticateWebAuthnCallbackDotNetObjectRef?.Dispose();
-
-            getAuthenticateWebAuthnOptionsCallbackDotNetObjectRef = DotNetObjectReference.Create(new JsInvokeResponseHandlerDelegate<Task<StateFlag<ClientBlazorWebAuthnAuthenticateOptions>>>(callback));
             authenticateWebAuthnCallbackDotNetObjectRef = DotNetObjectReference.Create(new JsInvokeAuthenticateWebAuthnHandlerDelegate(authenticateCallback));
-            await module.InvokeVoidAsync("authenticateWebAuthn", getAuthenticateWebAuthnOptionsCallbackDotNetObjectRef, authenticateWebAuthnCallbackDotNetObjectRef);
+            await module.InvokeVoidAsync("authenticateWebAuthn", options, authenticateWebAuthnCallbackDotNetObjectRef);
         }
         public async ValueTask DisposeAsync()
         {
@@ -58,10 +47,6 @@ namespace Silmoon.AspNetCore.Encryption
             }
             createWebAuthnCallbackDotNetObjectRef?.Dispose();
             createWebAuthnCallbackDotNetObjectRef = null;
-            getCreateWebAuthnOptionsCallbackDotNetObjectRef?.Dispose();
-            createWebAuthnCallbackDotNetObjectRef = null;
-            getAuthenticateWebAuthnOptionsCallbackDotNetObjectRef?.Dispose();
-            getAuthenticateWebAuthnOptionsCallbackDotNetObjectRef = null;
             authenticateWebAuthnCallbackDotNetObjectRef?.Dispose();
             authenticateWebAuthnCallbackDotNetObjectRef = null;
         }
@@ -85,10 +70,4 @@ namespace Silmoon.AspNetCore.Encryption
             return callback?.Invoke(blazorWebAuthnAuthenticateResponse);
         }
     }
-    public class JsInvokeResponseHandlerDelegate<TReturn>(Func<TReturn> callback)
-    {
-        [JSInvokable]
-        public TReturn InvokeCallback() => callback != null ? callback.Invoke() : default;
-    }
-
 }

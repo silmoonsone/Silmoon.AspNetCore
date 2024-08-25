@@ -57,7 +57,6 @@
 
 
 @code {
-    byte[] tmp { get; set; }
     List<UserWebAuthnInfo> UserWebAuthnInfos = [];
 
     User CurrentUser { get; set; }
@@ -76,29 +75,23 @@
     async void CreateWebAuthn()
     {
         var challenge = Guid.NewGuid().ToByteArray().GetBase64String();
-
-        await Wac.Create(
-            async () =>
+        ClientBlazorWebAuthnOptions clientBlazorWebAuthnOptions = new ClientBlazorWebAuthnOptions()
             {
-                ClientBlazorWebAuthnOptions clientBlazorWebAuthnOptions = new ClientBlazorWebAuthnOptions()
-                    {
-                        Challenge = challenge,
-                        Rp = new ClientBlazorWebAuthnOptions.ClientWebAuthnRp() { Id = "localhost", Name = "LocalhostTest" },
-                        User = new ClientBlazorWebAuthnOptions.ClientWebAuthnUser()
-                        {
-                            Name = CurrentUser.Username,
-                            DisplayName = $"{CurrentUser.Username}({CurrentUser.Nickname})",
-                            Id = CurrentUser._id.ToByteArray().GetBase64String(),
-                        },
-                        AuthenticatorSelection = new ClientBlazorWebAuthnOptions.ClientWebAuthnAuthenticatorSelection() { UserVerification = "preferred" },
-                    };
-                return await Task.FromResult(StateFlag<ClientBlazorWebAuthnOptions>.Create(true, clientBlazorWebAuthnOptions));
-            },
-            async blazorWebAuthnCreateResponse =>
+                Challenge = challenge,
+                Rp = new ClientBlazorWebAuthnOptions.ClientWebAuthnRp() { Id = "localhost", Name = "LocalhostTest" },
+                User = new ClientBlazorWebAuthnOptions.ClientWebAuthnUser()
+                {
+                    Name = CurrentUser.Username,
+                    DisplayName = $"{CurrentUser.Username}({CurrentUser.Nickname})",
+                    Id = CurrentUser._id.ToByteArray().GetBase64String(),
+                },
+                AuthenticatorSelection = new ClientBlazorWebAuthnOptions.ClientWebAuthnAuthenticatorSelection() { UserVerification = "preferred" },
+            };
+
+        await Wac.Create(clientBlazorWebAuthnOptions, async blazorWebAuthnCreateResponse =>
             {
                 if (blazorWebAuthnCreateResponse.Response.Challenge == challenge)
                 {
-
                     var userWebAuthInfo = new Models.SubModels.UserWebAuthnInfo()
                         {
                             AAGuid = blazorWebAuthnCreateResponse.AttestationObjectData.AAGUID,
@@ -115,53 +108,48 @@
                     await Jsc.Toast("注册Passkey成功");
                     Load();
                 }
-                else
-                    await Jsc.Toast("Challenge not found");
+                else await Jsc.Toast("Challenge not found");
             }
         );
     }
     async void AuthenticateWebAuthn()
     {
         var challenge = Guid.NewGuid().ToByteArray().GetBase64String();
-
-        await Wac.Authenticate(
-            async () =>
+        ClientBlazorWebAuthnAuthenticateOptions options = new ClientBlazorWebAuthnAuthenticateOptions()
             {
-                ClientBlazorWebAuthnAuthenticateOptions options = new ClientBlazorWebAuthnAuthenticateOptions()
-                    {
-                        Challenge = challenge,
-                        RpId = "localhost",
-                        AllowCredentials = UserWebAuthnInfos.Select(x => new Credential() { Id = x.CredentialId.GetBase64String() }).ToArray(),
-                    };
-                return await Task.FromResult(StateFlag<ClientBlazorWebAuthnAuthenticateOptions>.Create(true, options));
-            },
-            async blazorWebAuthnAuthenticateResponse =>
+                Challenge = challenge,
+                RpId = "localhost",
+                // AllowCredentials = UserWebAuthnInfos.Select(x => new Credential() { Id = x.CredentialId.GetBase64String() }).ToArray(),
+            };
+        await Wac.Authenticate(options, async blazorWebAuthnAuthenticateResponse =>
             {
                 if (blazorWebAuthnAuthenticateResponse.Response.Challenge == challenge)
                 {
                     var userWebAuthnInfos = Core.GetUserWebAuthnInfos(CurrentUser._id);
                     var credential = userWebAuthnInfos.FirstOrDefault(c => c.CredentialId.SequenceEqual(blazorWebAuthnAuthenticateResponse.RawId));
 
-                    var verifyResult = blazorWebAuthnAuthenticateResponse.VerifySignal(credential.PublicKey, credential.PublicKeyAlgorithm);
+                    if (credential is not null)
+                    {
+                        var verifyResult = blazorWebAuthnAuthenticateResponse.VerifySignal(credential.PublicKey, credential.PublicKeyAlgorithm);
 
-                    if (verifyResult.State)
-                        await Jsc.MetroUIConfirm("Result", "Success!");
-                    else
-                        await Jsc.MetroUIConfirm("Result", "Signature error(" + verifyResult.Message + ")");
+                        if (verifyResult.State)
+                            await Jsc.MetroUIConfirm("Result", "Success!");
+                        else
+                            await Jsc.MetroUIConfirm("Result", "Signature error(" + verifyResult.Message + ")");
+                    }
+                    else await Jsc.MetroUIConfirm("Result", "Failed(credential is not exist)!");
                 }
-                else
-                    await Jsc.Toast("Challenge not found");
+                else await Jsc.Toast("Challenge not found");
             }
         );
     }
     async void DeleteWebAuthn(byte[] credentialId)
     {
-        tmp = credentialId;
         await Jsc.MetroUIConfirm("确认", "确认删除(" + credentialId.GetBase64String() + ")？", true, async confirmd =>
         {
             if (confirmd)
             {
-                var result = Core.DeleteUserWebAuthnInfo(CurrentUser._id, tmp);
+                var result = Core.DeleteUserWebAuthnInfo(CurrentUser._id, credentialId);
                 if (result.State)
                 {
                     Load();

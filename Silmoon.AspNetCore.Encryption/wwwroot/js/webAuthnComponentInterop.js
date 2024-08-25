@@ -21,10 +21,20 @@ export async function createWebAuthn(options, createDotNetObjRef) {
                 clientDataJSON: arrayBufferToBase64(clientDataJSON),
             },
         };
-
-        await createDotNetObjRef.invokeMethodAsync('InvokeCallback', data);
-    } catch (err) {
-        console.error(err);
+        const result = {
+            state: true,
+            data: data,
+            message: 'Success'
+        };
+        await createDotNetObjRef.invokeMethodAsync('InvokeCallback', result);
+    }
+    catch (err) {
+        const result = {
+            state: false,
+            data: null,
+            message: err.message
+        };
+        await createDotNetObjRef.invokeMethodAsync('InvokeCallback', result);
     }
 }
 export async function authenticateWebAuthn(options, authenticateDotNetObjRef) {
@@ -56,10 +66,19 @@ export async function authenticateWebAuthn(options, authenticateDotNetObjRef) {
             },
         };
 
-        await authenticateDotNetObjRef.invokeMethodAsync('InvokeCallback', data);
+        const result = {
+            state: true,
+            data: data,
+            message: 'Success'
+        };
+        await authenticateDotNetObjRef.invokeMethodAsync('InvokeCallback', result);
     } catch (err) {
-        console.error(err);
-        alert('登录过程中出错');
+        const result = {
+            state: false,
+            data: null,
+            message: err.message
+        };
+        await authenticateDotNetObjRef.invokeMethodAsync('InvokeCallback', result);
     }
 }
 

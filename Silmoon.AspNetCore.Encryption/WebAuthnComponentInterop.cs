@@ -24,14 +24,14 @@ namespace Silmoon.AspNetCore.Encryption
                 "import", "./_content/Silmoon.AspNetCore.Encryption/js/webAuthnComponentInterop.js").AsTask());
         }
 
-        public async ValueTask Create(ClientBlazorWebAuthnOptions options, Func<BlazorWebAuthnCreateResponse, Task> createCallback)
+        public async ValueTask Create(ClientBlazorWebAuthnOptions options, Func<StateSet<bool, BlazorWebAuthnCreateResponse>, Task> createCallback)
         {
             var module = await moduleTask.Value;
             createWebAuthnCallbackDotNetObjectRef?.Dispose();
             createWebAuthnCallbackDotNetObjectRef = DotNetObjectReference.Create(new JsInvokeCreateWebAuthnHandlerDelegate(createCallback));
             await module.InvokeVoidAsync("createWebAuthn", options, createWebAuthnCallbackDotNetObjectRef);
         }
-        public async ValueTask Authenticate(ClientBlazorWebAuthnAuthenticateOptions options, Func<BlazorWebAuthnAuthenticateResponse, Task> authenticateCallback)
+        public async ValueTask Authenticate(ClientBlazorWebAuthnAuthenticateOptions options, Func<StateSet<bool, WebAuthnAuthenticateResponse>, Task> authenticateCallback)
         {
             var module = await moduleTask.Value;
             authenticateWebAuthnCallbackDotNetObjectRef?.Dispose();
@@ -51,23 +51,28 @@ namespace Silmoon.AspNetCore.Encryption
             authenticateWebAuthnCallbackDotNetObjectRef = null;
         }
     }
-    public class JsInvokeCreateWebAuthnHandlerDelegate(Func<BlazorWebAuthnCreateResponse, Task> callback)
+    public class JsInvokeCreateWebAuthnHandlerDelegate(Func<StateSet<bool, BlazorWebAuthnCreateResponse>, Task> callback)
     {
         [JSInvokable]
-        public Task InvokeCallback(WebAuthnCreateResponse data)
+        public Task InvokeCallback(StateSet<bool, WebAuthnCreateResponse> data)
         {
-            BlazorWebAuthnCreateResponse blazorWebAuthnCreateResponse = Copy.New<BlazorWebAuthnCreateResponse>(data);
-            blazorWebAuthnCreateResponse.AttestationObjectData = WebAuthnParser.ParseAttestationObject(blazorWebAuthnCreateResponse.Response.AttestationObject);
-            return callback?.Invoke(blazorWebAuthnCreateResponse);
+            var result = StateSet<bool, BlazorWebAuthnCreateResponse>.Create(data.State, null, data.Message);
+
+            if (data.State && data.Data is not null)
+            {
+                result.Data = Copy.New<BlazorWebAuthnCreateResponse>(data.Data);
+                result.Data.AttestationObjectData = WebAuthnParser.ParseAttestationObject(result.Data.Response.AttestationObject);
+                return callback?.Invoke(result);
+            }
+            else
+            {
+                return callback?.Invoke(result);
+            }
         }
     }
-    public class JsInvokeAuthenticateWebAuthnHandlerDelegate(Func<BlazorWebAuthnAuthenticateResponse, Task> callback)
+    public class JsInvokeAuthenticateWebAuthnHandlerDelegate(Func<StateSet<bool, WebAuthnAuthenticateResponse>, Task> callback)
     {
         [JSInvokable]
-        public Task InvokeCallback(BlazorWebAuthnAuthenticateResponse data)
-        {
-            BlazorWebAuthnAuthenticateResponse blazorWebAuthnAuthenticateResponse = Copy.New<BlazorWebAuthnAuthenticateResponse>(data);
-            return callback?.Invoke(blazorWebAuthnAuthenticateResponse);
-        }
+        public Task InvokeCallback(StateSet<bool, WebAuthnAuthenticateResponse> data) => callback?.Invoke(data);
     }
 }

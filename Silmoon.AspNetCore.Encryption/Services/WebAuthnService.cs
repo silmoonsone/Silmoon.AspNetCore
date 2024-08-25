@@ -175,38 +175,13 @@ namespace Silmoon.AspNetCore.Encryption.Services
                 }
 
                 // 组合签名数据：authenticatorData + SHA256(clientDataJSON)
-                var signedData = authenticatorData.Concat(SHA256.HashData(clientDataJSON)).ToArray();
+                var signedData = verifyWebAuthnResponse.SignedData;
 
                 // 验证签名
-                bool isValidSignature = false;
-                if (publicKeyInfo.PublicKeyAlgorithm == "ES256")
-                {
-                    using var ecdsa = ECDsa.Create();
-                    ecdsa.ImportSubjectPublicKeyInfo(publicKeyInfo.PublicKey, out _);
-                    isValidSignature = ecdsa.VerifyData(signedData, WebAuthnParser.ConvertDerToRS(signature), HashAlgorithmName.SHA256);
-                }
-                else if (publicKeyInfo.PublicKeyAlgorithm == "RS256")
-                {
-                    var rsa = RSA.Create();
-                    rsa.ImportRSAPublicKey(publicKeyInfo.PublicKey, out _);
-                    isValidSignature = rsa.VerifyData(signedData, signature, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
-                }
-                else
-                {
-                    result.Success = false;
-                    result.Message = "Unsupported public key algorithm";
-                    httpContext.Response.ContentType = "application/json";
-                    await httpContext.Response.WriteAsync(result.ToJsonString());
-                    return;
-                }
+                var validSignatureResult = verifyWebAuthnResponse.VerifySignal(publicKeyInfo);
 
-                if (!isValidSignature)
-                {
-                    result.Success = false;
-                    result.Message = "Invalid signature";
-                }
-                else
-                    result.Success = true;
+                result.Success = validSignatureResult.State;
+                result.Message = validSignatureResult.Message;
             }
             httpContext.Response.ContentType = "application/json";
             await httpContext.Response.WriteAsync(result.ToJsonString());

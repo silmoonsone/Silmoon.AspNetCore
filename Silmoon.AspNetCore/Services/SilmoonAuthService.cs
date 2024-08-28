@@ -77,7 +77,7 @@ namespace Silmoon.AspNetCore.Services
                 string json = HttpContextAccessor.HttpContext.Session.GetString("SessionCache:NameIdentifier+Username=" + NameIdentifier + "+" + Name);
                 if (json.IsNullOrEmpty())
                 {
-                    TUser user = (TUser)GetUserData(Name, NameIdentifier);
+                    TUser user = (TUser)await GetUserData(Name, NameIdentifier);
                     if (user is null)
                     {
                         await SignOut();
@@ -97,7 +97,7 @@ namespace Silmoon.AspNetCore.Services
         }
         public async Task<TUser> GetUser<TUser>(string UserToken, string Name = null, string NameIdentifier = null) where TUser : class, IDefaultUserIdentity
         {
-            TUser result = (TUser)GetUserDataByUserToken(Name, NameIdentifier, UserToken);
+            TUser result = (TUser)await GetUserDataByUserToken(Name, NameIdentifier, UserToken);
             return await Task.FromResult(result);
         }
         public async Task ReloadUser<TUser>() where TUser : class, IDefaultUserIdentity
@@ -105,7 +105,7 @@ namespace Silmoon.AspNetCore.Services
             var NameIdentifier = HttpContextAccessor.HttpContext.User.Claims.Where(c => c.Type == ClaimTypes.NameIdentifier).FirstOrDefault()?.Value;
             var Name = HttpContextAccessor.HttpContext.User.Claims.Where(c => c.Type == nameof(IDefaultUserIdentity.Username)).FirstOrDefault()?.Value;
             TUser user = default;
-            user = (TUser)GetUserData(Name, NameIdentifier);
+            user = (TUser)await GetUserData(Name, NameIdentifier);
             if (user is null) await SignOut();
             else SetUserCache(user, NameIdentifier);
         }
@@ -157,7 +157,7 @@ namespace Silmoon.AspNetCore.Services
             }
         }
 
-        public abstract IDefaultUserIdentity GetUserData(string Username, string NameIdentifier);
-        public abstract IDefaultUserIdentity GetUserDataByUserToken(string Username, string NameIdentifier, string UserToken);
+        public abstract Task<IDefaultUserIdentity> GetUserData(string Username, string NameIdentifier);
+        public abstract Task<IDefaultUserIdentity> GetUserDataByUserToken(string Username, string NameIdentifier, string UserToken);
     }
 }

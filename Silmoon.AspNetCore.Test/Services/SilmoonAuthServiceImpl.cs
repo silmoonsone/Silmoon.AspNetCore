@@ -10,15 +10,15 @@ namespace Silmoon.AspNetCore.Test.Services
         {
             Core = core;
         }
-        public override IDefaultUserIdentity GetUserData(string Username, string NameIdentifier)
+        public override async Task<IDefaultUserIdentity> GetUserData(string Username, string NameIdentifier)
         {
             var user = Core.GetUser(Username);
             if (user is not null) user.Password = "#hidden#";
-            return user;
+            return await Task.FromResult(user);
         }
-        public override IDefaultUserIdentity GetUserDataByUserToken(string Username, string NameIdentifier, string UserToken)
+        public override async Task<IDefaultUserIdentity> GetUserDataByUserToken(string Username, string NameIdentifier, string UserToken)
         {
-            return null;
+            return await Task.FromResult<DefaultUserIdentity>(default);
         }
     }
 }

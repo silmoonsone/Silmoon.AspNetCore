@@ -58,6 +58,8 @@
 
 
 @code {
+    @inject NavigationManager NavigationManager
+
     List<UserWebAuthnInfo> UserWebAuthnInfos = [];
 
     User CurrentUser { get; set; }
@@ -79,7 +81,7 @@
         ClientBlazorWebAuthnOptions clientBlazorWebAuthnOptions = new ClientBlazorWebAuthnOptions()
             {
                 Challenge = challenge,
-                Rp = new ClientBlazorWebAuthnOptions.ClientWebAuthnRp() { Id = "localhost", Name = "LocalhostTest" },
+                Rp = new ClientBlazorWebAuthnOptions.ClientWebAuthnRp() { Id = new Uri(NavigationManager.BaseUri).Host, Name = "LocalhostTest" },
                 User = new ClientBlazorWebAuthnOptions.ClientWebAuthnUser()
                 {
                     Name = CurrentUser.Username,
@@ -124,7 +126,7 @@
         ClientBlazorWebAuthnAuthenticateOptions options = new ClientBlazorWebAuthnAuthenticateOptions()
             {
                 Challenge = challenge,
-                RpId = "localhost",
+                RpId = new Uri(NavigationManager.BaseUri).Host,
                 // AllowCredentials = UserWebAuthnInfos.Select(x => new Credential() { Id = x.CredentialId.GetBase64String() }).ToArray(),
             };
         await Wac.Authenticate(options, async webAuthnAuthenticateResponse =>

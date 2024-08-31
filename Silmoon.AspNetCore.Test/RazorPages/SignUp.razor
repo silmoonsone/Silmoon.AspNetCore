@@ -71,6 +71,9 @@
             };
         var result = Core.NewUser(user);
 
-        Message = result.Message;
+        if (result.State)
+            Message = "Sign up success.";
+        else
+            Message = "Failed " + result.Message;
     }
 }

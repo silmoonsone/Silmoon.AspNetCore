@@ -16,7 +16,6 @@ namespace Silmoon.AspNetCore.Extensions
             services.Configure<SilmoonDevAppServiceOptions>(o => o.KeyCacheSecoundTimeout = 3600);
             services.AddSingleton<ISilmoonDevAppService, TSilmoonDevAppService>();
         }
-
         public static void AddSilmoonDevApp<TSilmoonDevAppService>(this IServiceCollection services, Action<SilmoonDevAppServiceOptions> options) where TSilmoonDevAppService : SilmoonDevAppService
         {
             ArgumentNullException.ThrowIfNull(services);
@@ -32,7 +31,16 @@ namespace Silmoon.AspNetCore.Extensions
 
             services.AddHttpContextAccessor();
             services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
-            services.AddScoped<ISilmoonAuthService, TSilmoonAuthService>();
+            services.AddSingleton<ISilmoonAuthService, TSilmoonAuthService>();
+        }
+        public static void AddSilmoonAuth<TSilmoonAuthService>(this IServiceCollection services, Action<SilmoonAuthServiceOption> options) where TSilmoonAuthService : class, ISilmoonAuthService
+        {
+            ArgumentNullException.ThrowIfNull(services);
+
+            services.AddHttpContextAccessor();
+            services.Configure(options);
+            services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
+            services.AddSingleton<ISilmoonAuthService, TSilmoonAuthService>();
         }
 
         public static void AddSilmoonConfigure<TSilmoonConfigureService>(this IServiceCollection services) where TSilmoonConfigureService : class, ISilmoonConfigureService

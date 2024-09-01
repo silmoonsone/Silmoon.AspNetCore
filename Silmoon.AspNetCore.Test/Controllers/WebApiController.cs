@@ -40,28 +40,6 @@ namespace Silmoon.AspNetCore.Test.Controllers
             };
             return this.JsonStateFlag(true, user);
         }
-        public async Task<IActionResult> CreateSession(string Username, string Password, string Url)
-        {
-            if (Username.IsNullOrEmpty() || Password.IsNullOrEmpty()) return (false, "用户名或密码为空").GetStateFlagResult();
-            var user = Core.GetUser(Username);
-            if (user is null) return (false, "用户名不存在或者密码错误").GetStateFlagResult();
-            //user.Password = EncryptHelper.RsaDecrypt(user.Password);
-            if (Username == user.Username && Password == user.Password)
-            {
-                await SilmoonAuthService.SignIn(user);
-                if (Url.IsNullOrEmpty()) Url = "../dashboard";
-                return true.GetStateFlagResult<string>(Url);
-            }
-            else
-            {
-                return (false, "用户名不存在或者密码错误").GetStateFlagResult();
-            }
-        }
-        public async Task<IActionResult> ClearSession()
-        {
-            var result = await SilmoonAuthService.SignOut();
-            return result.GetStateFlagResult();
-        }
 
         [Authorize]
         public IActionResult DashboardApi()

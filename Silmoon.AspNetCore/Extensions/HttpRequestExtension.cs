@@ -90,6 +90,13 @@ namespace Silmoon.AspNetCore.Extensions
             }
             return nameValueCollection;
         }
+        public static string GetQueryStringOrFormValue(this HttpRequest httpRequest, string key)
+        {
+            var value = httpRequest.Query[key];
+            if (value.Count == 0 && (httpRequest.ContentType.StartsWith("multipart/form-data") || httpRequest.ContentType == "application/x-www-form-urlencoded"))
+                value = httpRequest.Form[key];
+            return value;
+        }
         public static async Task<string> GetBodyString(this HttpRequest httpRequest, Encoding encoding = null)
         {
             if (!httpRequest.Body.CanSeek)

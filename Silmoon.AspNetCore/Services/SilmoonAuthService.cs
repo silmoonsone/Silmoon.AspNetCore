@@ -2,10 +2,13 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using Silmoon.AspNetCore.Extensions;
 using Silmoon.AspNetCore.Services.Interfaces;
 using Silmoon.Extension;
 using Silmoon.Extension.Models.Identities;
+using Silmoon.Models;
 using System;
 using System.Linq;
 using System.Security.Claims;
@@ -15,10 +18,12 @@ namespace Silmoon.AspNetCore.Services
 {
     public abstract class SilmoonAuthService : ISilmoonAuthService
     {
-        public IHttpContextAccessor HttpContextAccessor { get; set; }
-        public IServiceProvider ServiceProvider { get; set; }
-        public SilmoonAuthService(IServiceProvider serviceProvider, IHttpContextAccessor httpContextAccessor)
+        private IHttpContextAccessor HttpContextAccessor { get; set; }
+        private IServiceProvider ServiceProvider { get; set; }
+        public SilmoonAuthServiceOption Options { get; private set; }
+        public SilmoonAuthService(IServiceProvider serviceProvider, IHttpContextAccessor httpContextAccessor, IOptions<SilmoonAuthServiceOption> options)
         {
+            Options = options.Value;
             ServiceProvider = serviceProvider;
             HttpContextAccessor = httpContextAccessor;
         }
@@ -97,7 +102,7 @@ namespace Silmoon.AspNetCore.Services
         }
         public async Task<TUser> GetUser<TUser>(string UserToken, string Name = null, string NameIdentifier = null) where TUser : class, IDefaultUserIdentity
         {
-            TUser result = (TUser)await GetUserDataByUserToken(Name, NameIdentifier, UserToken);
+            TUser result = (TUser)await GetUserData(Name, NameIdentifier, UserToken);
             return await Task.FromResult(result);
         }
         public async Task ReloadUser<TUser>() where TUser : class, IDefaultUserIdentity
@@ -142,6 +147,7 @@ namespace Silmoon.AspNetCore.Services
 
         void SetUserCache<TUser>(TUser User, string NameIdentifier) where TUser : class, IDefaultUserIdentity
         {
+            User.Password = "##hidden###";
             HttpContextAccessor.HttpContext.Session.SetString("SessionCache:NameIdentifier+Username=" + NameIdentifier + "+" + User.Username, User.ToJsonString());
         }
         async Task<ClaimsPrincipal> GetCurrentClaimsPrincipalAsync()
@@ -157,7 +163,46 @@ namespace Silmoon.AspNetCore.Services
             }
         }
 
+        /// <summary>
+        /// 在缓存中没有找到用户信息时，调用此方法获取用户信息。
+        /// </summary>
+        /// <param name="Username"></param>
+        /// <param name="NameIdentifier"></param>
+        /// <returns></returns>
         public abstract Task<IDefaultUserIdentity> GetUserData(string Username, string NameIdentifier);
-        public abstract Task<IDefaultUserIdentity> GetUserDataByUserToken(string Username, string NameIdentifier, string UserToken);
+        /// <summary>
+        /// 当使用API调用接口时，需要用户信息时，使用UserToken来获取用户信息。
+        /// </summary>
+        /// <param name="Username"></param>
+        /// <param name="NameIdentifier"></param>
+        /// <param name="UserToken"></param>
+        /// <returns></returns>
+        public abstract Task<IDefaultUserIdentity> GetUserData(string Username, string NameIdentifier, string UserToken);
+
+        public virtual async Task OnSignIn(HttpContext httpContext, RequestDelegate requestDelegate, string username, string password)
+        {
+            if (username.IsNullOrEmpty() || password.IsNullOrEmpty()) await httpContext.Response.WriteJObjectAsync(false.ToStateFlag("用户名或密码为空"));
+            else
+            {
+                var gotUser = await GetUserData(username, null);
+                if (gotUser is null)
+                    await httpContext.Response.WriteJObjectAsync(false.ToStateFlag("用户名不存在或者密码错误"));
+                else
+                {
+
+                    if (username == gotUser.Username && password == gotUser.Password)
+                    {
+                        await SignIn(gotUser);
+                        await httpContext.Response.WriteJObjectAsync(true.ToStateFlag());
+                    }
+                    else await httpContext.Response.WriteJObjectAsync(false.ToStateFlag("用户名不存在或者密码错误"));
+                }
+            }
+        }
+        public virtual async Task OnSignOut(HttpContext httpContext, RequestDelegate requestDelegate)
+        {
+            var result = await SignOut();
+            await httpContext.Response.WriteJObjectAsync(result.ToStateFlag());
+        }
     }
 }

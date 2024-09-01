@@ -2,6 +2,8 @@
 @inject IJSRuntime Js
 @inject NavigationManager NavigationManager
 @inject ISilmoonAuthService SilmoonAuthService
+@inject JsSilmoonAuthInterop Jsa
+@inject JsComponentInterop Jsc
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -87,17 +89,14 @@
     User User { get; set; }
     async void __doClearSession()
     {
-        var result = await Js.InvokeAsync<object>("doClearSession");
-        if (result is not null)
+        await Jsc.MetroUIConfirm("确认", "确认退出登录？", true, async yes =>
         {
-            JObject jObject = JObject.Parse(result?.ToString());
-            NavigationManager.Refresh(true);
-            StateHasChanged();
-        }
-        else
-        {
-            await Js.InvokeVoidAsync("alert", "error: JsInvoke doClearSession result is null");
-        }
+            if (yes)
+            {
+                var result = await Jsa.SignOut();
+                NavigationManager.Refresh(true);
+            }
+        });
     }
 
     protected override async Task OnInitializedAsync()

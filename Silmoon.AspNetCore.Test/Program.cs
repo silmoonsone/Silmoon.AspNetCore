@@ -71,7 +71,9 @@ builder.Services.AddSilmoonConfigure<SilmoonConfigureServiceImpl>(o =>
 builder.Services.AddSingleton<Core>();
 builder.Services.AddSilmoonAuth<SilmoonAuthServiceImpl>();
 
+// ** required NuGet package for Silmoon.AspNetCore.Blazor
 builder.Services.AddJsComponentInterop();
+builder.Services.AddJsSilmoonAuthInterop();
 
 // ** required NuGet package for Silmoon.AspNetCore.Encryption
 builder.Services.AddWebAuthnJsInterop();
@@ -109,6 +111,7 @@ app.UseStaticFiles();
 app.UseCors(builder => builder.WithHosts("localhost"));
 
 app.UseSession();
+app.UseSilmoonAuth();
 app.UseRouting();
 
 app.UseAuthentication();

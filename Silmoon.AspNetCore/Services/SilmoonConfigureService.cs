@@ -10,7 +10,7 @@ namespace Silmoon.AspNetCore.Services
     public class SilmoonConfigureService : ISilmoonConfigureService
     {
         public JObject ConfigJson { get; private set; }
-        public SilmoonConfigureServiceOption Options { get; set; }
+        private SilmoonConfigureServiceOption Options { get; set; }
 
         public SilmoonConfigureService(IOptions<SilmoonConfigureServiceOption> options)
         {

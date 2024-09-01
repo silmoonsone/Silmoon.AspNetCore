@@ -13,7 +13,6 @@ using System.Security.Claims;
 using Silmoon.AspNetCore.Extensions;
 using Silmoon.AspNetCore.Encryption.Models;
 using Newtonsoft.Json;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -22,7 +21,7 @@ namespace Silmoon.AspNetCore.Encryption.Services
     public abstract class WebAuthnService : IWebAuthnService
     {
         public WebAuthnServiceOptions Options { get; set; }
-        public WebAuthnService(IOptions<WebAuthnServiceOptions> options) => Options = options.Value is null ? new WebAuthnServiceOptions() : options.Value;
+        public WebAuthnService(IOptions<WebAuthnServiceOptions> options) => Options = options.Value;
         public async Task GetCreateOptions(HttpContext httpContext, RequestDelegate requestDelegate)
         {
             var user = await GetClientOptionsWebAuthnUser(httpContext);
@@ -46,8 +45,7 @@ namespace Silmoon.AspNetCore.Encryption.Services
                 };
                 ObjectCache<string, string>.Set("______passkey_challenge:" + result.Data.Challenge.GetBase64String(), user.Id.GetBase64String(), TimeSpan.FromSeconds(300));
             }
-            httpContext.Response.ContentType = "application/json";
-            await httpContext.Response.WriteAsync(result.ToJsonString());
+            await httpContext.Response.WriteJObjectAsync(result);
         }
         public async Task GetAuthenticateOptions(HttpContext httpContext, RequestDelegate requestDelegate)
         {
@@ -72,8 +70,7 @@ namespace Silmoon.AspNetCore.Encryption.Services
                 };
                 ObjectCache<string, string>.Set("______passkey_challenge:" + challenge.GetBase64String(), allowUserCredential.UserId, TimeSpan.FromSeconds(300));
             }
-            httpContext.Response.ContentType = "application/json";
-            await httpContext.Response.WriteAsync(result.ToJsonString());
+            await httpContext.Response.WriteJObjectAsync(result);
         }
         public async Task Create(HttpContext httpContext, RequestDelegate requestDelegate)
         {
@@ -107,8 +104,7 @@ namespace Silmoon.AspNetCore.Encryption.Services
                     result.Message = createResult.Message;
                 }
             }
-            httpContext.Response.ContentType = "application/json";
-            await httpContext.Response.WriteAsync(result.ToJsonString());
+            await httpContext.Response.WriteJObjectAsync(result);
         }
         public async Task Delete(HttpContext httpContext, RequestDelegate requestDelegate)
         {
@@ -122,8 +118,7 @@ namespace Silmoon.AspNetCore.Encryption.Services
             {
                 result.Success = false;
                 result.Message = "CredentialId is empty";
-                httpContext.Response.ContentType = "application/json";
-                await httpContext.Response.WriteAsync(result.ToJsonString());
+                await httpContext.Response.WriteJObjectAsync(result);
             }
             else
             {
@@ -137,8 +132,7 @@ namespace Silmoon.AspNetCore.Encryption.Services
                     result.Success = false;
                     result.Message = deleteResult.Message;
                 }
-                httpContext.Response.ContentType = "application/json";
-                await httpContext.Response.WriteAsync(result.ToJsonString());
+                await httpContext.Response.WriteJObjectAsync(result);
 
             }
         }
@@ -170,8 +164,7 @@ namespace Silmoon.AspNetCore.Encryption.Services
                 {
                     result.Success = false;
                     result.Message = "Credential not found";
-                    httpContext.Response.ContentType = "application/json";
-                    await httpContext.Response.WriteAsync(result.ToJsonString());
+                    await httpContext.Response.WriteJObjectAsync(result);
                 }
 
                 // 组合签名数据：authenticatorData + SHA256(clientDataJSON)
@@ -183,8 +176,7 @@ namespace Silmoon.AspNetCore.Encryption.Services
                 result.Success = validSignatureResult.State;
                 result.Message = validSignatureResult.Message;
             }
-            httpContext.Response.ContentType = "application/json";
-            await httpContext.Response.WriteAsync(result.ToJsonString());
+            await httpContext.Response.WriteJObjectAsync(result);
         }
 
 

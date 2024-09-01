@@ -26,6 +26,9 @@ namespace Silmoon.AspNetCore.Extensions
         {
             app.UseMiddleware<ApiDecryptMiddleware>(AppIdRenameTo, KeyCacheSecound);
         }
-
+        public static void UseSilmoonAuth(this IApplicationBuilder app)
+        {
+            app.UseMiddleware<SilmoonAuthMiddleware>();
+        }
     }
 }

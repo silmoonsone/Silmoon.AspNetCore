@@ -32,6 +32,5 @@ namespace Silmoon.AspNetCore.Extensions
 
             return result;
         }
-
     }
 }

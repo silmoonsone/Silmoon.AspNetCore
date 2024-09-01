@@ -3,14 +3,13 @@ using Silmoon.AspNetCore.Services.Interfaces;
 using Silmoon.Models;
 using Silmoon.Runtime.Cache;
 using System;
-using System.Security.Cryptography.Xml;
 using System.Threading.Tasks;
 
 namespace Silmoon.AspNetCore.Services
 {
     public abstract class SilmoonDevAppService : ISilmoonDevAppService
     {
-        public SilmoonDevAppServiceOptions Options { get; set; }
+        private SilmoonDevAppServiceOptions Options { get; set; }
 
         public SilmoonDevAppService(IOptions<SilmoonDevAppServiceOptions> options)
         {

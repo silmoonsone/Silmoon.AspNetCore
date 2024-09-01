@@ -55,56 +55,55 @@ namespace Silmoon.AspNetCore.Middlewares
                     var encodeData = Convert.FromBase64String(encryptedPayload);
 
 
-
-
                     var silmoonAppDev = await SilmoonDevAppService.GetCachedKey(appId);
                     (string SignatureKey, string EncryptKey) = (silmoonAppDev.Data.SignatureKey, silmoonAppDev.Data.EncryptKey);
 
                     if (!silmoonAppDev.State)
                     {
                         await context.Response.WriteAsync(ApiResult.CreateToJsonString(ResultState.Fail, "Get Signature and EncryptKey fail(" + silmoonAppDev.Message + ")"));
-                        return;
                     }
-                    //计算Check（md5(payload + EncryptKey)）值
-                    var vCheck = (encryptedPayload + EncryptKey).GetMD5Hash();
-                    if (check != vCheck)
+                    else
                     {
-                        context.Response.ContentType = "application/json";
-                        await context.Response.WriteAsync(ApiResult.CreateToJsonString(ResultState.Fail, "Encrypt check fail"));
-                        return;
+                        //计算Check（md5(payload + EncryptKey)）值
+                        var vCheck = (encryptedPayload + EncryptKey).GetMD5Hash();
+                        if (check != vCheck)
+                        {
+                            await context.Response.WriteJObjectAsync(ApiResult.Create(ResultState.Fail, "Encrypt check fail"));
+                        }
+                        else
+                        {
+                            //使用EncryptKey解密payload
+                            var payload = EncryptHelper.AesDecryptBase64StringToString(encryptedPayload, EncryptKey);
+
+                            //计算SignatureKey，即为解密的payload和签名密钥md5校验
+                            var vSignature = (payload + SignatureKey).GetMD5Hash();
+                            if (signature != vSignature)
+                            {
+                                await context.Response.WriteJObjectAsync(ApiResult.Create(ResultState.Fail, "Encrypt signature error"));
+                            }
+                            else
+                            {
+                                //验证请求内容(payload)的签名
+                                var nameValues = UrlDataCollection.Parse(payload);
+                                signature = nameValues["Signature"];
+                                var csignature = nameValues.GetSign("Key", SignatureKey);
+                                if (signature != csignature)
+                                {
+                                    await context.Response.WriteJObjectAsync(ApiResult.Create(ResultState.Fail, "Signature error"));
+                                }
+                                else
+                                {
+                                    using var stream = new MemoryStream(payload.GetBytes(Encoding.UTF8));
+                                    context.Request.Body = stream;
+                                    await _next(context);
+                                }
+                            }
+                        }
                     }
-                    //使用EncryptKey解密payload
-                    var payload = EncryptHelper.AesDecryptBase64StringToString(encryptedPayload, EncryptKey);
-                    //计算SignatureKey，即为解密的payload和签名密钥md5校验
-                    var vSignature = (payload + SignatureKey).GetMD5Hash();
-                    if (signature != vSignature)
-                    {
-                        context.Response.ContentType = "application/json";
-                        await context.Response.WriteAsync(ApiResult.CreateToJsonString(ResultState.Fail, "Encrypt signature error"));
-                        return;
-                    }
-
-                    //验证请求内容(payload)的签名
-                    var nameValues = UrlDataCollection.Parse(payload);
-                    signature = nameValues["Signature"];
-                    var csignature = nameValues.GetSign("Key", SignatureKey);
-                    if (signature != csignature)
-                    {
-                        context.Response.ContentType = "application/json";
-                        await context.Response.WriteAsync(ApiResult.CreateToJsonString(ResultState.Fail, "Signature error"));
-                        return;
-                    }
-
-
-                    using var stream = new MemoryStream(Encoding.UTF8.GetBytes(payload));
-                    context.Request.Body = stream;
-
-                    await _next(context);
                 }
                 catch (Exception ex)
                 {
-                    context.Response.ContentType = "application/json";
-                    await context.Response.WriteAsync(ApiResult.CreateToJsonString(ResultState.Exception, ex.ToString()));
+                    await context.Response.WriteJObjectAsync(ApiResult.Create(ResultState.Exception, ex.ToString()));
                     return;
                 }
             }

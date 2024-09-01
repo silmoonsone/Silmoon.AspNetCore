@@ -70,7 +70,10 @@ builder.Services.AddSilmoonConfigure<SilmoonConfigureServiceImpl>(o =>
 });
 builder.Services.AddSingleton<Core>();
 builder.Services.AddSilmoonAuth<SilmoonAuthServiceImpl>();
+
 builder.Services.AddJsComponentInterop();
+
+// ** required NuGet package for Silmoon.AspNetCore.Encryption
 builder.Services.AddWebAuthnJsInterop();
 
 //builder.Services.AddSilmoonDevApp<SilmoonDevAppServiceImpl>();

@@ -19,12 +19,23 @@ namespace Silmoon.AspNetCore.Blazor
             moduleTask = new(() => jsRuntime.InvokeAsync<IJSObjectReference>(
                 "import", "./_content/Silmoon.AspNetCore.Blazor/js/jsComponentInterop.js").AsTask());
         }
+        public async ValueTask Alert(string message)
+        {
+            var module = await moduleTask.Value;
+            await module.InvokeVoidAsync("alert", message);
+        }
 
+        public async ValueTask<bool> Confirm(string message)
+        {
+            var module = await moduleTask.Value;
+            return await module.InvokeAsync<bool>("confirm", message);
+        }
         public async ValueTask<string> Prompt(string message)
         {
             var module = await moduleTask.Value;
             return await module.InvokeAsync<string>("showPrompt", message);
         }
+
         public async ValueTask Toast(string message, int delay = 1000)
         {
             var module = await moduleTask.Value;

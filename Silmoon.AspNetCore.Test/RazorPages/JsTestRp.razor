@@ -6,7 +6,9 @@
 
 <div>
     <button @onclick="Toast">Toast</button>
-    <button @onclick="() => MetroUIConfirm(DateTime.Now.ToString())">MetroUIConfirm</button>
+    <button @onclick="MetroUIConfirm">MetroUIConfirm</button>
+    <button @onclick="Alert">Alert</button>
+    <button @onclick="Confirm">Confirm</button>
 </div>
 
 @code {
@@ -14,18 +16,34 @@
     {
         await Jsc.Toast("hello");
     }
-    private async Task MetroUIConfirm(string msg)
+    private async Task MetroUIConfirm()
     {
         await Jsc.MetroUIConfirm("title", "msg", true, async result =>
         {
             if (result)
             {
-                await Jsc.Toast("confirm is true(" + msg + ")");
+                await Jsc.Toast("confirm is true");
             }
             else
             {
                 await Jsc.Toast("confirm is false");
             }
         });
+    }
+    private async Task Alert()
+    {
+        await Jsc.Alert("hello world");
+    }
+    private async Task Confirm()
+    {
+        var result = await Jsc.Confirm("hello world");
+        if (result)
+        {
+            await Jsc.Toast("confirm is true");
+        }
+        else
+        {
+            await Jsc.Toast("confirm is false");
+        }
     }
 }

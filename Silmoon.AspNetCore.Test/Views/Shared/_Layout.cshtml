@@ -53,7 +53,7 @@
                             <li class="nav-item dropdown">
                                 <a class="nav-link text-dark" href="javascript:void(0);" id="userMenuLink" data-bs-toggle="dropdown">@((await SilmoonAuthService.GetUser<User>()).Username)</a>
                                 <div class="dropdown-menu dropdown-menu-right shadow">
-                                    <a href="~/_session/clearSession" class="dropdown-item" data-ajax="true" data-ajax-begin="signOut_OnBegin" data-ajax-complete="signOut_OnComplete">退出登录</a>
+                                    <a href="~/_session/signOut" class="dropdown-item" data-ajax="true" data-ajax-begin="signOut_OnBegin" data-ajax-complete="signOut_OnComplete">退出登录</a>
                                 </div>
                             </li>
                         }

@@ -5,9 +5,8 @@
 <h1>用户登录</h1>
 <hr />
 <div class="jumbotron">
-    <form action="~/_session/createSession" data-ajax="true" data-ajax-complete="signin_OnComplete" data-ajax-begin="signin_OnBegin">
+    <form action="~/_session/signIn" data-ajax="true" data-ajax-complete="signin_OnComplete" data-ajax-begin="signin_OnBegin">
         <div>
-            @Html.Hidden("Url")
             <div class="form-group">
                 <label for="Username">用户名：</label>
                 <input id="Username" name="Username" class="form-control" />

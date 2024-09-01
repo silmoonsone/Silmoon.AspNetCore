@@ -22,14 +22,14 @@ namespace Silmoon.AspNetCore.Middlewares
         }
         public async Task Invoke(HttpContext context)
         {
-            if (context.Request.Path == SilmoonAuthService.Options.CreateSessionUrl)
+            if (context.Request.Path == SilmoonAuthService.Options.SignInUrl)
             {
                 var username = context.Request.GetQueryStringOrFormValue("Username");
                 var password = context.Request.GetQueryStringOrFormValue("Password");
 
                 await SilmoonAuthService.OnSignIn(context, _next, username, password);
             }
-            else if (context.Request.Path == SilmoonAuthService.Options.ClearSessionUrl)
+            else if (context.Request.Path == SilmoonAuthService.Options.SignOutUrl)
                 await SilmoonAuthService.OnSignOut(context, _next);
             else
                 await _next(context);

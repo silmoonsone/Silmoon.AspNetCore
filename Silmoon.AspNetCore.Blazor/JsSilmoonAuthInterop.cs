@@ -20,12 +20,12 @@ namespace Silmoon.AspNetCore.Blazor
         public async ValueTask<StateFlag<object>> SignIn(string username, string password)
         {
             var module = await moduleTask.Value;
-            return await module.InvokeAsync<StateFlag<object>>("doCreateSession", username, password);
+            return await module.InvokeAsync<StateFlag<object>>("doSignIn", username, password);
         }
         public async ValueTask<StateFlag<object>> SignOut()
         {
             var module = await moduleTask.Value;
-            return await module.InvokeAsync<StateFlag<object>>("doClearSession");
+            return await module.InvokeAsync<StateFlag<object>>("doSignOut");
         }
         public async ValueTask DisposeAsync()
         {

@@ -1,6 +1,6 @@
 ﻿let silmoonAuthOptions = {
-    createSessionUrl: "/_session/createSession",
-    clearSessionUrl: "/_session/clearSession"
+    signInUrl: "/_session/signIn",
+    signOutUrl: "/_session/signOut"
 }
 
 /**
@@ -9,13 +9,13 @@
  * @param {string} password
  * @returns {object} StateFlag类型的JSON。
  */
-async function doCreateSession(username, password) {
+async function doSignIn(username, password) {
     var formData = new FormData();
     formData.append('Username', username ?? '');
     formData.append('Password', password ?? '');
 
     try {
-        const response = await fetch(silmoonAuthOptions.createSessionUrl, {
+        const response = await fetch(silmoonAuthOptions.signInUrl, {
             method: 'POST',
             body: formData
         });
@@ -38,9 +38,9 @@ async function doCreateSession(username, password) {
  * 清除会话状态
  * @returns
  */
-async function doClearSession() {
+async function doSignOut() {
     try {
-        const response = await fetch(silmoonAuthOptions.clearSessionUrl);
+        const response = await fetch(silmoonAuthOptions.signOutUrl);
 
         if (!response.ok) {
             return { Success: false, Data: null, Message: await response.text() }

@@ -47,7 +47,7 @@
 
     async void doSignIn()
     {
-        var result = await Js.InvokeAsync<object>("doCreateSession", [Username, Password]);
+        var result = await Js.InvokeAsync<object>("doSignIn", [Username, Password]);
         JObject jObject = JObject.Parse(result?.ToString());
         if (jObject["Success"].Value<bool>())
         {

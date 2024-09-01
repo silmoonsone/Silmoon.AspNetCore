@@ -72,7 +72,7 @@
             <hr style="background-color: white;" />
 
             <div class="nav-item px-3">
-                <NavLink class="nav-link" href="javascript: void(0);" @onclick="__doClearSession">
+                <NavLink class="nav-link" href="javascript: void(0);" @onclick="doSignOut">
                     SignOut
                 </NavLink>
             </div>
@@ -87,7 +87,7 @@
 @code {
     bool IsSignedIn { get; set; } = false;
     User User { get; set; }
-    async void __doClearSession()
+    async void doSignOut()
     {
         await Jsc.MetroUIConfirm("确认", "确认退出登录？", true, async yes =>
         {

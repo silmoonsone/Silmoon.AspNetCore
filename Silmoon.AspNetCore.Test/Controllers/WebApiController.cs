@@ -6,7 +6,7 @@ using Silmoon.AspNetCore.Services.Interfaces;
 using Silmoon.Drawing;
 using Silmoon.Extension;
 using Silmoon.Runtime.Cache;
-using Silmoon.Runtime.Collections;
+using Silmoon.Collections;
 using Silmoon.Secure;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -51,7 +51,7 @@ namespace Silmoon.AspNetCore.Test.Controllers
         public IActionResult UploadTempImage(string UserId, string fileName)
         {
             if (fileName.IsNullOrEmpty()) fileName = HashHelper.RandomChars(32);
-            var files = ObjectCache<string, NameObjectCollection<byte[]>>.Get(UserId + ":temp_images");
+            var files = GlobalCaching<string, NameObjectCollection<byte[]>>.Get(UserId + ":temp_images");
 
             var image = new Bitmap(Request.Form.Files[0].OpenReadStream());
             var imageFormat = image.RawFormat;
@@ -67,13 +67,13 @@ namespace Silmoon.AspNetCore.Test.Controllers
             if (files.Matched)
                 files.Value[fileName] = data;
             else
-                ObjectCache<string, NameObjectCollection<byte[]>>.Set(UserId + ":temp_images", new NameObjectCollection<byte[]>() { { fileName, data } });
+                GlobalCaching<string, NameObjectCollection<byte[]>>.Set(UserId + ":temp_images", new NameObjectCollection<byte[]>() { { fileName, data } });
 
             return this.JsonStateFlag(true);
         }
         public IActionResult GetTempImageNames(string UserId)
         {
-            var files = ObjectCache<string, NameObjectCollection<byte[]>>.Get(UserId + ":temp_images");
+            var files = GlobalCaching<string, NameObjectCollection<byte[]>>.Get(UserId + ":temp_images");
             if (files.Matched)
             {
                 return this.JsonStateFlag(true, Data: files.Value.GetAllKeys());
@@ -83,7 +83,7 @@ namespace Silmoon.AspNetCore.Test.Controllers
         }
         public IActionResult DeleteTempImage(string UserId, string fileName)
         {
-            var files = ObjectCache<string, NameObjectCollection<byte[]>>.Get(UserId + ":temp_images");
+            var files = GlobalCaching<string, NameObjectCollection<byte[]>>.Get(UserId + ":temp_images");
             if (files.Matched)
             {
                 files.Value.Remove(fileName);
@@ -95,7 +95,7 @@ namespace Silmoon.AspNetCore.Test.Controllers
         //[OutputCache(Duration = 3600)]
         public IActionResult ShowTempImage(string UserId, string fileName)
         {
-            var files = ObjectCache<string, NameObjectCollection<byte[]>>.Get(UserId + ":temp_images");
+            var files = GlobalCaching<string, NameObjectCollection<byte[]>>.Get(UserId + ":temp_images");
             if (files.Matched)
                 return File(files.Value.Get(fileName) ?? Array.Empty<byte>(), "image/jpeg");
             else
@@ -107,20 +107,20 @@ namespace Silmoon.AspNetCore.Test.Controllers
 
         public IActionResult UploadFile(string UserId, string fileName)
         {
-            var files = ObjectCache<string, NameObjectCollection<byte[]>>.Get(UserId + ":temp_files");
+            var files = GlobalCaching<string, NameObjectCollection<byte[]>>.Get(UserId + ":temp_files");
 
             var data = Request.Form.Files[0].OpenReadStream().ToBytes();
 
             if (files.Matched)
                 files.Value.Set(fileName.IsNullOrEmpty() ? Request.Form.Files[0].FileName : fileName, data);
             else
-                ObjectCache<string, NameObjectCollection<byte[]>>.Set(UserId + ":temp_files", new NameObjectCollection<byte[]>() { { fileName.IsNullOrEmpty() ? Request.Form.Files[0].FileName : fileName, data } });
+                GlobalCaching<string, NameObjectCollection<byte[]>>.Set(UserId + ":temp_files", new NameObjectCollection<byte[]>() { { fileName.IsNullOrEmpty() ? Request.Form.Files[0].FileName : fileName, data } });
 
             return this.JsonStateFlag(true);
         }
         public IActionResult GetTempFileNames(string UserId)
         {
-            var files = ObjectCache<string, NameObjectCollection<byte[]>>.Get(UserId + ":temp_files");
+            var files = GlobalCaching<string, NameObjectCollection<byte[]>>.Get(UserId + ":temp_files");
             if (files.Matched)
             {
                 return this.JsonStateFlag(true, Data: files.Value.GetAllKeys());
@@ -130,7 +130,7 @@ namespace Silmoon.AspNetCore.Test.Controllers
         }
         public IActionResult DeleteTempFile(string UserId, string fileName)
         {
-            var files = ObjectCache<string, NameObjectCollection<byte[]>>.Get(UserId + ":temp_files");
+            var files = GlobalCaching<string, NameObjectCollection<byte[]>>.Get(UserId + ":temp_files");
             if (files.Matched)
             {
                 files.Value.Remove(fileName);
@@ -141,7 +141,7 @@ namespace Silmoon.AspNetCore.Test.Controllers
         }
         public IActionResult ShowTempFile(string UserId, string fileName)
         {
-            var files = ObjectCache<string, NameObjectCollection<byte[]>>.Get(UserId + ":temp_files");
+            var files = GlobalCaching<string, NameObjectCollection<byte[]>>.Get(UserId + ":temp_files");
             new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider().TryGetContentType(fileName, out var contentType);
 
             if (files.Matched)

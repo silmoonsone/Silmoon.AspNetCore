@@ -43,7 +43,7 @@ namespace Silmoon.AspNetCore.Encryption.Services
                     AuthenticatorSelection = new ClientWebAuthnOptions.ClientWebAuthnAuthenticatorSelection() { UserVerification = "preferred" },
                     Timeout = 60000
                 };
-                ObjectCache<string, string>.Set("______passkey_challenge:" + result.Data.Challenge.GetBase64String(), user.Id.GetBase64String(), TimeSpan.FromSeconds(300));
+                GlobalCaching<string, string>.Set("______passkey_challenge:" + result.Data.Challenge.GetBase64String(), user.Id.GetBase64String(), TimeSpan.FromSeconds(300));
             }
             await httpContext.Response.WriteJObjectAsync(result);
         }
@@ -68,7 +68,7 @@ namespace Silmoon.AspNetCore.Encryption.Services
                     RpId = Options.Host,
                     AllowCredentials = allowUserCredential.Credentials,
                 };
-                ObjectCache<string, string>.Set("______passkey_challenge:" + challenge.GetBase64String(), allowUserCredential.UserId, TimeSpan.FromSeconds(300));
+                GlobalCaching<string, string>.Set("______passkey_challenge:" + challenge.GetBase64String(), allowUserCredential.UserId, TimeSpan.FromSeconds(300));
             }
             await httpContext.Response.WriteJObjectAsync(result);
         }
@@ -79,7 +79,7 @@ namespace Silmoon.AspNetCore.Encryption.Services
             var clientDataJSON = createWebAuthnKeyResponse.Response.ClientDataJson.GetString();
             var clientJson = JObject.Parse(clientDataJSON);
 
-            var userIdResult = ObjectCache<string, string>.Get("______passkey_challenge:" + clientJson["challenge"].Value<string>().Base64UrlToBase64());
+            var userIdResult = GlobalCaching<string, string>.Get("______passkey_challenge:" + clientJson["challenge"].Value<string>().Base64UrlToBase64());
 
             StateFlag<bool> result = new StateFlag<bool>();
             if (!userIdResult.Matched)
@@ -148,7 +148,7 @@ namespace Silmoon.AspNetCore.Encryption.Services
 
             var clientData = verifyWebAuthnResponse.Response.GetClientJson();
 
-            var userIdResult = ObjectCache<string, string>.Get("______passkey_challenge:" + clientData["challenge"].Value<string>().Base64UrlToBase64());
+            var userIdResult = GlobalCaching<string, string>.Get("______passkey_challenge:" + clientData["challenge"].Value<string>().Base64UrlToBase64());
 
             StateFlag result = new StateFlag();
 

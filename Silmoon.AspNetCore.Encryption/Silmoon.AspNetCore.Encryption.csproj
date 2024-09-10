@@ -9,7 +9,7 @@
   <PropertyGroup>
     <IsPackable>true</IsPackable>
     <PackageId>Silmoon.AspNetCore.Encryption</PackageId>
-    <Version>0.1.0</Version>
+    <Version>0.1.1</Version>
     <Authors>SILMOON</Authors>
     <Company>SILMOON LLC</Company>
     <Description>Silmoon SDK</Description>
@@ -39,8 +39,8 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="8.0.8" />
-    <PackageReference Include="Silmoon" Version="1.4.4" />
-    <PackageReference Include="Silmoon.Extension" Version="1.4.7" />
+    <PackageReference Include="Silmoon" Version="1.5.0" />
+    <PackageReference Include="Silmoon.Extension" Version="1.5.0" />
     <PackageReference Include="PeterO.Cbor" Version="4.5.5" />
   </ItemGroup>
 

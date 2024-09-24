@@ -110,6 +110,5 @@ namespace Silmoon.AspNetCore.Middlewares
             else
                 await _next(context);
         }
-
     }
 }

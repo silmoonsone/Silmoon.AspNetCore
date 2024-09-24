@@ -12,6 +12,7 @@
 @inject WebAuthnComponentInterop Wac
 @inject JsComponentInterop Jsc
 @inject ISilmoonAuthService SilmoonAuthService
+@inject NavigationManager NavigationManager
 
 <h3>PasskeyRp</h3>
 
@@ -57,8 +58,6 @@
 
 
 @code {
-    @inject NavigationManager NavigationManager
-
     List<UserWebAuthnInfo> UserWebAuthnInfos = [];
 
     User CurrentUser { get; set; }

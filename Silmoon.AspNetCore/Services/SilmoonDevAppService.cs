@@ -38,7 +38,7 @@ namespace Silmoon.AspNetCore.Services
                 else
                 {
                     //没有获取到Signature和EncryptKey
-                    return StateSet<bool, (string SignatureKey, string EncryptKey)>.Create(false, (null, null), "Get SignatureKey and EncryptKey failed.");
+                    return StateSet<bool, (string SignatureKey, string EncryptKey)>.Create(false, (null, null), "Get SignatureKey and EncryptKey failed(" + result.Message + ").");
                 }
             }
 

@@ -45,7 +45,7 @@ namespace Silmoon.AspNetCore.Extension.CoreHelpers
 
         public virtual T[] Gets<T>(Expression<Func<T, bool>> whereFunc, int? offset = null, int? count = null) where T : IIdObject
         {
-            var result = (IQueryable<T>)Executer.GetQueryable<T>(MakeTableName<T>());
+            var result = Executer.GetQueryable<T>(MakeTableName<T>());
             if (whereFunc != null) result = result.Where(whereFunc);
             if (offset.HasValue) result = result.Skip(offset.Value);
             if (count.HasValue) result = result.Take(count.Value);
@@ -53,7 +53,7 @@ namespace Silmoon.AspNetCore.Extension.CoreHelpers
         }
         public virtual T[] Gets<T, TOrderKey>(Expression<Func<T, bool>> whereFunc, Expression<Func<T, TOrderKey>> orderFunc, bool? ascending, int? offset = null, int? count = null) where T : IIdObject
         {
-            var result = (IQueryable<T>)Executer.GetQueryable<T>(MakeTableName<T>());
+            var result = Executer.GetQueryable<T>(MakeTableName<T>());
             if (whereFunc != null) result = result.Where(whereFunc);
             if (orderFunc != null)
             {
@@ -66,7 +66,7 @@ namespace Silmoon.AspNetCore.Extension.CoreHelpers
         }
         public virtual IQueryable<T> GetsQuery<T>(Expression<Func<T, bool>> whereFunc, int? offset = null, int? count = null) where T : IIdObject
         {
-            var result = (IQueryable<T>)Executer.GetQueryable<T>(MakeTableName<T>());
+            var result = Executer.GetQueryable<T>(MakeTableName<T>());
             if (whereFunc != null) result = result.Where(whereFunc);
             if (offset.HasValue) result = result.Skip(offset.Value);
             if (count.HasValue) result = result.Take(count.Value);
@@ -74,7 +74,7 @@ namespace Silmoon.AspNetCore.Extension.CoreHelpers
         }
         public virtual IQueryable<T> GetsQuery<T, TOrderKey>(Expression<Func<T, bool>> whereFunc, Expression<Func<T, TOrderKey>> orderFunc, bool? ascending, int? offset = null, int? count = null) where T : IIdObject
         {
-            var result = (IQueryable<T>)Executer.GetQueryable<T>(MakeTableName<T>());
+            var result = Executer.GetQueryable<T>(MakeTableName<T>());
             if (whereFunc != null) result = result.Where(whereFunc);
             if (orderFunc != null)
             {
@@ -89,13 +89,13 @@ namespace Silmoon.AspNetCore.Extension.CoreHelpers
         public virtual T Get<T>(Expression<Func<T, bool>> whereFunc) where T : IIdObject
         {
             //return Executer.GetObject(MakeTableName<T>(),whereFunc,);
-            var result = (IQueryable<T>)Executer.GetQueryable<T>(MakeTableName<T>());
+            var result = Executer.GetQueryable<T>(MakeTableName<T>());
             if (whereFunc != null) result = result.Where(whereFunc);
             return result.FirstOrDefault();
         }
         public virtual T Get<T, TOrderKey>(Expression<Func<T, bool>> whereFunc, Expression<Func<T, TOrderKey>> orderFunc, bool? ascending) where T : IIdObject
         {
-            var result = (IQueryable<T>)Executer.GetQueryable<T>(MakeTableName<T>());
+            var result = Executer.GetQueryable<T>(MakeTableName<T>());
             if (whereFunc != null) result = result.Where(whereFunc);
             if (orderFunc != null)
             {

@@ -1,4 +1,4 @@
-﻿<div class="text-end">
+﻿<div class="d-inline">
     <button class="@TodayClass" @onclick="()=>SetDateRange(DateTime.Today, DateTime.Today)">今天</button>
     <button class="@YesterdayClass" @onclick="()=>SetDateRange(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(-1))">昨天</button>
     <button class="@Last7DaysClass" @onclick="()=>SetDateRange(DateTime.Today.AddDays(-6), DateTime.Today)">近七天</button>

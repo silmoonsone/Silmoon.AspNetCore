@@ -66,3 +66,43 @@ export function toast(msg, delay = 1000) {
         $(a).fadeOut(function () { a.remove(); })
     }, delay);
 }
+
+
+/**
+ * Blazor call web browser download file
+ * @param {string} fileName
+ * @param {string | Uint8Array} content
+ * @param {string} contentType
+ * @param {string} contentTypeDescription
+ * @returns
+ */
+export async function blazorDownloadFile(fileName, content, contentType, contentTypeDescription) {
+    if (!window.showSaveFilePicker) {
+        console.error("File System Access API is not supported in this browser.");
+        window.alert("File System Access API is not supported in this browser.");
+        return { state: false, data: null, message: "File System Access API is not supported in this browser." };
+    }
+
+    if (contentTypeDescription === null || contentTypeDescription === undefined) {
+        contentTypeDescription = contentType;
+    }
+
+    try {
+        const fileHandle = await window.showSaveFilePicker({
+            suggestedName: fileName,
+            types: [{
+                description: contentTypeDescription,
+                accept: { [contentType]: ['.' + fileName.split('.').pop()] }
+            }]
+        });
+
+        const writable = await fileHandle.createWritable();
+        await writable.write(content);
+        await writable.close();
+        return { state: true, data: null, message: null };
+        ;
+    } catch (error) {
+        console.error('下载文件出错:', error);
+        return { state: false, data: null, message: error.message };
+    }
+}

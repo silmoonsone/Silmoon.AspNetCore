@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Silmoon.AspNetCore.Blazor
+namespace Silmoon.AspNetCore.Blazor.JsComponents
 {
     public class JsSilmoonAuthInterop : IAsyncDisposable
     {

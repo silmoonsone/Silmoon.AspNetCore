@@ -10,7 +10,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Silmoon.AspNetCore.Encryption
+namespace Silmoon.AspNetCore.Encryption.JsComponents
 {
     public class WebAuthnComponentInterop
     {

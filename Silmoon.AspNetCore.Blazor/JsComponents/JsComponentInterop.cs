@@ -1,6 +1,7 @@
 using Microsoft.JSInterop;
+using Silmoon.Models;
 
-namespace Silmoon.AspNetCore.Blazor
+namespace Silmoon.AspNetCore.Blazor.JsComponents
 {
     // This class provides an example of how JavaScript functionality can be wrapped
     // in a .NET class for easy consumption. The associated JavaScript module is
@@ -19,6 +20,7 @@ namespace Silmoon.AspNetCore.Blazor
             moduleTask = new(() => jsRuntime.InvokeAsync<IJSObjectReference>(
                 "import", "./_content/Silmoon.AspNetCore.Blazor/js/jsComponentInterop.js").AsTask());
         }
+
         public async ValueTask Alert(string message)
         {
             var module = await moduleTask.Value;
@@ -30,6 +32,7 @@ namespace Silmoon.AspNetCore.Blazor
             var module = await moduleTask.Value;
             return await module.InvokeAsync<bool>("confirm", message);
         }
+
         public async ValueTask<string> Prompt(string message)
         {
             var module = await moduleTask.Value;
@@ -41,6 +44,7 @@ namespace Silmoon.AspNetCore.Blazor
             var module = await moduleTask.Value;
             await module.InvokeVoidAsync("toast", message, delay);
         }
+
         public async ValueTask MetroUIConfirm(string title, string msg, bool isConfirmDialog = false, Action<bool> callback = null)
         {
             var module = await moduleTask.Value;
@@ -56,6 +60,17 @@ namespace Silmoon.AspNetCore.Blazor
                 metroUIConfirmCallbackDotNetObjectRef?.Dispose();
                 metroUIConfirmCallbackDotNetObjectRef = null;
             }
+        }
+
+        public async ValueTask<StateSet<bool>> Download(string fileName, byte[] content, string contentType, string contentTypeDescription = null)
+        {
+            var module = await moduleTask.Value;
+            return await module.InvokeAsync<StateSet<bool>>("blazorDownloadFile", fileName, content, contentType, contentTypeDescription);
+        }
+        public async ValueTask<StateSet<bool>> Download(string fileName, string content, string contentType, string contentTypeDescription = null)
+        {
+            var module = await moduleTask.Value;
+            return await module.InvokeAsync<StateSet<bool>>("blazorDownloadFile", fileName, content, contentType, contentTypeDescription);
         }
         public async ValueTask DisposeAsync()
         {

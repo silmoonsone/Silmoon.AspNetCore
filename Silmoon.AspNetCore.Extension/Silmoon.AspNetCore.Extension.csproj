@@ -40,7 +40,7 @@
 
   <ItemGroup>
     <PackageReference Include="MongoDB.Driver" Version="3.0.0" />
-    <PackageReference Include="Silmoon.Data.MongoDB" Version="1.6.0-alpha.3" />
+    <PackageReference Include="Silmoon.Data.MongoDB" Version="1.6.0" />
   </ItemGroup>
 
 </Project>

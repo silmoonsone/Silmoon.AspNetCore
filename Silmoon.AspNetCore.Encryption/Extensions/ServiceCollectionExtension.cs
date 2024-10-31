@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Silmoon.AspNetCore.Encryption.JsComponents;
 using System;
 using System.Collections.Generic;
 using System.Linq;

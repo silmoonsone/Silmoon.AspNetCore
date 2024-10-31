@@ -9,6 +9,7 @@
     <button @onclick="MetroUIConfirm">MetroUIConfirm</button>
     <button @onclick="Alert">Alert</button>
     <button @onclick="Confirm">Confirm</button>
+    <button @onclick="Download">Download</button>
 </div>
 
 @code {
@@ -45,5 +46,11 @@
         {
             await Jsc.Toast("confirm is false");
         }
+    }
+    private async Task Download()
+    {
+        // var result = await Jsc.Download("data.json", "{\"id\":1}".GetBytes(), "application/json");
+        var result = await Jsc.Download("data.json", "{\"id\":1}", "application/json");
+        await Jsc.MetroUIConfirm("download", result.State ? "success" : "fail", false);
     }
 }

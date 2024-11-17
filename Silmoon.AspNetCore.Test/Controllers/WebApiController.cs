@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Silmoon.AspNetCore.Extensions;
 using Silmoon.AspNetCore.Test.Models;
 using Silmoon.AspNetCore.Services.Interfaces;
-using Silmoon.Drawing;
+using Silmoon.Graphics.Extension;
 using Silmoon.Extension;
 using Silmoon.Runtime.Cache;
 using Silmoon.Collections;
@@ -52,22 +52,20 @@ namespace Silmoon.AspNetCore.Test.Controllers
         {
             if (fileName.IsNullOrEmpty()) fileName = HashHelper.RandomChars(32);
             var files = GlobalCaching<string, NameObjectCollection<byte[]>>.Get(UserId + ":temp_images");
+            var imageData = Request.Form.Files[0].OpenReadStream().ToBytes();
+            using var image = imageData.GetSKImage();
 
-            var image = new Bitmap(Request.Form.Files[0].OpenReadStream());
-            var imageFormat = image.RawFormat;
-
-            ImageHelper.FixiPhoneOrientation(image);
-            var image2 = ImageHelper.ResizeWidth(image, 800, true, true);
-            image.Dispose();
-            var image3 = ImageHelper.Compress(image2, CompositingQuality.HighSpeed);
-            image2.Dispose();
-            var data = image3.GetBytes(imageFormat);
-            image3.Dispose();
+            using var fixedImage = image.FixiPhoneOrientation();
+            using var bitmap = fixedImage.ToSKBitmap();
+            using var resizedBitmap = bitmap.ResizeWidth(800, true, true);
+            using var resizedImage = resizedBitmap.ToSKImage();
+            var compressedImage = resizedImage.Compress();
+            var compressedImageData = compressedImage.GetBytes();
 
             if (files.Matched)
-                files.Value[fileName] = data;
+                files.Value[fileName] = compressedImageData;
             else
-                GlobalCaching<string, NameObjectCollection<byte[]>>.Set(UserId + ":temp_images", new NameObjectCollection<byte[]>() { { fileName, data } });
+                GlobalCaching<string, NameObjectCollection<byte[]>>.Set(UserId + ":temp_images", new NameObjectCollection<byte[]>() { { fileName, compressedImageData } });
 
             return this.JsonStateFlag(true);
         }

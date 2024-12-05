@@ -6,9 +6,8 @@
 DataProtection/
 .idea/
 .DS_Store
-*.localcode.*
-config-local.*.json
-config-local.json
+config.local.*.json
+config.local.json
 *.local.cs
 *.local.db
 

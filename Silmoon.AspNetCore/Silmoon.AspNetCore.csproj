@@ -10,7 +10,7 @@
   <PropertyGroup>
     <IsPackable>true</IsPackable>
     <PackageId>Silmoon.AspNetCore</PackageId>
-    <Version>1.5.3</Version>
+    <Version>1.5.4</Version>
     <Authors>SILMOON</Authors>
     <Company>SILMOON LLC</Company>
     <Description>Silmoon SDK</Description>
@@ -39,8 +39,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Silmoon" Version="1.6.1" />
-    <PackageReference Include="Silmoon.Extension" Version="1.6.0" />
+    <PackageReference Include="Silmoon" Version="1.6.2" />
+    <PackageReference Include="Silmoon.Extension" Version="1.6.1" />
   </ItemGroup>
 
 </Project>

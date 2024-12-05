@@ -66,8 +66,13 @@ builder.Services.AddRazorComponents().AddInteractiveServerComponents().AddCircui
 
 builder.Services.AddSilmoonConfigure<SilmoonConfigureServiceImpl>(o =>
 {
+#if DEBUG
+    o.DebugConfig();
+#else
     o.ReleaseConfig();
+#endif
 });
+
 builder.Services.AddSingleton<Core>();
 builder.Services.AddSilmoonAuth<SilmoonAuthServiceImpl>();
 

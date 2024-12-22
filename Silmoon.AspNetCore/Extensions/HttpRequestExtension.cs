@@ -90,7 +90,15 @@ namespace Silmoon.AspNetCore.Extensions
             }
             return nameValueCollection;
         }
+        [Obsolete("This method is obsolete, please use GetRequestValue method instead.")]
         public static string GetQueryStringOrFormValue(this HttpRequest httpRequest, string key)
+        {
+            var value = httpRequest.Query[key];
+            if (value.Count == 0 && (httpRequest.ContentType.StartsWith("multipart/form-data") || httpRequest.ContentType == "application/x-www-form-urlencoded"))
+                value = httpRequest.Form[key];
+            return value;
+        }
+        public static string GetRequestValue(this HttpRequest httpRequest, string key)
         {
             var value = httpRequest.Query[key];
             if (value.Count == 0 && (httpRequest.ContentType.StartsWith("multipart/form-data") || httpRequest.ContentType == "application/x-www-form-urlencoded"))

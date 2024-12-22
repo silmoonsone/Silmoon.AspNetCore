@@ -70,7 +70,8 @@
     void Load()
     {
         UserWebAuthnInfos.Clear();
-        UserWebAuthnInfos.AddRange(Core.GetUserWebAuthnInfos(CurrentUser._id));
+        var webAuthnInfos = Core.GetUserWebAuthnInfos(CurrentUser._id);
+        if (!webAuthnInfos.IsNullOrEmpty()) UserWebAuthnInfos.AddRange(webAuthnInfos);
         StateHasChanged();
     }
     async void CreateWebAuthn()

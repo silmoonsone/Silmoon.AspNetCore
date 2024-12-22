@@ -1,6 +1,7 @@
 ﻿@page "/signup"
 @rendermode InteractiveServer
 @inject Core Core
+@using Silmoon.Secure
 
 <h3>SignUp</h3>
 <hr />
@@ -67,7 +68,7 @@
         var user = new User()
             {
                 Username = Username,
-                Password = Password,
+                Password = Password.GetMD5Hash(),
             };
         var result = Core.NewUser(user);
 

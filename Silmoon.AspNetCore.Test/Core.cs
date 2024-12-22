@@ -1,18 +1,26 @@
 ﻿using MongoDB.Bson;
+using Silmoon.AspNetCore.Services.Interfaces;
 using Silmoon.AspNetCore.Test.Models;
 using Silmoon.AspNetCore.Test.Models.SubModels;
+using Silmoon.AspNetCore.Test.Services;
 using Silmoon.Data.LiteDB;
+using Silmoon.Data.MongoDB;
 using Silmoon.Extension;
 using Silmoon.Models;
 using System.Formats.Asn1;
 
 namespace Silmoon.AspNetCore.Test
 {
-    public class Core : LiteDBService
+    public class Core : MongoService
     {
-        public Core()
+        public override MongoExecuter Executer { get; set; }
+        public SilmoonConfigureServiceImpl SilmoonConfigureService { get; set; }
+        public Core(ISilmoonConfigureService silmoonConfigureService)
         {
-            Database = new LiteDB.LiteDatabase("Filename=user.local.db; Connection=shared");
+            //Database = new LiteDB.LiteDatabase("Filename=user.local.db; Connection=shared");
+            SilmoonConfigureService = (SilmoonConfigureServiceImpl)silmoonConfigureService;
+            Executer = new MongoExecuter(SilmoonConfigureService.MongoDBConnectionString);
+
         }
 
         public User GetUser(ObjectId UserObjectId) => Get<User>(x => x._id == UserObjectId);
@@ -58,7 +66,7 @@ namespace Silmoon.AspNetCore.Test
             if (GetUserWebAuthnInfo(UserObjectId, userWebAuthnInfo.CredentialId) is null)
             {
                 userAuthInfo.WebAuthnInfos.Add(userWebAuthnInfo);
-                Sets<UserAuthInfo>(x => new UserAuthInfo() { WebAuthnInfos = userAuthInfo.WebAuthnInfos }, x => x.UserObjectId == UserObjectId);
+                Sets(new UserAuthInfo() { WebAuthnInfos = userAuthInfo.WebAuthnInfos }, x => x.UserObjectId == UserObjectId, null, x => x.WebAuthnInfos);
                 return true.ToStateSet();
             }
             else
@@ -73,7 +81,7 @@ namespace Silmoon.AspNetCore.Test
             else
             {
                 userAuthInfo.WebAuthnInfos.Remove(userAuthInfo.WebAuthnInfos.Where(x => x.CredentialId != null && x.CredentialId.SequenceEqual(CredentialId)).FirstOrDefault());
-                Sets<UserAuthInfo>(x => new UserAuthInfo() { WebAuthnInfos = userAuthInfo.WebAuthnInfos }, x => x.UserObjectId == UserObjectId);
+                Sets(new UserAuthInfo() { WebAuthnInfos = userAuthInfo.WebAuthnInfos }, x => x.UserObjectId == UserObjectId, null, x => x.WebAuthnInfos);
                 return true.ToStateSet();
             }
         }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using Silmoon.AspNetCore.Services;
 using Silmoon.Extension.Models.Identities;
+using Silmoon.Secure;
 
 namespace Silmoon.AspNetCore.Test.Services
 {
@@ -19,6 +20,10 @@ namespace Silmoon.AspNetCore.Test.Services
         public override async Task<IDefaultUserIdentity> GetUserData(string Username, string NameIdentifier, string UserToken)
         {
             return await Task.FromResult<DefaultUserIdentity>(default);
+        }
+        public override string PasswordHash(string password)
+        {
+            return password.GetMD5Hash();
         }
     }
 }

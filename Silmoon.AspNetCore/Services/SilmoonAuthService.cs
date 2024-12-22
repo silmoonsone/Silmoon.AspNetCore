@@ -178,6 +178,7 @@ namespace Silmoon.AspNetCore.Services
         /// <param name="UserToken"></param>
         /// <returns></returns>
         public abstract Task<IDefaultUserIdentity> GetUserData(string Username, string NameIdentifier, string UserToken);
+        public abstract string PasswordHash(string password);
 
         public virtual async Task OnSignIn(HttpContext httpContext, RequestDelegate requestDelegate, string username, string password)
         {
@@ -189,8 +190,7 @@ namespace Silmoon.AspNetCore.Services
                     await httpContext.Response.WriteJObjectAsync(false.ToStateFlag("用户名不存在或者密码错误"));
                 else
                 {
-
-                    if (username == gotUser.Username && password == gotUser.Password)
+                    if (gotUser.Username == username && gotUser.Password == PasswordHash(password))
                     {
                         await SignIn(gotUser);
                         await httpContext.Response.WriteJObjectAsync(true.ToStateFlag());

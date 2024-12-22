@@ -29,10 +29,15 @@ namespace Silmoon.AspNetCore.Blazor.JsComponents
         }
         public async ValueTask DisposeAsync()
         {
+            // is a bug?
             if (moduleTask.IsValueCreated)
             {
                 var module = await moduleTask.Value;
-                await module.DisposeAsync();
+                try
+                {
+                    await module.DisposeAsync();
+                }
+                catch { }
             }
         }
     }

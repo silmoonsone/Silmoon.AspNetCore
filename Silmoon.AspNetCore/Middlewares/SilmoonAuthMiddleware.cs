@@ -24,8 +24,8 @@ namespace Silmoon.AspNetCore.Middlewares
         {
             if (context.Request.Path == SilmoonAuthService.Options.SignInUrl)
             {
-                var username = context.Request.GetQueryStringOrFormValue("Username");
-                var password = context.Request.GetQueryStringOrFormValue("Password");
+                var username = context.Request.GetRequestValue("Username");
+                var password = context.Request.GetRequestValue("Password");
 
                 await SilmoonAuthService.OnSignIn(context, _next, username, password);
             }

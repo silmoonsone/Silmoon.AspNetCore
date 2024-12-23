@@ -39,7 +39,7 @@ namespace Silmoon.AspNetCore.Extensions
         public static IActionResult JsonApiResult(this ControllerBase controller, ResultState resultState, bool httpContentCompress = false) => JsonApiResult(controller, resultState, null, 0, httpContentCompress);
         public static IActionResult JsonApiResult(this ControllerBase controller, ResultState resultState, int code, bool httpContentCompress = false) => JsonApiResult(controller, resultState, null, code, httpContentCompress);
         public static IActionResult JsonApiResult(this ControllerBase controller, ResultState resultState, string message, bool httpContentCompress = false) => JsonApiResult(controller, resultState, message, 0, httpContentCompress);
-        public static IActionResult JsonApiResult(this ControllerBase controller, ResultState resultState, string message = null, int code = 0, bool httpContentCompress = false) => JsonApiResult(controller, ApiResult.Create(resultState, message, code), httpContentCompress);
+        public static IActionResult JsonApiResult(this ControllerBase controller, ResultState resultState, string message, int code, bool httpContentCompress = false) => JsonApiResult(controller, ApiResult.Create(resultState, message, code), httpContentCompress);
         public static IActionResult JsonApiResult(this ControllerBase controller, ApiResult apiResult, bool httpContentCompress = false)
         {
             if (httpContentCompress)
@@ -55,10 +55,10 @@ namespace Silmoon.AspNetCore.Extensions
                 return new ContentResult() { Content = apiResult.ToJsonString(), ContentType = "application/json" };
         }
 
-        public static IActionResult JsonApiResult<T>(this ControllerBase controller, ResultState resultState, int code = 0, bool httpContentCompress = false) => JsonApiResult<T>(controller, resultState, default, null, code, httpContentCompress);
-        public static IActionResult JsonApiResult<T>(this ControllerBase controller, ResultState resultState, string message, int code = 0, bool httpContentCompress = false) => JsonApiResult<T>(controller, resultState, default, message, code, httpContentCompress);
-        public static IActionResult JsonApiResult<T>(this ControllerBase controller, ResultState resultState, T data, int code = 0, bool httpContentCompress = false) => JsonApiResult<T>(controller, resultState, data, null, code, httpContentCompress);
-        public static IActionResult JsonApiResult<T>(this ControllerBase controller, ResultState resultState, T data, string Message, int code = 0, bool httpContentCompress = false) => JsonApiResult(controller, ApiResult<T>.Create(resultState, data, Message, code), httpContentCompress);
+        public static IActionResult JsonApiResult<T>(this ControllerBase controller, ResultState resultState, T data, bool httpContentCompress = false) => JsonApiResult(controller, resultState, data, string.Empty, 0, httpContentCompress);
+        public static IActionResult JsonApiResult<T>(this ControllerBase controller, ResultState resultState, T data, int code, bool httpContentCompress = false) => JsonApiResult(controller, resultState, data, string.Empty, code, httpContentCompress);
+        public static IActionResult JsonApiResult<T>(this ControllerBase controller, ResultState resultState, T data, string message, bool httpContentCompress = false) => JsonApiResult(controller, resultState, data, message, 0, httpContentCompress);
+        public static IActionResult JsonApiResult<T>(this ControllerBase controller, ResultState resultState, T data, string message, int code, bool httpContentCompress = false) => JsonApiResult(controller, ApiResult<T>.Create(resultState, data, message, code), httpContentCompress);
         public static IActionResult JsonApiResult<T>(this ControllerBase controller, ApiResult<T> apiResult, bool httpContentCompress = false)
         {
             if (httpContentCompress)

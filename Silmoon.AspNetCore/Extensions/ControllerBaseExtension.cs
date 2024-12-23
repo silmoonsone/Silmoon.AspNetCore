@@ -46,10 +46,7 @@ namespace Silmoon.AspNetCore.Extensions
             {
                 controller.Response.Headers["HttpContentGzipCompression"] = "true";
                 var compressedData = CompressHelper.CompressStringToByteArray(apiResult.ToJsonString());
-                return new ObjectResult(compressedData)
-                {
-                    ContentTypes = new Microsoft.AspNetCore.Mvc.Formatters.MediaTypeCollection() { "application/json+gzip" },
-                };
+                return new FileContentResult(compressedData, "application/json+gzip");
             }
             else
                 return new ContentResult() { Content = apiResult.ToJsonString(), ContentType = "application/json" };
@@ -65,10 +62,7 @@ namespace Silmoon.AspNetCore.Extensions
             {
                 controller.Response.Headers["HttpContentGzipCompression"] = "true";
                 var compressedData = CompressHelper.CompressStringToByteArray(apiResult.ToJsonString());
-                return new ObjectResult(compressedData)
-                {
-                    ContentTypes = new Microsoft.AspNetCore.Mvc.Formatters.MediaTypeCollection() { "application/json+gzip" },
-                };
+                return new FileContentResult(compressedData, "application/json+gzip");
             }
             else
                 return new ContentResult() { Content = apiResult.ToJsonString(), ContentType = "application/json" };

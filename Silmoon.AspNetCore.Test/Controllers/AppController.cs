@@ -18,10 +18,12 @@ namespace Silmoon.AspNetCore.Test.Controllers
         {
             return View();
         }
-        public IActionResult ApiTest()
+        public IActionResult TestGzipApi()
         {
-            this.JsonApiResult<object>(ResultState.Success, new object(), "message");
-            return this.JsonApiResult(ResultState.Success, "message");
+            var obj = new { Name = "Silmoon", Age = 18 };
+
+            return this.JsonApiResult(ResultState.Success, obj, "message", true);
+            //return this.JsonApiResult(ResultState.Success, "message");
         }
     }
 }

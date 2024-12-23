@@ -45,7 +45,7 @@ namespace Silmoon.AspNetCore.Test.Controllers
         public IActionResult DashboardApi()
         {
             var result = User.Identity.IsAuthenticated;
-            return this.JsonStateFlag(true, $"You IsAuthenticated is {result}.", Data: result);
+            return this.JsonStateFlag(true, $"You IsAuthenticated is {result}.", data: result);
         }
 
         public IActionResult UploadTempImage(string UserId, string fileName)
@@ -74,10 +74,10 @@ namespace Silmoon.AspNetCore.Test.Controllers
             var files = GlobalCaching<string, NameObjectCollection<byte[]>>.Get(UserId + ":temp_images");
             if (files.Matched)
             {
-                return this.JsonStateFlag(true, Data: files.Value.GetAllKeys());
+                return this.JsonStateFlag(true, data: files.Value.GetAllKeys());
             }
             else
-                return this.JsonStateFlag(true, Data: 0);
+                return this.JsonStateFlag(true, data: 0);
         }
         public IActionResult DeleteTempImage(string UserId, string fileName)
         {
@@ -121,10 +121,10 @@ namespace Silmoon.AspNetCore.Test.Controllers
             var files = GlobalCaching<string, NameObjectCollection<byte[]>>.Get(UserId + ":temp_files");
             if (files.Matched)
             {
-                return this.JsonStateFlag(true, Data: files.Value.GetAllKeys());
+                return this.JsonStateFlag(true, data: files.Value.GetAllKeys());
             }
             else
-                return this.JsonStateFlag(true, Data: 0);
+                return this.JsonStateFlag(true, data: 0);
         }
         public IActionResult DeleteTempFile(string UserId, string fileName)
         {

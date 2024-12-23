@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Silmoon.Compress;
 using Silmoon.Extension;
 using Silmoon.Extension.Models;
 using Silmoon.Extension.Models.Types;
@@ -14,38 +15,64 @@ namespace Silmoon.AspNetCore.Extensions
     public static class ControllerBaseExtension
     {
 
-        public static ContentResult JsonStateFlag(this ControllerBase controller, bool Success) => JsonStateFlag(controller, Success, 0, null);
-        public static ContentResult JsonStateFlag(this ControllerBase controller, bool Success, string Message) => JsonStateFlag(controller, Success, 0, Message);
-        public static ContentResult JsonStateFlag(this ControllerBase controller, bool Success, int Code) => JsonStateFlag(controller, Success, Code, null);
-        public static ContentResult JsonStateFlag(this ControllerBase controller, bool Success, int Code, string Message)
+        public static IActionResult JsonStateFlag(this ControllerBase controller, bool success) => JsonStateFlag(controller, success, 0, null);
+        public static IActionResult JsonStateFlag(this ControllerBase controller, bool success, string message) => JsonStateFlag(controller, success, 0, message);
+        public static IActionResult JsonStateFlag(this ControllerBase controller, bool success, int code) => JsonStateFlag(controller, success, code, null);
+        public static IActionResult JsonStateFlag(this ControllerBase controller, bool success, int code, string message)
         {
-            var result = StateFlag.Create(Success, Code, Message);
+            var result = StateFlag.Create(success, code, message);
             return new ContentResult() { Content = result.ToJsonString(), ContentType = "application/json" };
         }
-        public static ContentResult JsonStateFlag<T>(this ControllerBase controller, bool Success) => JsonStateFlag<T>(controller, Success, 0, "", default);
-        public static ContentResult JsonStateFlag<T>(this ControllerBase controller, bool Success, string Message) => JsonStateFlag<T>(controller, Success, 0, Message, default);
-        public static ContentResult JsonStateFlag<T>(this ControllerBase controller, bool Success, int Code) => JsonStateFlag<T>(controller, Success, Code, "", default);
-        public static ContentResult JsonStateFlag<T>(this ControllerBase controller, bool Success, int Code, string Message) => JsonStateFlag<T>(controller, Success, Code, Message, default);
-        public static ContentResult JsonStateFlag<T>(this ControllerBase controller, bool Success, T Data) => JsonStateFlag<T>(controller, Success, 0, "", Data);
-        public static ContentResult JsonStateFlag<T>(this ControllerBase controller, bool Success, string Message, T Data) => JsonStateFlag<T>(controller, Success, 0, Message, Data);
-        public static ContentResult JsonStateFlag<T>(this ControllerBase controller, bool Success, int Code, T Data) => JsonStateFlag<T>(controller, Success, Code, "", Data);
-        public static ContentResult JsonStateFlag<T>(this ControllerBase controller, bool Success, int Code, string Message, T Data) => JsonStateFlag(controller, StateFlag<T>.Create(Success, Code, Data, Message));
-        public static ContentResult JsonStateFlag<T>(this ControllerBase controller, StateFlag<T> stateFlag) => new ContentResult() { Content = stateFlag.ToJsonString(), ContentType = "application/json" };
+        public static IActionResult JsonStateFlag<T>(this ControllerBase controller, bool success) => JsonStateFlag<T>(controller, success, 0, string.Empty, default);
+        public static IActionResult JsonStateFlag<T>(this ControllerBase controller, bool success, string message) => JsonStateFlag<T>(controller, success, 0, message, default);
+        public static IActionResult JsonStateFlag<T>(this ControllerBase controller, bool success, int code) => JsonStateFlag<T>(controller, success, code, string.Empty, default);
+        public static IActionResult JsonStateFlag<T>(this ControllerBase controller, bool success, int code, string message) => JsonStateFlag<T>(controller, success, code, message, default);
+        public static IActionResult JsonStateFlag<T>(this ControllerBase controller, bool success, T data) => JsonStateFlag<T>(controller, success, 0, string.Empty, data);
+        public static IActionResult JsonStateFlag<T>(this ControllerBase controller, bool success, string message, T data) => JsonStateFlag<T>(controller, success, 0, message, data);
+        public static IActionResult JsonStateFlag<T>(this ControllerBase controller, bool success, int code, T data) => JsonStateFlag<T>(controller, success, code, string.Empty, data);
+        public static IActionResult JsonStateFlag<T>(this ControllerBase controller, bool success, int code, string message, T data) => JsonStateFlag(controller, StateFlag<T>.Create(success, code, data, message));
+        public static IActionResult JsonStateFlag<T>(this ControllerBase controller, StateFlag<T> stateFlag) => new ContentResult() { Content = stateFlag.ToJsonString(), ContentType = "application/json" };
 
 
 
 
-        public static ContentResult JsonApiResult(this ControllerBase controller, ResultState ResultState) => JsonApiResult(controller, ResultState, null, 0);
-        public static ContentResult JsonApiResult(this ControllerBase controller, ResultState ResultState, int Code) => JsonApiResult(controller, ResultState, null, Code);
-        public static ContentResult JsonApiResult(this ControllerBase controller, ResultState ResultState, string Message) => JsonApiResult(controller, ResultState, Message, 0);
-        public static ContentResult JsonApiResult(this ControllerBase controller, ResultState ResultState, string Message = null, int Code = 0) => JsonApiResult(controller, ApiResult.Create(ResultState, Message, Code));
-        public static ContentResult JsonApiResult(this ControllerBase controller, ApiResult apiResult) => new ContentResult() { Content = apiResult.ToJsonString(), ContentType = "application/json" };
+        public static IActionResult JsonApiResult(this ControllerBase controller, ResultState resultState, bool httpContentCompress = false) => JsonApiResult(controller, resultState, null, 0, httpContentCompress);
+        public static IActionResult JsonApiResult(this ControllerBase controller, ResultState resultState, int code, bool httpContentCompress = false) => JsonApiResult(controller, resultState, null, code, httpContentCompress);
+        public static IActionResult JsonApiResult(this ControllerBase controller, ResultState resultState, string message, bool httpContentCompress = false) => JsonApiResult(controller, resultState, message, 0, httpContentCompress);
+        public static IActionResult JsonApiResult(this ControllerBase controller, ResultState resultState, string message = null, int code = 0, bool httpContentCompress = false) => JsonApiResult(controller, ApiResult.Create(resultState, message, code), httpContentCompress);
+        public static IActionResult JsonApiResult(this ControllerBase controller, ApiResult apiResult, bool httpContentCompress = false)
+        {
+            if (httpContentCompress)
+            {
+                controller.Response.Headers["HttpContentGzipCompression"] = "true";
+                var compressedData = CompressHelper.CompressStringToByteArray(apiResult.ToJsonString());
+                return new ObjectResult(compressedData)
+                {
+                    ContentTypes = new Microsoft.AspNetCore.Mvc.Formatters.MediaTypeCollection() { "application/json+gzip" },
+                };
+            }
+            else
+                return new ContentResult() { Content = apiResult.ToJsonString(), ContentType = "application/json" };
+        }
 
+        public static IActionResult JsonApiResult<T>(this ControllerBase controller, ResultState resultState, int code = 0, bool httpContentCompress = false) => JsonApiResult<T>(controller, resultState, default, null, code, httpContentCompress);
+        public static IActionResult JsonApiResult<T>(this ControllerBase controller, ResultState resultState, string message, int code = 0, bool httpContentCompress = false) => JsonApiResult<T>(controller, resultState, default, message, code, httpContentCompress);
+        public static IActionResult JsonApiResult<T>(this ControllerBase controller, ResultState resultState, T data, int code = 0, bool httpContentCompress = false) => JsonApiResult<T>(controller, resultState, data, null, code, httpContentCompress);
+        public static IActionResult JsonApiResult<T>(this ControllerBase controller, ResultState resultState, T data, string Message, int code = 0, bool httpContentCompress = false) => JsonApiResult(controller, ApiResult<T>.Create(resultState, data, Message, code), httpContentCompress);
+        public static IActionResult JsonApiResult<T>(this ControllerBase controller, ApiResult<T> apiResult, bool httpContentCompress = false)
+        {
+            if (httpContentCompress)
+            {
+                controller.Response.Headers["HttpContentGzipCompression"] = "true";
+                var compressedData = CompressHelper.CompressStringToByteArray(apiResult.ToJsonString());
+                return new ObjectResult(compressedData)
+                {
+                    ContentTypes = new Microsoft.AspNetCore.Mvc.Formatters.MediaTypeCollection() { "application/json+gzip" },
+                };
+            }
+            else
+                return new ContentResult() { Content = apiResult.ToJsonString(), ContentType = "application/json" };
 
-        public static ContentResult JsonApiResult<T>(this ControllerBase controller, ResultState ResultState, int Code = 0) => JsonApiResult<T>(controller, ResultState, default, null, Code);
-        public static ContentResult JsonApiResult<T>(this ControllerBase controller, ResultState ResultState, string Message, int Code = 0) => JsonApiResult<T>(controller, ResultState, default, Message, Code);
-        public static ContentResult JsonApiResult<T>(this ControllerBase controller, ResultState ResultState, T Data, int Code = 0) => JsonApiResult<T>(controller, ResultState, Data, null, Code);
-        public static ContentResult JsonApiResult<T>(this ControllerBase controller, ResultState ResultState, T Data, string Message, int Code = 0) => JsonApiResult(controller, ApiResult<T>.Create(ResultState, Data, Message, Code));
-        public static ContentResult JsonApiResult<T>(this ControllerBase controller, ApiResult<T> apiResult) => new ContentResult() { Content = apiResult.ToJsonString(), ContentType = "application/json" };
+        }
     }
 }

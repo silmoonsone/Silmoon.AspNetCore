@@ -22,8 +22,8 @@ namespace Silmoon.AspNetCore.Test.Controllers
         {
             var obj = new { Name = "Silmoon", Age = 18 };
 
-            return this.JsonApiResult(ResultState.Success, obj, "message", true);
-            //return this.JsonApiResult(ResultState.Success, "message");
+            //return this.JsonApiResult(ResultState.Success, obj, "message", true);
+            return this.JsonApiResult(ResultState.Success, "message");
         }
     }
 }

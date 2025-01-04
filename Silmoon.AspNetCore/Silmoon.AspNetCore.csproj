@@ -39,7 +39,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Silmoon" Version="1.7.0" />
+    <PackageReference Include="Silmoon" Version="1.7.3" />
     <PackageReference Include="Silmoon.Extension" Version="1.6.5" />
   </ItemGroup>
 

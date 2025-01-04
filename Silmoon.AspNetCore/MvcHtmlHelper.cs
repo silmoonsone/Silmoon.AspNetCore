@@ -7,26 +7,30 @@ namespace Silmoon.AspNetCore
 {
     public class MvcHtmlHelper
     {
-        public static IEnumerable<SelectListItem> GetSelectListItems(Enum value)
+        [Obsolete]
+        public static SelectListItem[] GetSelectListItems(Enum selectedValue)
         {
-            if (value.GetType().IsEnum)
+            if (selectedValue.GetType().IsEnum)
             {
-                var values = Enum.GetValues(value.GetType());
-                var result = new List<SelectListItem>();
+                var values = Enum.GetValues(selectedValue.GetType());
+                var result = new SelectListItem[values.Length];
+
                 for (int i = 0; i < values.Length; i++)
                 {
-                    var item = new SelectListItem() { Text = ((Enum)values.GetValue(i)).GetDisplayName(), Value = values.GetValue(i).ToString() };
-                    if (item.Value == values.GetValue(i).ToString())
+                    var value = values.GetValue(i);
+                    var item = new SelectListItem()
                     {
-                        item.Selected = true;
-                    }
-                    result.Add(item);
+                        Text = ((Enum)value).GetDisplayName(),
+                        Value = value.ToString(),
+                        Selected = selectedValue.Equals(value)
+                    };
+                    result[i] = item;
                 }
                 return result;
             }
             else
             {
-                return new List<SelectListItem>();
+                return [];
             }
         }
     }

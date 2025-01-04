@@ -18,10 +18,10 @@ namespace Silmoon.AspNetCore.Razor
                 var recvLen = await stream.ReadAsync(buff);
                 dataList.AddRange(buff.Take(recvLen));
                 decimal percent = decimal.Divide(dataList.Count, e.File.Size);
-                if (reading != null) await reading.Invoke(dataList.Count, e.File.Size, percent);
+                if (reading != null) await reading.Invoke(e.File.Size, dataList.Count, percent);
             } while (dataList.Count < stream.Length);
 
-            byte[] data = dataList.ToArray();
+            byte[] data = [.. dataList];
             if (finish != null) await finish.Invoke(data, e.File.Size);
             return data;
         }

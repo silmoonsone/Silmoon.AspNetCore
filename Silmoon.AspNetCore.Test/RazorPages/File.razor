@@ -1,4 +1,4 @@
-﻿@page "/file"
+﻿@page "/file-test"
 @rendermode InteractiveServer
 <h3>File</h3>
 <hr />
@@ -15,7 +15,7 @@
     {
         var data = await RazorComponentHelper.ReadInputFile(e, (_, _, percent) =>
         {
-            Message = "上传中..." + string.Format("{0:P0}", percent);
+            Message = "上传中..." + percent.ToString("P2");
             StateHasChanged();
             return Task.CompletedTask;
         }, null);

@@ -24,4 +24,5 @@ public static class CorsPolicyBuilderExtension
             }
         });
     }
+    public static CorsPolicyBuilder AllowAll(this CorsPolicyBuilder builder) => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
 }

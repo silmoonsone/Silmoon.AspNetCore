@@ -1,0 +1,37 @@
+﻿@page
+@model Silmoon.AspNetCore.UserAuthTest.Pages.SignInModel
+@{
+}
+<h3>Sign In</h3>
+
+<form method="post">
+    <div class="py-3">
+        <label for="Username">Username:</label>
+        <input class="form-control" type="text" id="Username" name="Username" />
+    </div>
+    <div class="py-3">
+        <label for="Password">Password:</label>
+        <input class="form-control" type="password" id="Password" name="Password" />
+    </div>
+    <div class="py-3">
+        <button class="btn btn-primary" type="button" onclick="signIn()">Sign Up</button>
+        @* <button class="btn btn-primary" type="submit">Sign Up</button> *@
+    </div>
+</form>
+<script>
+    async function signIn() {
+        const username = document.getElementById('Username').value;
+        const password = document.getElementById('Password').value;
+
+        // referrer by ~/_session/Silmoon.AspNetCore/session.js functions
+        // can by session "silmoonAuthOptions" object to request path.
+        const result = await doSignIn(username, password);
+
+        if(result.Success){
+            alert("Sign in success!");
+            location.href = "/PassKey";
+        }else{
+            alert("Sign in failed(" + result.Message + ")!");
+        }
+    }
+</script>

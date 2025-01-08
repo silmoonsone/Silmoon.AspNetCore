@@ -1,0 +1,89 @@
+﻿@using Silmoon.AspNetCore.Services.Interfaces
+@using Silmoon.AspNetCore.UserAuthTest.Models
+@inject ISilmoonAuthService SilmoonAuthService
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Silmoon.AspNetCore.UserAuthTest</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Silmoon.AspNetCore.UserAuthTest.styles.css" asp-append-version="true" />
+    <!-- 用于处理用户登录行为JS依赖 -->
+    <script src="~/_content/Silmoon.AspNetCore/js/session.js"></script>
+    <!-- 用于处理Passkey机制的JS依赖 -->
+    <script src="~/_content/Silmoon.AspNetCore.Encryption/js/webauthnSupport.js"></script>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container">
+                <a class="navbar-brand" asp-area="" asp-page="/Index">Silmoon.AspNetCore.UserAuthTest</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link text-dark" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                User
+                            </a>
+                            <ul class="dropdown-menu shadow" aria-labelledby="userDropdown">
+                                <li><a class="dropdown-item" asp-area="" asp-page="/SignIn">SignIn</a></li>
+                                <li><a class="dropdown-item" asp-area="" asp-page="/SignUp">SignUp</a></li>
+                                @{
+                                    if (await SilmoonAuthService.IsSignIn())
+                                    {
+                                        <li><a class="dropdown-item" onclick="signOut()" href="javascript:void(0)">SignOut(@((await SilmoonAuthService.GetUser<User>()).Username))</a></li>
+                                    }
+                                }
+                            </ul>
+                        </li>
+                        @{
+                            if (await SilmoonAuthService.IsSignIn())
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-page="/Passkey">Passkey</a>
+                                </li>
+                            }
+                        }
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2025 - Silmoon.AspNetCore.UserAuthTest - <a asp-area="" asp-page="/Privacy">Privacy</a>
+        </div>
+    </footer>
+
+    <script>
+        async function signOut(){
+            var result = await doSignOut();
+            location.href = "/SignIn"
+        }
+    </script>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

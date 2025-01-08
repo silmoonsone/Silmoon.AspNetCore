@@ -17,10 +17,8 @@ namespace Silmoon.AspNetCore.Test
         public SilmoonConfigureServiceImpl SilmoonConfigureService { get; set; }
         public Core(ISilmoonConfigureService silmoonConfigureService)
         {
-            //Database = new LiteDB.LiteDatabase("Filename=user.local.db; Connection=shared");
             SilmoonConfigureService = (SilmoonConfigureServiceImpl)silmoonConfigureService;
             Executer = new MongoExecuter(SilmoonConfigureService.MongoDBConnectionString);
-
         }
 
         public User GetUser(ObjectId UserObjectId) => Get<User>(x => x._id == UserObjectId);

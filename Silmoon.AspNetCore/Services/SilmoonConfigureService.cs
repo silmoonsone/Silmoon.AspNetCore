@@ -11,6 +11,7 @@ namespace Silmoon.AspNetCore.Services
     {
         public JObject ConfigJson { get; private set; }
         private SilmoonConfigureServiceOption Options { get; set; }
+        public string CurrentConfigFilePath { get; set; }
 
         public SilmoonConfigureService(IOptions<SilmoonConfigureServiceOption> options)
         {
@@ -22,10 +23,13 @@ namespace Silmoon.AspNetCore.Services
             }
             else
             {
-                if (File.Exists(Options.ConfigFile))
-                    ConfigJson = JsonHelperV2.LoadJsonFromFile(Options.ConfigFile);
+                if (File.Exists(Options.LocalConfigFile))
+                    CurrentConfigFilePath = Options.LocalConfigFile;
                 else
-                    ConfigJson = JsonHelperV2.LoadJsonFromFile(Options.DefaultConfigFile);
+                    CurrentConfigFilePath = Options.DefaultConfigFile;
+
+
+                ConfigJson = JsonHelperV2.LoadJsonFromFile(CurrentConfigFilePath);
             }
         }
     }

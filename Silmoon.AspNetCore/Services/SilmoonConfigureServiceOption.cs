@@ -6,7 +6,7 @@ namespace Silmoon.AspNetCore.Services
     {
 #if DEBUG
         public string DefaultConfigFile { get; private set; } = "config.debug.json";
-        public string ConfigFile { get; private set; } = "config.local.debug.json";
+        public string LocalConfigFile { get; private set; } = "config.local.debug.json";
         public bool? IsDebug { get; private set; }
 #else
         public string DefaultConfigFile { get; set; } = "config.json";
@@ -21,13 +21,13 @@ namespace Silmoon.AspNetCore.Services
         {
             IsDebug = true;
             this.DefaultConfigFile = DefaultConfigFile;
-            this.ConfigFile = ConfigFile;
+            LocalConfigFile = ConfigFile;
         }
         public void ReleaseConfig(string DefaultConfigFile = "config.json", string ConfigFile = "config.local.json")
         {
             IsDebug = false;
             this.DefaultConfigFile = DefaultConfigFile;
-            this.ConfigFile = ConfigFile;
+            LocalConfigFile = ConfigFile;
         }
     }
 }

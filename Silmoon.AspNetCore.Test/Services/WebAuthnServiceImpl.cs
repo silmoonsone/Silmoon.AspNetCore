@@ -15,7 +15,7 @@ namespace Silmoon.AspNetCore.Test.Services
     public class WebAuthnServiceImpl : WebAuthnService
     {
         Core Core { get; set; }
-        IServiceProvider ServiceProvider { get; set; }
+        ISilmoonAuthService SilmoonAuthService { get; set; }
         public WebAuthnServiceImpl(IOptions<WebAuthnServiceOptions> options, Core core) : base(options)
         {
             Core = core;
@@ -23,11 +23,9 @@ namespace Silmoon.AspNetCore.Test.Services
 
         public override async Task<ClientWebAuthnOptions.ClientWebAuthnUser> GetClientOptionsWebAuthnUser(HttpContext httpContext)
         {
-            ISilmoonAuthService silmoonAuthService = httpContext.RequestServices.GetService<ISilmoonAuthService>();
-            if (await silmoonAuthService.IsSignIn())
+            if (await SilmoonAuthService.IsSignIn())
             {
-                var user = await silmoonAuthService.GetUser<User>();
-
+                var user = await SilmoonAuthService.GetUser<User>();
                 var result = new ClientWebAuthnOptions.ClientWebAuthnUser()
                 {
                     Name = user.Username,
@@ -41,11 +39,10 @@ namespace Silmoon.AspNetCore.Test.Services
                 return null;
             }
         }
-        public override Task<StateSet<bool>> OnCreate(HttpContext httpContext, AttestationObjectData attestationObjectData, string clientDataJSON, byte[] attestationObjectByteArray, string authenticatorAttachment)
+        public override async Task<StateSet<bool>> OnCreate(HttpContext httpContext, AttestationObjectData attestationObjectData, string clientDataJSON, byte[] attestationObjectByteArray, string authenticatorAttachment)
         {
-            var sessionUserObjectId = ObjectId.Parse(httpContext.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier).Value);
-            var user = Core.GetUser(sessionUserObjectId);
-            if (user is null) return Task.FromResult(false.ToStateSet("User not found"));
+            var user = await SilmoonAuthService.GetUser<User>();
+            if (user is null) return false.ToStateSet("User not found");
             else
             {
                 var userWebAuthInfo = new Models.SubModels.UserWebAuthnInfo()
@@ -61,21 +58,20 @@ namespace Silmoon.AspNetCore.Test.Services
                     AuthenticatorAttachment = authenticatorAttachment,
                 };
                 var result = Core.AddUserWebAuthnInfo(user._id, userWebAuthInfo);
-                return Task.FromResult(result);
+                return result;
             }
         }
-        public override Task<StateSet<bool>> OnDelete(HttpContext httpContext, byte[] credentialId)
+        public override async Task<StateSet<bool>> OnDelete(HttpContext httpContext, byte[] credentialId)
         {
-            var sessionUserObjectId = ObjectId.Parse(httpContext.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier).Value);
-            var user = Core.GetUser(sessionUserObjectId);
-            if (user is null) return Task.FromResult(false.ToStateSet("User not found"));
+            var user = await SilmoonAuthService.GetUser<User>();
+            if (user is null) return false.ToStateSet("User not found");
             else
             {
                 var result = Core.DeleteUserWebAuthnInfo(user._id, credentialId);
                 if (result.State)
-                    return Task.FromResult(true.ToStateSet());
+                    return true.ToStateSet();
                 else
-                    return Task.FromResult(false.ToStateSet(result.Message));
+                    return false.ToStateSet(result.Message);
             }
         }
 
@@ -97,17 +93,20 @@ namespace Silmoon.AspNetCore.Test.Services
         {
             var userObjectId = ObjectId.Parse(userId);
             var userWebAuthnInfos = Core.GetUserWebAuthnInfos(userObjectId);
-
-            var allowUserCerdential = new AllowUserCredential()
+            if (userWebAuthnInfos is not null)
             {
-                Credentials = userWebAuthnInfos.Select(c => new Credential()
+                var allowUserCerdential = new AllowUserCredential()
                 {
-                    Id = Convert.ToBase64String(c.CredentialId),
-                    Type = "public-key"
-                }).ToArray(),
-                UserId = userObjectId.ToString(),
-            };
-            return Task.FromResult(allowUserCerdential);
+                    Credentials = userWebAuthnInfos.Select(c => new Credential()
+                    {
+                        Id = Convert.ToBase64String(c.CredentialId),
+                        Type = "public-key"
+                    }).ToArray(),
+                    UserId = userObjectId.ToString(),
+                };
+                return Task.FromResult(allowUserCerdential);
+            }
+            else return null;
         }
     }
 }

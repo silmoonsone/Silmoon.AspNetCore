@@ -1,0 +1,70 @@
+﻿@page
+@using Silmoon.AspNetCore.Services.Interfaces
+@using Silmoon.AspNetCore.UserAuthTest.Models
+@using Silmoon.AspNetCore.UserAuthTest.Models.SubModels
+@using Silmoon.Extension
+@model Silmoon.AspNetCore.UserAuthTest.Pages.PasskeyListModel
+@inject ISilmoonAuthService SilmoonAuthService
+@{
+    ViewBag.Title = "Passkey List";
+    UserWebAuthnInfo[] userWebAuthnInfos = ViewBag.UserWebAuthnInfos as UserWebAuthnInfo[];
+    var user = await SilmoonAuthService.GetUser<User>();
+}
+<div>
+    <div class="d-flex justify-content-between align-items-center">
+
+        <div>Passkey list</div>
+        <div>
+            <button class="btn btn-primary" onclick="onCreatePasskey()">Create</button>
+            <button class="btn btn-primary" onclick="onVerify('@user._id')">Verify(User)</button>
+            <button class="btn btn-primary" onclick="onVerify()">Verify(AllUser)</button>
+        </div>
+    </div>
+    <hr />
+    <div>
+        @if (userWebAuthnInfos.IsNullOrEmpty())
+        {
+            <div class="small text-secondary">No any passkey.</div>
+        }
+        else
+        {
+            @foreach (var item in userWebAuthnInfos)
+            {
+                <div class="card shadow p-3 my-3">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <span class="mark">[@item.PublicKeyAlgorithm]</span>
+                            <span class="mark">[@item.AuthenticatorAttachment]</span>
+                            <span>@item.CredentialId.GetBase64String()</span>
+                        </div>
+                        <div>
+                            <button class="btn btn-sm btn-danger deleteButton" onclick="onDeletePasskey('@item.CredentialId.GetBase64String()')">DELETE</button>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+<script>
+    function onCreatePasskey(){
+        createWebAuthn(()=>{
+            alert("Passkey created successfully");
+        }, ()=>{
+            alert("Failed to create passkey");
+        });
+    }
+
+    function onVerify(userId){
+        authenticateWebAuthn(userId,()=>{
+            alert("Passkey verified successfully");
+        }, ()=>{
+            alert("Failed to verify passkey");
+        });
+    }
+
+    async function onDeletePasskey(credentialId){
+        var result = await deleteWebAuthn(credentialId);
+        console.log(result);
+    }
+</script>

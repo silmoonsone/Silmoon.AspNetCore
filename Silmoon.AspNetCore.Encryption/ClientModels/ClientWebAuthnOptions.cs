@@ -19,9 +19,9 @@ namespace Silmoon.AspNetCore.Encryption.ClientModels
             new ClientWebAuthnPubKeyCredParams() { Alg = -257, Type = "public-key" }
         };
         [JsonProperty("authenticatorSelection")]
-        required public ClientWebAuthnAuthenticatorSelection AuthenticatorSelection { get; set; }
+        required public ClientWebAuthnAuthenticatorSelection AuthenticatorSelection { get; set; } = new ClientWebAuthnAuthenticatorSelection();
         [JsonProperty("timeout")]
-        public int Timeout { get; set; }
+        public int Timeout { get; set; } = 60000;
         [JsonProperty("attestation")]
         public string Attestation { get; set; } = "direct";
 
@@ -54,7 +54,7 @@ namespace Silmoon.AspNetCore.Encryption.ClientModels
             [JsonProperty("authenticatorAttachment")]
             public string AuthenticatorAttachment { get; set; }
             [JsonProperty("userVerification")]
-            public string UserVerification { get; set; }
+            public string UserVerification { get; set; } = "preferred";
         }
     }
 }

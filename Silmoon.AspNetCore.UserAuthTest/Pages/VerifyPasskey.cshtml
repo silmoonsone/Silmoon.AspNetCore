@@ -1,0 +1,23 @@
+﻿@page
+@model Silmoon.AspNetCore.UserAuthTest.Pages.VerifyPasskeyModel
+@{
+    ViewBag.Title = "Verify Passkey";
+}
+
+<div>
+    <button class="btn btn-primary" onclick="onVerifyPasskey()">Verify Passkey</button>
+    <div id="message"></div>
+</div>
+
+<script>
+    function onVerifyPasskey(){
+        authenticateWebAuthn("username",()=>{
+            // alert("Passkey verified successfully");
+            $("#message").text("Passkey verified successfully");
+
+        }, ()=>{
+            // alert("Failed to verify passkey");
+            $("#message").text("Failed to verify passkey");
+        });
+    }
+</script>

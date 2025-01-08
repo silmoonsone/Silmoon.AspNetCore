@@ -1,0 +1,60 @@
+﻿@page
+@model Silmoon.AspNetCore.UserAuthTest.Pages.SignUpModel
+@{
+    ViewData["Title"] = "Sign Up";
+}
+
+<h3>Sign Up</h3>
+
+<form method="post">
+    <div class="py-3">
+        <label for="Username">Username:</label>
+        <input class="form-control" type="text" id="Username" name="Username" />
+    </div>
+    <div class="py-3">
+        <label for="Password">Password:</label>
+        <input class="form-control" type="password" id="Password" name="Password" />
+    </div>
+    <div class="py-3">
+        <label for="RetypePassword">Confirm Password:</label>
+        <input class="form-control" type="password" id="RetypePassword" name="RetypePassword" />
+    </div>
+    <div class="py-3">
+        <button class="btn btn-primary" type="button" onclick="signUp()">Sign Up</button>
+        @* <button class="btn btn-primary" type="submit">Sign Up</button> *@
+    </div>
+</form>
+<script>
+    async function signUp() {
+        const username = document.getElementById('Username').value;
+        const password = document.getElementById('Password').value;
+        const retypePassword = document.getElementById('RetypePassword').value;
+
+        if (password !== retypePassword) {
+            alert('Passwords do not match!');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('username', username);
+        formData.append('password', password);
+
+        const response = await fetch('/api/SignUp', {
+            method: 'POST',
+            body: formData
+        });
+        const json = await response.json();
+        if (response.ok) {
+            {
+                if (json.Success) {
+                    alert("Sign up success!");
+                    location.href = "/SignIn";
+                } else {
+                    alert("Sign up failed(" + json.Message + ")!");
+                }
+            }
+        } else {
+            alert("Sign up failed(error)!");
+        }
+    }
+</script>

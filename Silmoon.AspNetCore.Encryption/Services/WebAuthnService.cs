@@ -62,6 +62,7 @@ namespace Silmoon.AspNetCore.Encryption.Services
             }
             else
             {
+                result.Success = true;
                 result.Data = new ClientWebAuthnAuthenticateOptions
                 {
                     Challenge = challenge,
@@ -164,17 +165,18 @@ namespace Silmoon.AspNetCore.Encryption.Services
                 {
                     result.Success = false;
                     result.Message = "Credential not found";
-                    await httpContext.Response.WriteJObjectAsync(result);
                 }
+                else
+                {
+                    // 组合签名数据：authenticatorData + SHA256(clientDataJSON)
+                    var signedData = verifyWebAuthnResponse.SignedData;
 
-                // 组合签名数据：authenticatorData + SHA256(clientDataJSON)
-                var signedData = verifyWebAuthnResponse.SignedData;
+                    // 验证签名
+                    var validSignatureResult = verifyWebAuthnResponse.VerifySignature(publicKeyInfo);
 
-                // 验证签名
-                var validSignatureResult = verifyWebAuthnResponse.VerifySignature(publicKeyInfo);
-
-                result.Success = validSignatureResult.State;
-                result.Message = validSignatureResult.Message;
+                    result.Success = validSignatureResult.State;
+                    result.Message = validSignatureResult.Message;
+                }
             }
             await httpContext.Response.WriteJObjectAsync(result);
         }

@@ -76,11 +76,19 @@ namespace Silmoon.AspNetCore.Blazor.JsComponents
         {
             if (moduleTask.IsValueCreated)
             {
-                var module = await moduleTask.Value;
-                await module.DisposeAsync();
+                try
+                {
+                    var module = await moduleTask.Value;
+                    await module.DisposeAsync();
+                }
+                catch { }
             }
-            metroUIConfirmCallbackDotNetObjectRef?.Dispose();
-            metroUIConfirmCallbackDotNetObjectRef = null;
+            try
+            {
+                metroUIConfirmCallbackDotNetObjectRef?.Dispose();
+                metroUIConfirmCallbackDotNetObjectRef = null;
+            }
+            catch { }
         }
     }
 }

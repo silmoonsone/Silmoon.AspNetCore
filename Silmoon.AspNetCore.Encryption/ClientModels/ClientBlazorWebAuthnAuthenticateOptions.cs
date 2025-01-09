@@ -5,9 +5,9 @@ namespace Silmoon.AspNetCore.Encryption.ClientModels
     public class ClientBlazorWebAuthnAuthenticateOptions
     {
         [JsonProperty("challenge")]
-        public string Challenge { get; set; }
+        required public string Challenge { get; set; }
         [JsonProperty("rpId")]
-        public string RpId { get; set; }
+        required public string RpId { get; set; }
         [JsonProperty("allowCredentials")]
         public Credential[] AllowCredentials { get; set; } = [];
         [JsonProperty("timeout")]

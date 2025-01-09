@@ -1,7 +1,7 @@
 ﻿using MongoDB.Bson;
+using Silmoon.AspNetCore.Encryption.Models;
 using Silmoon.AspNetCore.Services.Interfaces;
 using Silmoon.AspNetCore.Test.Models;
-using Silmoon.AspNetCore.Test.Models.SubModels;
 using Silmoon.AspNetCore.Test.Services;
 using Silmoon.Data.LiteDB;
 using Silmoon.Data.MongoDB;
@@ -48,17 +48,17 @@ namespace Silmoon.AspNetCore.Test
             }
             return result;
         }
-        public UserWebAuthnInfo[] GetUserWebAuthnInfos(ObjectId UserObjectId)
+        public WebAuthnInfo[] GetUserWebAuthnInfos(ObjectId UserObjectId)
         {
             return GetUserAuthInfo(UserObjectId)?.WebAuthnInfos.ToArray();
         }
 
-        public UserWebAuthnInfo GetUserWebAuthnInfo(ObjectId UserObjectId, byte[] CredentialId)
+        public WebAuthnInfo GetUserWebAuthnInfo(ObjectId UserObjectId, byte[] CredentialId)
         {
             var userAuthInfo = GetUserAuthInfo(UserObjectId);
             return userAuthInfo.WebAuthnInfos.FirstOrDefault(x => x.CredentialId != null && x.CredentialId.SequenceEqual(CredentialId));
         }
-        public StateSet<bool> AddUserWebAuthnInfo(ObjectId UserObjectId, UserWebAuthnInfo userWebAuthnInfo)
+        public StateSet<bool> AddUserWebAuthnInfo(ObjectId UserObjectId, WebAuthnInfo userWebAuthnInfo)
         {
             var userAuthInfo = GetUserAuthInfo(UserObjectId);
             if (GetUserWebAuthnInfo(UserObjectId, userWebAuthnInfo.CredentialId) is null)

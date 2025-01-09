@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Silmoon.AspNetCore.Encryption.JsComponents
 {
-    public class WebAuthnComponentInterop
+    public class WebAuthnComponentInterop : IAsyncDisposable
     {
         private readonly Lazy<Task<IJSObjectReference>> moduleTask;
         private DotNetObjectReference<JsInvokeCreateWebAuthnHandlerDelegate> createWebAuthnCallbackDotNetObjectRef;
@@ -24,55 +24,93 @@ namespace Silmoon.AspNetCore.Encryption.JsComponents
                 "import", "./_content/Silmoon.AspNetCore.Encryption/js/webAuthnComponentInterop.js").AsTask());
         }
 
-        public async ValueTask Create(ClientBlazorWebAuthnOptions options, Func<StateSet<bool, BlazorWebAuthnCreateResponse>, Task> createCallback)
+        public async ValueTask Create(ClientBlazorWebAuthnOptions options, Func<StateSet<bool, WebAuthnCreateResponse>, Task> createCallback)
         {
             var module = await moduleTask.Value;
             createWebAuthnCallbackDotNetObjectRef?.Dispose();
-            createWebAuthnCallbackDotNetObjectRef = DotNetObjectReference.Create(new JsInvokeCreateWebAuthnHandlerDelegate(createCallback));
+            createWebAuthnCallbackDotNetObjectRef = DotNetObjectReference.Create(new JsInvokeCreateWebAuthnHandlerDelegate(createCallback, options.Challenge));
             await module.InvokeVoidAsync("createWebAuthn", options, createWebAuthnCallbackDotNetObjectRef);
         }
         public async ValueTask Authenticate(ClientBlazorWebAuthnAuthenticateOptions options, Func<StateSet<bool, WebAuthnAuthenticateResponse>, Task> authenticateCallback)
         {
             var module = await moduleTask.Value;
             authenticateWebAuthnCallbackDotNetObjectRef?.Dispose();
-            authenticateWebAuthnCallbackDotNetObjectRef = DotNetObjectReference.Create(new JsInvokeAuthenticateWebAuthnHandlerDelegate(authenticateCallback));
+            authenticateWebAuthnCallbackDotNetObjectRef = DotNetObjectReference.Create(new JsInvokeAuthenticateWebAuthnHandlerDelegate(authenticateCallback, options.Challenge));
             await module.InvokeVoidAsync("authenticateWebAuthn", options, authenticateWebAuthnCallbackDotNetObjectRef);
         }
         public async ValueTask DisposeAsync()
         {
-            if (moduleTask.IsValueCreated)
+            try
             {
-                var module = await moduleTask.Value;
-                await module.DisposeAsync();
+                if (moduleTask.IsValueCreated)
+                {
+                    var module = await moduleTask.Value;
+                    await module.DisposeAsync();
+                }
             }
-            createWebAuthnCallbackDotNetObjectRef?.Dispose();
-            createWebAuthnCallbackDotNetObjectRef = null;
-            authenticateWebAuthnCallbackDotNetObjectRef?.Dispose();
-            authenticateWebAuthnCallbackDotNetObjectRef = null;
+            catch { }
+
+            try
+            {
+                createWebAuthnCallbackDotNetObjectRef?.Dispose();
+                createWebAuthnCallbackDotNetObjectRef = null;
+            }
+            catch { }
+            try
+            {
+                authenticateWebAuthnCallbackDotNetObjectRef?.Dispose();
+                authenticateWebAuthnCallbackDotNetObjectRef = null;
+            }
+            catch { }
         }
     }
-    public class JsInvokeCreateWebAuthnHandlerDelegate(Func<StateSet<bool, BlazorWebAuthnCreateResponse>, Task> callback)
+    public class JsInvokeCreateWebAuthnHandlerDelegate(Func<StateSet<bool, WebAuthnCreateResponse>, Task> callback, string challenge)
     {
         [JSInvokable]
-        public Task InvokeCallback(StateSet<bool, WebAuthnCreateResponse> data)
+        public Task InvokeCallback(StateSet<bool, WebAuthnCreateResponse> response)
         {
-            var result = StateSet<bool, BlazorWebAuthnCreateResponse>.Create(data.State, null, data.Message);
+            var result = StateSet<bool, WebAuthnCreateResponse>.Create(response.State, null, response.Message);
 
-            if (data.State && data.Data is not null)
+            if (response.State && response.Data is not null)
             {
-                result.Data = Copy.New<BlazorWebAuthnCreateResponse>(data.Data);
-                result.Data.AttestationObjectData = WebAuthnParser.ParseAttestationObject(result.Data.Response.AttestationObject);
-                return callback?.Invoke(result);
+                if (response.Data.Response.Challenge == challenge)
+                {
+                    result.Data = Copy.New<WebAuthnCreateResponse>(response.Data);
+                    result.Data.AttestationObjectData = WebAuthnParser.ParseAttestationObject(response.Data.Response.AttestationObject);
+                    result.Data.WebAuthnInfo = WebAuthnInfo.Create(response.Data);
+                    return callback?.Invoke(result);
+                }
+                else
+                {
+                    result.State = false;
+                    result.Message = "Challenge failed";
+                    return callback?.Invoke(result);
+                }
             }
             else
-            {
                 return callback?.Invoke(result);
-            }
         }
     }
-    public class JsInvokeAuthenticateWebAuthnHandlerDelegate(Func<StateSet<bool, WebAuthnAuthenticateResponse>, Task> callback)
+    public class JsInvokeAuthenticateWebAuthnHandlerDelegate(Func<StateSet<bool, WebAuthnAuthenticateResponse>, Task> callback, string challenge)
     {
         [JSInvokable]
-        public Task InvokeCallback(StateSet<bool, WebAuthnAuthenticateResponse> data) => callback?.Invoke(data);
+        public Task InvokeCallback(StateSet<bool, WebAuthnAuthenticateResponse> response)
+        {
+            if (response.State && response.Data is not null)
+            {
+                if (response.Data.Response.Challenge == challenge)
+                {
+                    return callback?.Invoke(response);
+                }
+                else
+                {
+                    response.State = false;
+                    response.Message = "Challenge failed";
+                    return callback?.Invoke(response);
+                }
+            }
+            else
+                return callback?.Invoke(response);
+        }
     }
 }

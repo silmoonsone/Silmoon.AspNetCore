@@ -7,7 +7,7 @@ using Silmoon.Extension;
 
 namespace Silmoon.AspNetCore.UserAuthTest.Models.SubModels
 {
-    public class UserWebAuthnInfo : PublicKeyInfo, IIdObject, ICreatedAt
+    public class UserWebAuthnInfo : WebAuthnInfo, IIdObject, ICreatedAt
     {
         [Newtonsoft.Json.JsonConverter(typeof(ObjectIdJsonConverter))]
         [System.Text.Json.Serialization.JsonConverter(typeof(ObjectIdStringJsonConverter))]
@@ -15,13 +15,7 @@ namespace Silmoon.AspNetCore.UserAuthTest.Models.SubModels
         [Newtonsoft.Json.JsonConverter(typeof(ObjectIdJsonConverter))]
         [System.Text.Json.Serialization.JsonConverter(typeof(ObjectIdStringJsonConverter))]
         public ObjectId UserObjectId { get; set; }
-        public string AAGuid { get; set; }
-        public string AttestationFormat { get; set; }
-        public byte[] CredentialId { get; set; }
-        public int SignCount { get; set; }
-        public bool UserVerified { get; set; }
-        public string AuthenticatorAttachment { get; set; }
-        public byte[] AttestationObject { get; set; }
+
         [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
         public DateTime created_at { get; set; } = DateTime.Now;
 

@@ -2,7 +2,6 @@
 @using Silmoon.AspNetCore.Encryption.JsComponents
 @using Silmoon.AspNetCore.Encryption.ClientModels
 @using Silmoon.AspNetCore.Encryption.Models
-@using Silmoon.AspNetCore.Test.Models.SubModels
 @using Silmoon.Models
 @using System.Security.Cryptography
 @using Silmoon.Secure
@@ -58,7 +57,7 @@
 
 
 @code {
-    List<UserWebAuthnInfo> UserWebAuthnInfos = [];
+    List<WebAuthnInfo> UserWebAuthnInfos = [];
 
     User CurrentUser { get; set; }
     protected override async Task OnInitializedAsync()
@@ -87,35 +86,20 @@
                     DisplayName = $"{CurrentUser.Username}({CurrentUser.Nickname})",
                     Id = CurrentUser._id.ToByteArray().GetBase64String(),
                 },
-                AuthenticatorSelection = new ClientBlazorWebAuthnOptions.ClientWebAuthnAuthenticatorSelection() { UserVerification = "preferred" },
+                AuthenticatorSelection = new ClientBlazorWebAuthnOptions.ClientWebAuthnAuthenticatorSelection(),
             };
 
-        await Wac.Create(clientBlazorWebAuthnOptions, async blazorWebAuthnCreateResponse =>
+        await Wac.Create(clientBlazorWebAuthnOptions, async response =>
             {
-                if (blazorWebAuthnCreateResponse.State)
+                if (response.State)
                 {
-                    if (blazorWebAuthnCreateResponse.Data.Response.Challenge == challenge)
-                    {
-                        var userWebAuthInfo = new Models.SubModels.UserWebAuthnInfo()
-                            {
-                                AAGuid = blazorWebAuthnCreateResponse.Data.AttestationObjectData.AAGUID,
-                                AttestationFormat = blazorWebAuthnCreateResponse.Data.AttestationObjectData.AttestationFormat,
-                                CredentialId = blazorWebAuthnCreateResponse.Data.AttestationObjectData.CredentialId,
-                                PublicKey = blazorWebAuthnCreateResponse.Data.AttestationObjectData.PublicKey,
-                                PublicKeyAlgorithm = blazorWebAuthnCreateResponse.Data.AttestationObjectData.PublicKeyAlgorithm,
-                                SignCount = blazorWebAuthnCreateResponse.Data.AttestationObjectData.SignCount,
-                                UserVerified = blazorWebAuthnCreateResponse.Data.AttestationObjectData.UserVerified,
-                                AttestationObject = blazorWebAuthnCreateResponse.Data.Response.AttestationObject,
-                                AuthenticatorAttachment = blazorWebAuthnCreateResponse.Data.AuthenticatorAttachment,
-                            };
-                        var result = Core.AddUserWebAuthnInfo(CurrentUser._id, userWebAuthInfo);
-                        await Jsc.Toast("CreateWebAuthn success", 3000);
-                        Load();
-                    }
-                    else await Jsc.Toast("Challenge not found");
+                    var userWebAuthInfo = response.Data.WebAuthnInfo;
+                    var result = Core.AddUserWebAuthnInfo(CurrentUser._id, userWebAuthInfo);
+                    await Jsc.Toast("CreateWebAuthn success", 3000);
+                    Load();
                 }
                 else
-                    await Jsc.MetroUIConfirm("Result", "Error (" + blazorWebAuthnCreateResponse.Message + ")");
+                    await Jsc.MetroUIConfirm("Result", "Error (" + response.Message + ")");
             }
         );
     }
@@ -132,23 +116,19 @@
             {
                 if (webAuthnAuthenticateResponse.State)
                 {
-                    if (webAuthnAuthenticateResponse.Data.Response.Challenge == challenge)
+                    var userWebAuthnInfos = Core.GetUserWebAuthnInfos(CurrentUser._id);
+                    var credential = userWebAuthnInfos.FirstOrDefault(c => c.CredentialId.SequenceEqual(webAuthnAuthenticateResponse.Data.RawId));
+
+                    if (credential is not null)
                     {
-                        var userWebAuthnInfos = Core.GetUserWebAuthnInfos(CurrentUser._id);
-                        var credential = userWebAuthnInfos.FirstOrDefault(c => c.CredentialId.SequenceEqual(webAuthnAuthenticateResponse.Data.RawId));
+                        var verifyResult = webAuthnAuthenticateResponse.Data.VerifySignature(credential.PublicKey, credential.PublicKeyAlgorithm);
 
-                        if (credential is not null)
-                        {
-                            var verifyResult = webAuthnAuthenticateResponse.Data.VerifySignature(credential.PublicKey, credential.PublicKeyAlgorithm);
-
-                            if (verifyResult.State)
-                                await Jsc.MetroUIConfirm("Result", "Success!");
-                            else
-                                await Jsc.MetroUIConfirm("Result", "Signature error(" + verifyResult.Message + ")");
-                        }
-                        else await Jsc.MetroUIConfirm("Result", "Failed(credential is not exist)!");
+                        if (verifyResult.State)
+                            await Jsc.MetroUIConfirm("Result", "Success!");
+                        else
+                            await Jsc.MetroUIConfirm("Result", "Signature error(" + verifyResult.Message + ")");
                     }
-                    else await Jsc.Toast("Challenge not found");
+                    else await Jsc.MetroUIConfirm("Result", "Failed(credential is not exist)!");
                 }
                 else
                     await Jsc.MetroUIConfirm("Result", "Error (" + webAuthnAuthenticateResponse.Message + ")");

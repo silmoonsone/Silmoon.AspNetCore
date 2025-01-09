@@ -32,9 +32,9 @@ namespace Silmoon.AspNetCore.Encryption.ClientModels
         public class ClientWebAuthnRp
         {
             [JsonProperty("name")]
-            public string Name { get; set; }
+            required public string Name { get; set; }
             [JsonProperty("id")]
-            public string Id { get; set; }
+            required public string Id { get; set; }
         }
         public class ClientWebAuthnUser
         {

@@ -5,8 +5,10 @@ using Silmoon.AspNetCore.Encryption.Models;
 using Silmoon.AspNetCore.Encryption.Services;
 using Silmoon.AspNetCore.Services.Interfaces;
 using Silmoon.AspNetCore.UserAuthTest.Models;
+using Silmoon.AspNetCore.UserAuthTest.Models.SubModels;
 using Silmoon.Extension;
 using Silmoon.Models;
+using Silmoon.Runtime;
 using System.Security.Claims;
 
 namespace Silmoon.AspNetCore.UserAuthTest.Services
@@ -52,25 +54,15 @@ namespace Silmoon.AspNetCore.UserAuthTest.Services
             };
             return result;
         }
-        public override async Task<StateSet<bool>> OnCreate(HttpContext httpContext, AttestationObjectData attestationObjectData, string clientDataJSON, byte[] attestationObjectByteArray, string authenticatorAttachment)
+        public override async Task<StateSet<bool>> OnCreate(HttpContext httpContext, WebAuthnCreateResponse webAuthnCreateResponse)
         {
             var user = await SilmoonAuthService.GetUser<User>();
             if (user is null) return false.ToStateSet("User not found");
             else
             {
-                var userWebAuthInfo = new Models.SubModels.UserWebAuthnInfo()
-                {
-                    UserObjectId = user._id,
-                    AAGuid = attestationObjectData.AAGUID,
-                    AttestationFormat = attestationObjectData.AttestationFormat,
-                    CredentialId = attestationObjectData.CredentialId,
-                    PublicKey = attestationObjectData.PublicKey,
-                    PublicKeyAlgorithm = attestationObjectData.PublicKeyAlgorithm,
-                    SignCount = attestationObjectData.SignCount,
-                    UserVerified = attestationObjectData.UserVerified,
-                    AttestationObject = attestationObjectByteArray,
-                    AuthenticatorAttachment = authenticatorAttachment,
-                };
+                var wsebAuthInfo = WebAuthnInfo.Create(webAuthnCreateResponse);
+                var userWebAuthInfo = Copy.New<WebAuthnInfo, UserWebAuthnInfo>(wsebAuthInfo);
+                userWebAuthInfo.UserObjectId = user._id;
                 Core.AddUserWebAuthnInfo(userWebAuthInfo);
                 return true.ToStateSet();
             }

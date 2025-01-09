@@ -18,6 +18,12 @@ namespace Silmoon.AspNetCore.Encryption.Models
         [JsonProperty("response")]
         public CreateWebAuthnResponse Response { get; set; }
 
+
+        [JsonIgnore]
+        public AttestationObjectData AttestationObjectData { get; set; }
+        [JsonIgnore]
+        public WebAuthnInfo WebAuthnInfo { get; set; }
+
         public class CreateWebAuthnResponse
         {
             JObject clientJson;

@@ -15,6 +15,7 @@ using Silmoon.AspNetCore.Encryption.Models;
 using Newtonsoft.Json;
 using System.Security.Cryptography;
 using System.Text;
+using Silmoon.Runtime;
 
 namespace Silmoon.AspNetCore.Encryption.Services
 {
@@ -86,14 +87,14 @@ namespace Silmoon.AspNetCore.Encryption.Services
             if (!userIdResult.Matched)
             {
                 result.Success = false;
-                result.Message = "Challenge not found";
+                result.Message = "Challenge failed";
             }
             else
             {
-                var attestationObjectByteArray = createWebAuthnKeyResponse.Response.AttestationObject;
-                var attestationData = WebAuthnParser.ParseAttestationObject(attestationObjectByteArray);
+                createWebAuthnKeyResponse.AttestationObjectData = WebAuthnParser.ParseAttestationObject(createWebAuthnKeyResponse.Response.AttestationObject);
+                createWebAuthnKeyResponse.WebAuthnInfo = WebAuthnInfo.Create(createWebAuthnKeyResponse);
 
-                var createResult = await OnCreate(httpContext, attestationData, clientDataJSON, attestationObjectByteArray, createWebAuthnKeyResponse.AuthenticatorAttachment);
+                var createResult = await OnCreate(httpContext, createWebAuthnKeyResponse);
 
                 if (createResult.State)
                 {
@@ -156,7 +157,7 @@ namespace Silmoon.AspNetCore.Encryption.Services
             if (!userIdResult.Matched)
             {
                 result.Success = false;
-                result.Message = "Challenge not found";
+                result.Message = "Challenge failed";
             }
             else
             {
@@ -184,7 +185,7 @@ namespace Silmoon.AspNetCore.Encryption.Services
 
         public abstract Task<ClientWebAuthnOptions.ClientWebAuthnUser> GetClientOptionsWebAuthnUser(HttpContext httpContext);
         public abstract Task<AllowUserCredential> GetAllowCredentials(HttpContext httpContext, string userId);
-        public abstract Task<StateSet<bool>> OnCreate(HttpContext httpContext, AttestationObjectData attestationObjectData, string clientDataJSON, byte[] attestationObjectByteArray, string authenticatorAttachment);
+        public abstract Task<StateSet<bool>> OnCreate(HttpContext httpContext, WebAuthnCreateResponse webAuthnCreateResponse);
         public abstract Task<StateSet<bool>> OnDelete(HttpContext httpContext, byte[] credentialId);
         public abstract Task<PublicKeyInfo> OnGetPublicKeyInfo(HttpContext httpContext, byte[] rawId, string userId);
     }

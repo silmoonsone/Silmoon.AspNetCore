@@ -19,7 +19,7 @@
     }
     private async Task MetroUIConfirm()
     {
-        await Jsc.MetroUIConfirm("title", "msg", true, async result =>
+        await Jsc.MetroUIConfirm("title", "msg: now is " + DateTime.Now, true, async result =>
         {
             if (result)
             {

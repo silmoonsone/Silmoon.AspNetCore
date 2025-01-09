@@ -26,7 +26,7 @@ export async function createWebAuthn(options, createDotNetObjRef) {
             data: data,
             message: 'Success'
         };
-        await createDotNetObjRef.invokeMethodAsync('InvokeCallback', result);
+        return result;
     }
     catch (err) {
         const result = {
@@ -34,7 +34,7 @@ export async function createWebAuthn(options, createDotNetObjRef) {
             data: null,
             message: err.message
         };
-        await createDotNetObjRef.invokeMethodAsync('InvokeCallback', result);
+        return result;
     }
 }
 export async function authenticateWebAuthn(options, authenticateDotNetObjRef) {
@@ -71,14 +71,14 @@ export async function authenticateWebAuthn(options, authenticateDotNetObjRef) {
             data: data,
             message: 'Success'
         };
-        await authenticateDotNetObjRef.invokeMethodAsync('InvokeCallback', result);
+        return result;
     } catch (err) {
         const result = {
             state: false,
             data: null,
             message: err.message
         };
-        await authenticateDotNetObjRef.invokeMethodAsync('InvokeCallback', result);
+        return result;
     }
 }
 

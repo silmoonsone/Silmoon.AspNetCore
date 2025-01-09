@@ -89,19 +89,17 @@
                 AuthenticatorSelection = new ClientBlazorWebAuthnOptions.ClientWebAuthnAuthenticatorSelection(),
             };
 
-        await Wac.Create(clientBlazorWebAuthnOptions, async response =>
-            {
-                if (response.State)
-                {
-                    var userWebAuthInfo = response.Data.WebAuthnInfo;
-                    var result = Core.AddUserWebAuthnInfo(CurrentUser._id, userWebAuthInfo);
-                    await Jsc.Toast("CreateWebAuthn success", 3000);
-                    Load();
-                }
-                else
-                    await Jsc.MetroUIConfirm("Result", "Error (" + response.Message + ")");
-            }
-        );
+        var response = await Wac.Create(clientBlazorWebAuthnOptions);
+        if (response.State)
+        {
+            var userWebAuthInfo = response.Data.WebAuthnInfo;
+            var result = Core.AddUserWebAuthnInfo(CurrentUser._id, userWebAuthInfo);
+            await Jsc.Toast("CreateWebAuthn success", 3000);
+            Load();
+        }
+        else
+            await Jsc.MetroUIConfirm("Result", "Error (" + response.Message + ")");
+
     }
     async void AuthenticateWebAuthn()
     {
@@ -112,28 +110,27 @@
                 RpId = new Uri(NavigationManager.BaseUri).Host,
                 // AllowCredentials = UserWebAuthnInfos.Select(x => new Credential() { Id = x.CredentialId.GetBase64String() }).ToArray(),
             };
-        await Wac.Authenticate(options, async webAuthnAuthenticateResponse =>
+        var webAuthnAuthenticateResponse = await Wac.Authenticate(options);
+
+        if (webAuthnAuthenticateResponse.State)
+        {
+            var userWebAuthnInfos = Core.GetUserWebAuthnInfos(CurrentUser._id);
+            var credential = userWebAuthnInfos.FirstOrDefault(c => c.CredentialId.SequenceEqual(webAuthnAuthenticateResponse.Data.RawId));
+
+            if (credential is not null)
             {
-                if (webAuthnAuthenticateResponse.State)
-                {
-                    var userWebAuthnInfos = Core.GetUserWebAuthnInfos(CurrentUser._id);
-                    var credential = userWebAuthnInfos.FirstOrDefault(c => c.CredentialId.SequenceEqual(webAuthnAuthenticateResponse.Data.RawId));
+                var verifyResult = webAuthnAuthenticateResponse.Data.VerifySignature(credential.PublicKey, credential.PublicKeyAlgorithm);
 
-                    if (credential is not null)
-                    {
-                        var verifyResult = webAuthnAuthenticateResponse.Data.VerifySignature(credential.PublicKey, credential.PublicKeyAlgorithm);
-
-                        if (verifyResult.State)
-                            await Jsc.MetroUIConfirm("Result", "Success!");
-                        else
-                            await Jsc.MetroUIConfirm("Result", "Signature error(" + verifyResult.Message + ")");
-                    }
-                    else await Jsc.MetroUIConfirm("Result", "Failed(credential is not exist)!");
-                }
+                if (verifyResult.State)
+                    await Jsc.MetroUIConfirm("Result", "Success!");
                 else
-                    await Jsc.MetroUIConfirm("Result", "Error (" + webAuthnAuthenticateResponse.Message + ")");
+                    await Jsc.MetroUIConfirm("Result", "Signature error(" + verifyResult.Message + ")");
             }
-        );
+            else await Jsc.MetroUIConfirm("Result", "Failed(credential is not exist)!");
+        }
+        else
+            await Jsc.MetroUIConfirm("Result", "Error (" + webAuthnAuthenticateResponse.Message + ")");
+
     }
     async void DeleteWebAuthn(byte[] credentialId)
     {

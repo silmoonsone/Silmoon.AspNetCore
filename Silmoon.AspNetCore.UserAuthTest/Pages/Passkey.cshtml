@@ -47,24 +47,32 @@
     </div>
 </div>
 <script>
-    function onCreatePasskey(){
-        createWebAuthn(()=>{
+    async function onCreatePasskey() {
+        var result = await createWebAuthn();
+        if (result.Success) {
             alert("Passkey created successfully");
-        }, ()=>{
+            location.reload();
+        } else {
             alert("Failed to create passkey");
-        });
+        }
     }
 
-    function onVerify(userId){
-        authenticateWebAuthn(userId,()=>{
+    async function onVerify(userId) {
+        var result = await authenticateWebAuthn(userId);
+        if (result.Success) {
             alert("Passkey verified successfully");
-        }, ()=>{
+        } else {
             alert("Failed to verify passkey");
-        });
+        }
     }
 
-    async function onDeletePasskey(credentialId){
+    async function onDeletePasskey(credentialId) {
         var result = await deleteWebAuthn(credentialId);
-        console.log(result);
+        if (result.Success) {
+            alert("Passkey deleted successfully");
+            location.reload();
+        } else {
+            alert("Failed to delete passkey");
+        }
     }
 </script>

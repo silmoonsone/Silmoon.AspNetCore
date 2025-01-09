@@ -4,12 +4,14 @@
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
 DataProtection/
+Migrations/
 .idea/
 .DS_Store
 config.local.*.json
 config.local.json
 *.local.cs
 *.local.db
+*.local-log.db
 
 # User-specific files
 *.rsuser

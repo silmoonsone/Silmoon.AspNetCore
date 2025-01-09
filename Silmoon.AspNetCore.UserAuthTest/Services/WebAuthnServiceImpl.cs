@@ -60,7 +60,7 @@ namespace Silmoon.AspNetCore.UserAuthTest.Services
             if (user is null) return false.ToStateSet("User not found");
             else
             {
-                var wsebAuthInfo = WebAuthnInfo.Create(webAuthnCreateResponse);
+                var wsebAuthInfo = webAuthnCreateResponse.WebAuthnInfo;
                 var userWebAuthInfo = Copy.New<WebAuthnInfo, UserWebAuthnInfo>(wsebAuthInfo);
                 userWebAuthInfo.UserObjectId = user._id;
                 Core.AddUserWebAuthnInfo(userWebAuthInfo);

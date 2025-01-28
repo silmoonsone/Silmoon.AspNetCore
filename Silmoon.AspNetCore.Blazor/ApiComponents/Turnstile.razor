@@ -14,7 +14,7 @@
         ____turnstileLoaded = true;
         ____turnstileRendered = true;
         turnstile.render('#____turnstile', {
-            sitekey: '1x00000000000000000000AA',
+            sitekey: '@SiteKey',
             callback: function (token) {
                 document.getElementById("____turnstileWaitingMessage").style.display = "none";
                 ____turnstileResultCallback(token);
@@ -48,10 +48,18 @@
 
 @code
 {
-    [Parameter] public string Response { get; set; }
-    [Parameter] public EventCallback<string> ResponseChanged { get; set; }
-    [Parameter] public string SiteKey { get; set; }
-    [Parameter] public string WaitingMessage { get; set; } = "等待人机测试结果...";
+    [Parameter]
+    public string Response { get; set; }
+
+    [Parameter]
+    public EventCallback<string> ResponseChanged { get; set; }
+
+    [Parameter]
+    public string SiteKey { get; set; } = "1x00000000000000000000AA";
+
+    [Parameter]
+    public string WaitingMessage { get; set; } = "等待人机测试结果...";
+
     [Inject] IJSRuntime Js { get; set; }
 
     bool showScriptTag = false;

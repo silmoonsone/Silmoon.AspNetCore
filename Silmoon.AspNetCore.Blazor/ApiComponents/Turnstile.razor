@@ -1,8 +1,10 @@
 ﻿@using Microsoft.JSInterop
-@if (showScriptTag)
+@if (!ScriptImported)
 {
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=____turnstileRender" async defer></script>
+    ScriptImported = true;
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=____onTurnstileLoaded" async defer></script>
 }
+
 <div id="____turnstile"></div>
 <div id="____turnstileWaitingMessage">@WaitingMessage</div>
 <script>
@@ -10,11 +12,11 @@
     var ____dotNetInvokeObj;
     var ____turnstileRendered = false;
 
-    function ____turnstileRender() {
+    function ____turnstileRender(sitekey) {
         ____turnstileLoaded = true;
         ____turnstileRendered = true;
         turnstile.render('#____turnstile', {
-            sitekey: '@SiteKey',
+            sitekey: sitekey,
             callback: function (token) {
                 document.getElementById("____turnstileWaitingMessage").style.display = "none";
                 ____turnstileResultCallback(token);
@@ -22,19 +24,17 @@
         });
     };
 
+    function ____onTurnstileLoaded(){
+        ____dotNetInvokeObj.invokeMethodAsync("JsCall_OnTurnstileLoaded");
+    }
+
     function ____turnstileResultCallback(token) {
         ____turnstileResponse = token;
-        ____dotNetInvokeObj.invokeMethodAsync("__on_response_received", token);
+        ____dotNetInvokeObj.invokeMethodAsync("JsCall_OnTrunstileResponseToken", token);
     }
     function injectDotNetInvokeObj(obj) {
         ____dotNetInvokeObj = obj;
     }
-
-    // window.onload = function () {
-    //     if (typeof (____turnstileLoaded) != "undefined" && ____turnstileLoaded) {
-    //         ____turnstileRender();
-    //     }
-    // }
 
     function ____turnstileIsLoaded() {
         if (typeof (____turnstileLoaded) == "undefined") return false;
@@ -62,34 +62,34 @@
 
     [Inject] IJSRuntime Js { get; set; }
 
-    bool showScriptTag = false;
+    public bool ScriptImported { get; set; } = false;
 
     [JSInvokable]
-    public void __on_response_received(string response)
+    public void JsCall_OnTrunstileResponseToken(string response)
     {
         Response = response;
         ResponseChanged.InvokeAsync(response);
     }
-
-    protected async override Task OnAfterRenderAsync(bool firstRender)
+    [JSInvokable]
+    public async Task JsCall_OnTurnstileLoaded()
     {
         var isLoaded = await Js.InvokeAsync<bool>("____turnstileIsLoaded");
 
-        if (!isLoaded && !showScriptTag)
+        if (!isLoaded)
         {
-            showScriptTag = true;
             StateHasChanged();
         }
 
-        if (!showScriptTag)
+        var isRendered = await Js.InvokeAsync<bool>("____turnstileIsRendered");
+        if (!isRendered)
         {
-            var isRendered = await Js.InvokeAsync<bool>("____turnstileIsRendered");
-            if (!isRendered)
-            {
-                await Js.InvokeVoidAsync("____turnstileRender");
-            }
+            await Js.InvokeVoidAsync("____turnstileRender", SiteKey);
         }
 
+    }
+
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
         var jsInvokeObj = DotNetObjectReference.Create(this);
         await Js.InvokeVoidAsync("injectDotNetInvokeObj", jsInvokeObj);
         await base.OnAfterRenderAsync(firstRender);

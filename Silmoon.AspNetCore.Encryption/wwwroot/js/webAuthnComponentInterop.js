@@ -1,5 +1,5 @@
 // WebAuthn support script
-export async function createWebAuthn(options, createDotNetObjRef) {
+export async function createWebAuthn(options) {
     try {
         options.challenge = base64ToUint8Array(options.challenge);
         options.user.id = base64ToUint8Array(options.user.id);
@@ -37,7 +37,7 @@ export async function createWebAuthn(options, createDotNetObjRef) {
         return result;
     }
 }
-export async function authenticateWebAuthn(options, authenticateDotNetObjRef) {
+export async function authenticateWebAuthn(options) {
     try {
         options.challenge = base64ToUint8Array(options.challenge);
         options.allowCredentials = options.allowCredentials.map(cred => {

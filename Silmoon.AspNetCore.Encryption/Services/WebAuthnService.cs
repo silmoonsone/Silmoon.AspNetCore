@@ -25,13 +25,13 @@ namespace Silmoon.AspNetCore.Encryption.Services
         public WebAuthnService(IOptions<WebAuthnServiceOptions> options) => Options = options.Value;
         public async Task GetCreateOptions(HttpContext httpContext, RequestDelegate requestDelegate)
         {
-            var user = await GetClientOptionsWebAuthnUser(httpContext);
+            var getResult = await GetClientCreateWebAuthnOptions(httpContext);
             StateFlag<ClientWebAuthnOptions> result = new StateFlag<ClientWebAuthnOptions>();
 
-            if (user is null)
+            if (!getResult.State)
             {
                 result.Success = false;
-                result.Message = "User not found";
+                result.Message = getResult.Message;
             }
             else
             {
@@ -40,11 +40,11 @@ namespace Silmoon.AspNetCore.Encryption.Services
                 {
                     Challenge = Guid.NewGuid().ToByteArray(),
                     Rp = new ClientWebAuthnOptions.ClientWebAuthnRp() { Id = Options.Host, Name = Options.AppName },
-                    User = user,
+                    User = getResult.Data,
                     AuthenticatorSelection = new ClientWebAuthnOptions.ClientWebAuthnAuthenticatorSelection() { UserVerification = "preferred" },
                     Timeout = 60000
                 };
-                GlobalCaching<string, string>.Set("______passkey_challenge:" + result.Data.Challenge.GetBase64String(), user.Id.GetBase64String(), TimeSpan.FromSeconds(300));
+                GlobalCaching<string, string>.Set("______passkey_challenge:" + result.Data.Challenge.GetBase64String(), getResult.Data.Id.GetBase64String(), TimeSpan.FromSeconds(300));
             }
             await httpContext.Response.WriteJObjectAsync(result);
         }
@@ -183,10 +183,10 @@ namespace Silmoon.AspNetCore.Encryption.Services
         }
 
 
-        public abstract Task<ClientWebAuthnOptions.ClientWebAuthnUser> GetClientOptionsWebAuthnUser(HttpContext httpContext);
+        public abstract Task<StateSet<bool, ClientWebAuthnOptions.ClientWebAuthnUser>> GetClientCreateWebAuthnOptions(HttpContext httpContext);
         public abstract Task<AllowUserCredential> GetAllowCredentials(HttpContext httpContext, string userId);
         public abstract Task<StateSet<bool>> OnCreate(HttpContext httpContext, WebAuthnCreateResponse webAuthnCreateResponse);
         public abstract Task<StateSet<bool>> OnDelete(HttpContext httpContext, byte[] credentialId);
-        public abstract Task<PublicKeyInfo> OnGetPublicKeyInfo(HttpContext httpContext, byte[] rawId, string userId);
+        public abstract Task<PublicKeyInfo> OnGetPublicKeyInfo(HttpContext httpContext, byte[] rawId, string userId = null);
     }
 }

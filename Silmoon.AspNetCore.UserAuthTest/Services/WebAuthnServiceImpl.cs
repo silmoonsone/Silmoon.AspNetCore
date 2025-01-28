@@ -42,7 +42,7 @@ namespace Silmoon.AspNetCore.UserAuthTest.Services
             }
             return Task.FromResult(allowUserCerdential);
         }
-        public override async Task<ClientWebAuthnOptions.ClientWebAuthnUser> GetClientOptionsWebAuthnUser(HttpContext httpContext)
+        public override async Task<StateSet<bool, ClientWebAuthnOptions.ClientWebAuthnUser>> GetClientCreateWebAuthnOptions(HttpContext httpContext)
         {
             var user = await SilmoonAuthService.GetUser<User>();
 
@@ -52,7 +52,7 @@ namespace Silmoon.AspNetCore.UserAuthTest.Services
                 Id = user._id.ToByteArray(),
                 Name = user.Username,
             };
-            return result;
+            return true.ToStateSet(result);
         }
         public override async Task<StateSet<bool>> OnCreate(HttpContext httpContext, WebAuthnCreateResponse webAuthnCreateResponse)
         {
@@ -80,7 +80,7 @@ namespace Silmoon.AspNetCore.UserAuthTest.Services
                     return true.ToStateSet();
             }
         }
-        public override Task<PublicKeyInfo> OnGetPublicKeyInfo(HttpContext httpContext, byte[] rawId, string userId)
+        public override Task<PublicKeyInfo> OnGetPublicKeyInfo(HttpContext httpContext, byte[] rawId, string userId = null)
         {
             if (userId.IsNullOrEmpty())
             {

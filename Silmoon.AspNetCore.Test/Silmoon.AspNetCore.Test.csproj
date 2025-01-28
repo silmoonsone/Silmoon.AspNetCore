@@ -29,9 +29,9 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Silmoon.Data.LiteDB" Version="1.7.1" />
     <PackageReference Include="Silmoon.Graphics" Version="0.0.2" />
-    <PackageReference Include="Silmoon" Version="1.7.4" />
+    <PackageReference Include="Silmoon" Version="1.7.5" />
     <PackageReference Include="Silmoon.Data.MongoDB" Version="1.7.2" />
-    <PackageReference Include="Silmoon.Extension" Version="1.6.7" />
+    <PackageReference Include="Silmoon.Extension" Version="1.6.8" />
   </ItemGroup>
 
   <ItemGroup>

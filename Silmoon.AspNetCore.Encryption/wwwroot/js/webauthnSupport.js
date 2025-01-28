@@ -11,8 +11,10 @@ async function createWebAuthn() {
     try {
         // 1. 向服务器请求创建挑战 (challenge) 和 RP 信息
         const response = await fetch(webAuthnClientOptions.getWebAuthnOptionsUrl);
-        const options = (await response.json()).Data;
+        const result = await response.json();
+        const options = result.Data;
 
+        if (!result.Success) return { Success: false, Message: result.Message }
 
         // 2. 将 challenge 和 user.id 转换为 Uint8Array
         options.challenge = base64ToUint8Array(options.challenge);

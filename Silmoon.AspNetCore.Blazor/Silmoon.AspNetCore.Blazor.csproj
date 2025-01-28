@@ -9,7 +9,7 @@
   <PropertyGroup>
     <IsPackable>true</IsPackable>
     <PackageId>Silmoon.AspNetCore.Blazor</PackageId>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <Authors>SILMOON</Authors>
     <Company>SILMOON LLC</Company>
     <Description>Silmoon SDK</Description>
@@ -38,8 +38,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Silmoon" Version="1.7.4" />
-    <PackageReference Include="Silmoon.Extension" Version="1.6.7" />
+    <PackageReference Include="Silmoon" Version="1.7.5" />
+    <PackageReference Include="Silmoon.Extension" Version="1.6.8" />
   </ItemGroup>
 
   <ItemGroup>

@@ -79,7 +79,7 @@ async function deleteWebAuthn(credentialId) {
         } catch (err) {
             return { Success: false, Message: err.message, Data: err }
         }
-    }
+    } else return { Success: false, Message: "Delete canceled.", Data: null }
 }
 async function authenticateWebAuthn(userId) {
     try {

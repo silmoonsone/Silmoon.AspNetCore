@@ -67,6 +67,10 @@ namespace Silmoon.AspNetCore.UserAuthTest.Services
                 return true.ToStateSet();
             }
         }
+        public override Task<StateSet<bool>> OnAuthenticateCompleted(HttpContext httpContext, WebAuthnAuthenticateResponse webAuthnAuthenticateResponse, StateSet<bool> result, string flagData)
+        {
+            return Task.FromResult(result);
+        }
         public override async Task<StateSet<bool>> OnDelete(HttpContext httpContext, byte[] credentialId)
         {
             var user = await SilmoonAuthService.GetUser<User>();

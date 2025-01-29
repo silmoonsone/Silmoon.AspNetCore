@@ -81,8 +81,9 @@ async function deleteWebAuthn(credentialId) {
         }
     } else return { Success: false, Message: "Delete canceled.", Data: null }
 }
-async function authenticateWebAuthn(userId) {
+async function authenticateWebAuthn(userId, flagData) {
     try {
+        if (typeof flagData == "undefined") flagData = null;
         // 1. 向服务器请求挑战 (challenge) 和其他验证选项
         const response = await fetch(webAuthnClientOptions.getWebAuthnAuthenticateOptions + '?UserId=' + userId);
         const responseData = await response.json();
@@ -117,6 +118,7 @@ async function authenticateWebAuthn(userId) {
                 clientDataJSON: arrayBufferToBase64(clientDataJSON),
                 signature: arrayBufferToBase64(signature),
             },
+            flagData: flagData
         };
 
         const verificationResponse = await fetch(webAuthnClientOptions.authenticateWebAuthnUrl, {

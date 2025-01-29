@@ -16,8 +16,8 @@
         <div>Passkey list</div>
         <div>
             <button class="btn btn-primary" onclick="onCreatePasskey()">Create</button>
-            <button class="btn btn-primary" onclick="onVerify('@user._id')">Verify(User)</button>
-            <button class="btn btn-primary" onclick="onVerify()">Verify(AllUser)</button>
+            <button class="btn btn-primary" onclick="onVerify('@user._id', 'ValiUser')">Verify(User)</button>
+            <button class="btn btn-primary" onclick="onVerify(null, 'ValiAllUser')">Verify(AllUser)</button>
         </div>
     </div>
     <hr />
@@ -57,10 +57,10 @@
         }
     }
 
-    async function onVerify(userId) {
-        var result = await authenticateWebAuthn(userId);
+    async function onVerify(userId, flagData) {
+        var result = await authenticateWebAuthn(userId, flagData);
         if (result.Success) {
-            alert("Passkey verified successfully");
+            alert("Passkey verified successfully, flagData: " + result.Data);
         } else {
             alert("Failed to verify passkey\r" + result.Message);
         }

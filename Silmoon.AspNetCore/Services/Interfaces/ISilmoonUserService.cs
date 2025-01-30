@@ -18,9 +18,12 @@ namespace Silmoon.AspNetCore.Services.Interfaces
         Task<TUser> GetUser<TUser>() where TUser : class, IDefaultUserIdentity;
         Task<TUser> GetUser<TUser>(string UserToken, string Name = null, string NameIdentifier = null) where TUser : class, IDefaultUserIdentity;
         Task ReloadUser<TUser>() where TUser : class, IDefaultUserIdentity;
-
         Task<bool> IsSignIn();
         Task<string[]> GetRoles();
+
+        void SetUserSessionFlag<T>(string Name, T Data);
+        T GetUserSessionFlag<T>(string Name);
+
         bool IsInRole(params string[] Roles);
         bool IsInRole(params Enum[] Roles);
         Task<bool> IsInRoleAsync(params string[] Roles);

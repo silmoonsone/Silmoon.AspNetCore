@@ -63,7 +63,13 @@ namespace Silmoon.AspNetCore.Services
             {
                 var NameIdentifier = HttpContextAccessor.HttpContext.User.Claims.Where(c => c.Type == ClaimTypes.NameIdentifier).FirstOrDefault()?.Value;
                 var Name = HttpContextAccessor.HttpContext.User.Claims.Where(c => c.Type == nameof(IDefaultUserIdentity.Username)).FirstOrDefault()?.Value;
-                HttpContextAccessor.HttpContext.Session.Remove("SessionCache:NameIdentifier+Username=" + NameIdentifier + "+" + Name);
+                HttpContextAccessor.HttpContext.Session.Keys.Each(key =>
+                {
+                    if (key.StartsWith("SessionCache"))
+                    {
+                        HttpContextAccessor.HttpContext.Session.Remove(key);
+                    }
+                });
                 await HttpContextAccessor.HttpContext.SignOutAsync();
                 return true;
             }
@@ -143,6 +149,17 @@ namespace Silmoon.AspNetCore.Services
         {
             var claimsPrincipal = await GetCurrentClaimsPrincipalAsync();
             return claimsPrincipal.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToArray();
+        }
+
+        public void SetUserSessionFlag<T>(string Name, T Data)
+        {
+            HttpContextAccessor.HttpContext.Session.SetString("SessionCache:Flag:" + Name, Data.ToJsonString());
+        }
+        public T GetUserSessionFlag<T>(string Name)
+        {
+            string json = HttpContextAccessor.HttpContext.Session.GetString("SessionCache:Flag:" + Name);
+            if (json.IsNullOrEmpty()) return default;
+            else return JsonConvert.DeserializeObject<T>(json);
         }
 
         void SetUserCache<TUser>(TUser User, string NameIdentifier) where TUser : class, IDefaultUserIdentity

@@ -10,7 +10,7 @@ using System.Security.Claims;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web;
-using Silmoon.Extension.Models.Identities;
+using Silmoon.Extension.Interfaces;
 
 namespace Silmoon.AspNetCore
 {

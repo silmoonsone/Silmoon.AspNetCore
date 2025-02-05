@@ -2,8 +2,8 @@
 using MongoDB.Bson.Serialization.Attributes;
 using Silmoon.Data.MongoDB.Converters;
 using Silmoon.Data.MongoDB.Models;
-using Silmoon.Extension.Models.Identities;
-using Silmoon.Extension.Models.Identities.Enums;
+using Silmoon.Extension.Interfaces;
+using Silmoon.Extension.Enums;
 
 namespace Silmoon.AspNetCore.Test.Models
 {

@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Silmoon.Extension.Models.Identities;
+using Silmoon.Extension.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;

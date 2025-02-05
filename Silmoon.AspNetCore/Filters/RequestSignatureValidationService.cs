@@ -8,7 +8,7 @@ using System.Security.Cryptography.Xml;
 using Microsoft.Extensions.DependencyInjection;
 using Silmoon.AspNetCore.Services;
 using Silmoon.AspNetCore.Services.Interfaces;
-using Silmoon.Extension.Models.Types;
+using Silmoon.Extension.Enums;
 using Silmoon.Extension.Models;
 
 namespace Silmoon.AspNetCore.Filters

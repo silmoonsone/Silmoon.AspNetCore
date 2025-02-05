@@ -2,7 +2,7 @@
 using System;
 using Silmoon.AspNetCore;
 using Silmoon.AspNetCore.Middlewares;
-using Silmoon.Extension.Models.Identities;
+using Silmoon.Extension.Interfaces;
 
 namespace Silmoon.AspNetCore.Extensions
 {

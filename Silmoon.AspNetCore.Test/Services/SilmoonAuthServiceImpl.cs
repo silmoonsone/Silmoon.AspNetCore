@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using Silmoon.AspNetCore.Services;
-using Silmoon.Extension.Models.Identities;
+using Silmoon.Extension.Interfaces;
+using Silmoon.Extension.Models;
 using Silmoon.Secure;
 
 namespace Silmoon.AspNetCore.Test.Services

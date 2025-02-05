@@ -2,8 +2,8 @@
 using Silmoon.AspNetCore.UserAuthTest.Models.SubModels;
 using Silmoon.Data.MongoDB;
 using Silmoon.Data.MongoDB.Converters;
-using Silmoon.Extension.Models.Identities;
-using Silmoon.Extension.Models.Identities.Enums;
+using Silmoon.Extension.Enums;
+using Silmoon.Extension.Interfaces;
 
 namespace Silmoon.AspNetCore.UserAuthTest.Models
 {

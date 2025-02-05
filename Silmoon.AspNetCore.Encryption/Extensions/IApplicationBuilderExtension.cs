@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using System;
-using Silmoon.Extension.Models.Identities;
 using Silmoon.AspNetCore.Encryption.Middlewares;
 
 namespace Silmoon.AspNetCore.Encryption.Extensions

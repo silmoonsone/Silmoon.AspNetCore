@@ -2,7 +2,7 @@
 using Silmoon.Compress;
 using Silmoon.Extension;
 using Silmoon.Extension.Models;
-using Silmoon.Extension.Models.Types;
+using Silmoon.Extension.Enums;
 using Silmoon.Models;
 using System;
 using System.Collections.Generic;

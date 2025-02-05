@@ -5,7 +5,7 @@ using Silmoon.Extension;
 using Silmoon.Threading;
 using System.Threading.Tasks;
 using System;
-using Silmoon.Extension.Models.Types;
+using Silmoon.Extension.Enums;
 using Silmoon.Extension.Models;
 
 namespace Silmoon.AspNetCore.Filters

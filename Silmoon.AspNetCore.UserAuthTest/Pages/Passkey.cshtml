@@ -1,4 +1,5 @@
 ﻿@page
+@attribute [Authorize]
 @using Silmoon.AspNetCore.Services.Interfaces
 @using Silmoon.AspNetCore.UserAuthTest.Models
 @using Silmoon.AspNetCore.UserAuthTest.Models.SubModels
@@ -16,8 +17,8 @@
         <div>Passkey list</div>
         <div>
             <button class="btn btn-primary" onclick="onCreatePasskey()">Create</button>
-            <button class="btn btn-primary" onclick="onVerify('@user._id', 'ValiUser')">Verify(User)</button>
-            <button class="btn btn-primary" onclick="onVerify(null, 'ValiAllUser')">Verify(AllUser)</button>
+            <button class="btn btn-primary" onclick="onVerify('@user._id', {do: 'verifyUser'})">Verify(User)</button>
+            <button class="btn btn-primary" onclick="onVerify(null, {do: 'verifyAllUser'})">Verify(AllUser)</button>
         </div>
     </div>
     <hr />
@@ -60,7 +61,7 @@
     async function onVerify(userId, flagData) {
         var result = await authenticateWebAuthn(userId, flagData);
         if (result.Success) {
-            alert("Passkey verified successfully, flagData: " + result.Data);
+            alert("Passkey verified successfully, flagData: " + JSON.stringify(result.Data));
         } else {
             alert("Failed to verify passkey\r" + result.Message);
         }

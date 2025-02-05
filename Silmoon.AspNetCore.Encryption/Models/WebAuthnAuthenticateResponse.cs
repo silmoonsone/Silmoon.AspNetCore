@@ -16,7 +16,7 @@ namespace Silmoon.AspNetCore.Encryption.Models
         [JsonProperty("response")]
         public VerifyWebAuthnResponseResponse Response { get; set; }
         [JsonProperty("flagData")]
-        public string FlagData { get; set; }
+        public object FlagData { get; set; }
 
         public class VerifyWebAuthnResponseResponse
         {

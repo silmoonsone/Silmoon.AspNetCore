@@ -67,7 +67,7 @@ namespace Silmoon.AspNetCore.UserAuthTest.Services
                 return true.ToStateSet();
             }
         }
-        public override Task<StateSet<bool>> OnAuthenticateCompleted(HttpContext httpContext, WebAuthnAuthenticateResponse webAuthnAuthenticateResponse, StateSet<bool> result, string flagData)
+        public override Task<StateSet<bool>> OnAuthenticateCompleted(HttpContext httpContext, WebAuthnAuthenticateResponse webAuthnAuthenticateResponse, StateSet<bool> result, object flagData)
         {
             return Task.FromResult(result);
         }

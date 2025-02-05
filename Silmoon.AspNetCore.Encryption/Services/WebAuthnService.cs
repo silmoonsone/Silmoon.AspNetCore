@@ -28,12 +28,7 @@ namespace Silmoon.AspNetCore.Encryption.Services
             var getResult = await GetClientCreateWebAuthnOptions(httpContext);
             StateFlag<ClientWebAuthnOptions> result = new StateFlag<ClientWebAuthnOptions>();
 
-            if (!getResult.State)
-            {
-                result.Success = false;
-                result.Message = getResult.Message;
-            }
-            else
+            if (getResult.State)
             {
                 result.Success = true;
                 result.Data = new ClientWebAuthnOptions()
@@ -45,6 +40,11 @@ namespace Silmoon.AspNetCore.Encryption.Services
                     Timeout = 60000
                 };
                 GlobalCaching<string, string>.Set("______passkey_challenge:" + result.Data.Challenge.GetBase64String(), getResult.Data.Id.GetBase64String(), TimeSpan.FromSeconds(300));
+            }
+            else
+            {
+                result.Success = false;
+                result.Message = getResult.Message;
             }
             await httpContext.Response.WriteJObjectAsync(result);
         }
@@ -180,7 +180,7 @@ namespace Silmoon.AspNetCore.Encryption.Services
                 }
             }
             var newResult = await OnAuthenticateCompleted(httpContext, verifyWebAuthnResponse, result, verifyWebAuthnResponse.FlagData);
-            StateFlag<string> stateFlag = new StateFlag<string>() { Success = newResult.State, Data = verifyWebAuthnResponse.FlagData, Message = newResult.Message };
+            StateFlag<object> stateFlag = new StateFlag<object>() { Success = newResult.State, Data = verifyWebAuthnResponse.FlagData, Message = newResult.Message };
             await httpContext.Response.WriteJObjectAsync(stateFlag);
         }
 
@@ -188,7 +188,7 @@ namespace Silmoon.AspNetCore.Encryption.Services
         public abstract Task<StateSet<bool, ClientWebAuthnOptions.ClientWebAuthnUser>> GetClientCreateWebAuthnOptions(HttpContext httpContext);
         public abstract Task<AllowUserCredential> GetAllowCredentials(HttpContext httpContext, string userId);
         public abstract Task<StateSet<bool>> OnCreate(HttpContext httpContext, WebAuthnCreateResponse webAuthnCreateResponse);
-        public abstract Task<StateSet<bool>> OnAuthenticateCompleted(HttpContext httpContext, WebAuthnAuthenticateResponse webAuthnAuthenticateResponse, StateSet<bool> result, string flagData);
+        public abstract Task<StateSet<bool>> OnAuthenticateCompleted(HttpContext httpContext, WebAuthnAuthenticateResponse webAuthnAuthenticateResponse, StateSet<bool> result, object flagData);
         public abstract Task<StateSet<bool>> OnDelete(HttpContext httpContext, byte[] credentialId);
         public abstract Task<PublicKeyInfo> OnGetPublicKeyInfo(HttpContext httpContext, byte[] rawId, string userId = null);
     }

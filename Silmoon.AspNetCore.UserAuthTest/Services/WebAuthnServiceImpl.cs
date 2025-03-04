@@ -1,5 +1,5 @@
-﻿using Microsoft.Extensions.Options;
-using MongoDB.Bson;
+﻿using LiteDB;
+using Microsoft.Extensions.Options;
 using Silmoon.AspNetCore.Encryption.ClientModels;
 using Silmoon.AspNetCore.Encryption.Models;
 using Silmoon.AspNetCore.Encryption.Services;
@@ -25,7 +25,20 @@ namespace Silmoon.AspNetCore.UserAuthTest.Services
 
         public override Task<AllowUserCredential> GetAllowCredentials(HttpContext httpContext, string userId)
         {
-            var hasUserObjectId = ObjectId.TryParse(userId, out var userObjectId);
+            //var hasUserObjectId = ObjectId.TryParse(userId, out var userObjectId);
+            var hasUserObjectId = false;
+            ObjectId userObjectId = null;
+            try
+            {
+                userObjectId = new ObjectId(userId);
+                hasUserObjectId = true;
+            }
+            catch
+            {
+                hasUserObjectId = false;
+            }
+
+
             var allowUserCerdential = new AllowUserCredential();
             if (hasUserObjectId)
             {
@@ -103,7 +116,7 @@ namespace Silmoon.AspNetCore.UserAuthTest.Services
             }
             else
             {
-                var userObjectId = ObjectId.Parse(userId);
+                var userObjectId = new ObjectId(userId);
                 var userWebAuthnInfos = Core.GetUserWebAuthnInfos(userObjectId);
                 var credential = userWebAuthnInfos.FirstOrDefault(c => c.CredentialId.SequenceEqual(rawId));
                 PublicKeyInfo publicKeyInfo = new PublicKeyInfo()

@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using MongoDB.Bson;
 using Silmoon.AspNetCore.Extensions;
 using Silmoon.AspNetCore.UserAuthTest.Models;
 using Silmoon.AspNetCore.UserAuthTest.Models.SubModels;

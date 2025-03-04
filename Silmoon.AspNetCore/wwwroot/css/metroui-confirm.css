@@ -41,6 +41,7 @@
     background-color: #1269ED;
     color: #FFF;
     cursor: default;
+    border-radius: 5px;
 }
 
 #metroUIConfirmCancelButton {
@@ -48,6 +49,7 @@
     background-color: #999;
     color: #FFF;
     cursor: default;
+    border-radius: 5px;
 }
 
 .metroUIConfirmButton {

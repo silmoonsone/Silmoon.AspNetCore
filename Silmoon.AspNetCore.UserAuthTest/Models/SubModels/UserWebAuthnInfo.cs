@@ -1,8 +1,7 @@
-﻿using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
+﻿using LiteDB;
 using Silmoon.AspNetCore.Encryption.Models;
-using Silmoon.Data.MongoDB.Converters;
-using Silmoon.Data.MongoDB.Models;
+using Silmoon.Data.LiteDB.Converters;
+using Silmoon.Data.LiteDB.Interfaces;
 using Silmoon.Extension;
 
 namespace Silmoon.AspNetCore.UserAuthTest.Models.SubModels
@@ -11,12 +10,11 @@ namespace Silmoon.AspNetCore.UserAuthTest.Models.SubModels
     {
         [Newtonsoft.Json.JsonConverter(typeof(ObjectIdJsonConverter))]
         [System.Text.Json.Serialization.JsonConverter(typeof(ObjectIdStringJsonConverter))]
-        public ObjectId _id { get; set; } = ObjectId.GenerateNewId();
+        public ObjectId _id { get; set; } = ObjectId.NewObjectId();
         [Newtonsoft.Json.JsonConverter(typeof(ObjectIdJsonConverter))]
         [System.Text.Json.Serialization.JsonConverter(typeof(ObjectIdStringJsonConverter))]
         public ObjectId UserObjectId { get; set; }
 
-        [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
         public DateTime created_at { get; set; } = DateTime.Now;
 
         public override string ToString()

@@ -6,7 +6,6 @@ using Silmoon.Extension.Interfaces;
 
 namespace Silmoon.AspNetCore.Extensions
 {
-    [Obsolete]
     public static class IApplicationBuilderExtension
     {
         [Obsolete]

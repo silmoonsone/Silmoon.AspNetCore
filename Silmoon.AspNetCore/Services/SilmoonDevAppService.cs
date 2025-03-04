@@ -18,12 +18,12 @@ namespace Silmoon.AspNetCore.Services
 
         public async Task<StateSet<bool, (string SignatureKey, string EncryptKey)>> GetCachedKey(string AppId)
         {
-            var cacheKeyResult = GlobalCaching<string, (string SignatureKey, string EncryptKey)>.Get("__" + AppId + "__S.E.Key_cache");
+            var cacheKeyResult = GlobalCaching<string, (string SignatureKey, string EncryptKey)>.Get($"__{AppId}__S.E.Key_cache");
 
             //在缓存中找到Signature和EncryptKey
             if (cacheKeyResult.Matched)
             {
-                GlobalCaching<string, (string, string)>.Set("__" + AppId + "__S.E.Key_cache", (cacheKeyResult.Value.SignatureKey, cacheKeyResult.Value.EncryptKey), DateTime.Now.AddSeconds(Options.KeyCacheSecoundTimeout));
+                GlobalCaching<string, (string, string)>.Set($"__{AppId}__S.E.Key_cache", (cacheKeyResult.Value.SignatureKey, cacheKeyResult.Value.EncryptKey), DateTime.Now.AddSeconds(Options.KeyCacheSecoundTimeout));
                 return StateSet<bool, (string SignatureKey, string EncryptKey)>.Create(true, (cacheKeyResult.Value.SignatureKey, cacheKeyResult.Value.EncryptKey), "cached.");
             }
             else
@@ -32,16 +32,15 @@ namespace Silmoon.AspNetCore.Services
                 var result = await GetKey(AppId);
                 if (result.State)
                 {
-                    if (Options.KeyCacheSecoundTimeout > 0) GlobalCaching<string, (string, string)>.Set("__" + AppId + "__S.E.Key_cache", (result.Data.SignatureKey, result.Data.EncryptKey), DateTime.Now.AddSeconds(Options.KeyCacheSecoundTimeout));
+                    if (Options.KeyCacheSecoundTimeout > 0) GlobalCaching<string, (string, string)>.Set($"__{AppId}__S.E.Key_cache", (result.Data.SignatureKey, result.Data.EncryptKey), DateTime.Now.AddSeconds(Options.KeyCacheSecoundTimeout));
                     return StateSet<bool, (string SignatureKey, string EncryptKey)>.Create(true, (result.Data.SignatureKey, result.Data.EncryptKey));
                 }
                 else
                 {
                     //没有获取到Signature和EncryptKey
-                    return StateSet<bool, (string SignatureKey, string EncryptKey)>.Create(false, (null, null), "Get SignatureKey and EncryptKey failed(" + result.Message + ").");
+                    return StateSet<bool, (string SignatureKey, string EncryptKey)>.Create(false, (null, null), $"Get SignatureKey and EncryptKey failed({result.Message}).");
                 }
             }
-
         }
         public abstract Task<StateSet<bool, (string SignatureKey, string EncryptKey)>> GetKey(string AppId);
     }

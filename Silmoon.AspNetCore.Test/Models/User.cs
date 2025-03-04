@@ -1,7 +1,7 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using Silmoon.Data.MongoDB.Converters;
-using Silmoon.Data.MongoDB.Models;
+using Silmoon.Data.MongoDB.Interfaces;
 using Silmoon.Extension.Interfaces;
 using Silmoon.Extension.Enums;
 

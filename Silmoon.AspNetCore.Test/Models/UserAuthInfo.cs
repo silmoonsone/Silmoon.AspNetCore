@@ -1,6 +1,6 @@
 ﻿using MongoDB.Bson;
 using Silmoon.AspNetCore.Encryption.Models;
-using Silmoon.Data.MongoDB;
+using Silmoon.Data.MongoDB.Models;
 
 namespace Silmoon.AspNetCore.Test.Models
 {

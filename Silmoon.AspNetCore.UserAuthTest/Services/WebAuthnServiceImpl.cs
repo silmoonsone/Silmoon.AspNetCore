@@ -1,5 +1,6 @@
 ﻿using LiteDB;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json.Linq;
 using Silmoon.AspNetCore.Encryption.ClientModels;
 using Silmoon.AspNetCore.Encryption.Models;
 using Silmoon.AspNetCore.Encryption.Services;
@@ -82,6 +83,13 @@ namespace Silmoon.AspNetCore.UserAuthTest.Services
         }
         public override Task<StateSet<bool>> OnAuthenticateCompleted(HttpContext httpContext, WebAuthnAuthenticateResponse webAuthnAuthenticateResponse, StateSet<bool> result, object flagData)
         {
+            //if (flagData is JObject data)
+            //{
+            //    if (data["do"].Value<string>() == "validationAdvance")
+            //    {
+            //        SilmoonAuthService.SetUserSessionFlag("validationAdvance", true);
+            //    }
+            //}
             return Task.FromResult(result);
         }
         public override async Task<StateSet<bool>> OnDelete(HttpContext httpContext, byte[] credentialId)

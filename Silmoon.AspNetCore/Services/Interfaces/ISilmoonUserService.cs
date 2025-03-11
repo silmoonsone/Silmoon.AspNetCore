@@ -21,6 +21,8 @@ namespace Silmoon.AspNetCore.Services.Interfaces
         Task<bool> IsSignIn();
         Task<string[]> GetRoles();
 
+        Task ReSignIn(string[] NewCustomerRoles = null, string[] RemoveCustomerRoles = null);
+        Task ReSignIn(bool RemoveAllCustomerRoles, string[] NewCustomerRoles = null);
         void SetUserSessionFlag<T>(string Name, T Data);
         T GetUserSessionFlag<T>(string Name);
 

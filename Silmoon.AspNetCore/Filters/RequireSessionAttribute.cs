@@ -20,7 +20,7 @@ namespace Silmoon.AspNetCore.Filters
         public string UserTokenKey { get; set; }
         public string UserTokenSignInKey { get; set; }
         public bool IsRequire { get; set; } = true;
-        public RequireSessionAttribute(IdentityRole Role, bool RequestRefreshUserSession = false, bool IsApiRequest = false, string UserTokenKey = "UserToken", string UserTokenSignInKey = "UserTokenSignin", bool IsRequire = true, string SignInUrl = "~/User/Signin?url=$SigninUrl") : base()
+        public RequireSessionAttribute(IdentityRole Role, bool IsRequire = true, bool RequestRefreshUserSession = false, bool IsApiRequest = false, string UserTokenKey = "UserToken", string UserTokenSignInKey = "UserTokenSignin", string SignInUrl = "~/User/Signin?url=$SigninUrl") : base()
         {
             this.Role = Role;
             this.RequestRefreshUserSession = RequestRefreshUserSession;
@@ -30,7 +30,7 @@ namespace Silmoon.AspNetCore.Filters
             this.SignInUrl = SignInUrl;
             this.IsRequire = IsRequire;
         }
-        public RequireSessionAttribute(bool RequestRefreshUserSession = false, bool IsApiRequest = false, string UserTokenKey = "UserToken", string UserTokenSignInKey = "UserTokenSignin", bool IsRequire = true, string SignInUrl = "~/User/Signin?url=$SigninUrl") : base()
+        public RequireSessionAttribute(bool IsRequire = true, bool RequestRefreshUserSession = false, bool IsApiRequest = false, string UserTokenKey = "UserToken", string UserTokenSignInKey = "UserTokenSignin", string SignInUrl = "~/User/Signin?url=$SigninUrl") : base()
         {
             Role = IdentityRole.Undefined;
             this.RequestRefreshUserSession = RequestRefreshUserSession;

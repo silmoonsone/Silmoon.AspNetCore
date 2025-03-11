@@ -10,7 +10,7 @@ namespace Silmoon.AspNetCore.Encryption.Models
 {
     public class WebAuthnInfo : PublicKeyInfo
     {
-        private static readonly Dictionary<string, string> AAGUIDDeviceMapping = new Dictionary<string, string>
+        private static readonly Dictionary<string, string> aguidMapping = new Dictionary<string, string>
         {
             { "08987058cadc4b81b6e130de50dcbe96", "Windows Hello" },
             { "9ddd1817af5a4672a2b93e3dd95000a9", "Windows Hello" },
@@ -50,7 +50,7 @@ namespace Silmoon.AspNetCore.Encryption.Models
         public string AuthenticatorAttachment { get; set; }
         public byte[] AttestationObject { get; set; }
 
-        public string GetDeviceDescription() => AAGUIDDeviceMapping.ContainsKey(AAGUID) ? AAGUIDDeviceMapping[AAGUID] : "Unknown";
+        public string GetDeviceDescription() => aguidMapping.ContainsKey(AAGUID) ? aguidMapping[AAGUID] : "Unknown";
 
         public static WebAuthnInfo Create(WebAuthnCreateResponse response)
         {

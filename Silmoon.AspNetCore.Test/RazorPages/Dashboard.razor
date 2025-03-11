@@ -1,8 +1,11 @@
 ﻿@page "/dashboard"
+@rendermode InteractiveServer
 @attribute [Authorize]
+@inject JsComponentInterop Jsc
+@inject ISilmoonAuthService SilmoonAuthService
 
 <h3>Dashboard</h3>
-
+<hr />
 @code {
 
 }

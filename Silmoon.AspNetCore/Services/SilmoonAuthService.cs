@@ -48,7 +48,7 @@ namespace Silmoon.AspNetCore.Services
             {
                 foreach (var item in CustomerRoles)
                 {
-                    claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, item));
+                    if (!item.IsNullOrEmpty()) claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, item));
                 }
             }
 
@@ -78,6 +78,58 @@ namespace Silmoon.AspNetCore.Services
                 return false;
             }
         }
+        public async Task ReSignIn(string[] NewCustomerRoles = null, string[] RemoveCustomerRoles = null)
+        {
+            var claimsPrincipal = await GetCurrentClaimsPrincipalAsync();
+            var cliaimIdentity = claimsPrincipal.Identity as ClaimsIdentity;
+            var oldClaims = cliaimIdentity.Claims.ToList();
+
+            // 移除指定角色
+            if (RemoveCustomerRoles is not null) oldClaims.RemoveAll(c => c.Type == ClaimTypes.Role && RemoveCustomerRoles.Contains(c.Value, StringComparer.OrdinalIgnoreCase));
+
+            // 获取现有角色（移除后重新计算）
+            var existingRoles = oldClaims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            // 添加新角色
+            if (!NewCustomerRoles.IsNullOrEmpty())
+            {
+                foreach (var item in NewCustomerRoles)
+                {
+                    if (!item.IsNullOrEmpty() && !existingRoles.Contains(item)) oldClaims.Add(new Claim(ClaimTypes.Role, item));
+                }
+            }
+
+            cliaimIdentity = new ClaimsIdentity(oldClaims, cliaimIdentity.AuthenticationType);
+            claimsPrincipal = new ClaimsPrincipal(cliaimIdentity);
+            await HttpContextAccessor.HttpContext.SignInAsync(claimsPrincipal);
+        }
+        public async Task ReSignIn(bool RemoveAllCustomerRoles, string[] NewCustomerRoles = null)
+        {
+            var claimsPrincipal = await GetCurrentClaimsPrincipalAsync();
+            var cliaimIdentity = claimsPrincipal.Identity as ClaimsIdentity;
+            var oldClaims = cliaimIdentity.Claims.ToList();
+
+            // 移除全部角色
+            if (RemoveAllCustomerRoles) oldClaims.RemoveAll(c => c.Type == ClaimTypes.Role);
+
+            // 获取现有角色（移除后重新计算）
+            var existingRoles = oldClaims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            // 添加新角色
+            if (NewCustomerRoles is not null)
+            {
+                foreach (var item in NewCustomerRoles)
+                {
+                    if (!item.IsNullOrEmpty() && !existingRoles.Contains(item)) oldClaims.Add(new Claim(ClaimTypes.Role, item));
+                }
+            }
+
+            cliaimIdentity = new ClaimsIdentity(oldClaims, cliaimIdentity.AuthenticationType);
+            claimsPrincipal = new ClaimsPrincipal(cliaimIdentity);
+            await HttpContextAccessor.HttpContext.SignInAsync(claimsPrincipal);
+        }
+
+
         public async Task<TUser> GetUser<TUser>() where TUser : class, IDefaultUserIdentity
         {
             if (await IsSignIn())

@@ -138,5 +138,14 @@ namespace Silmoon.AspNetCore.Extensions
             httpRequest.Body.Position = 0;
             return await httpRequest.Body.ToBytesAsync(httpRequest.ContentLength).ConfigureAwait(false);
         }
+        public static string GetBearerToken(this HttpRequest request)
+        {
+            var authorization = request.Headers["Authorization"];
+            if (string.IsNullOrEmpty(authorization)) return null;
+            var parts = authorization[0].Split(' ');
+            if (parts.Length != 2 || parts[0] != "Bearer") return null;
+            return parts[1];
+        }
+
     }
 }

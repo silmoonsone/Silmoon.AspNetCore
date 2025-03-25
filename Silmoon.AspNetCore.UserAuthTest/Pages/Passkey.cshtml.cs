@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Silmoon.AspNetCore.Services.Interfaces;
+using Silmoon.AspNetCore.Interfaces;
 using Silmoon.AspNetCore.UserAuthTest.Models;
 using Silmoon.AspNetCore.UserAuthTest.Models.SubModels;
 

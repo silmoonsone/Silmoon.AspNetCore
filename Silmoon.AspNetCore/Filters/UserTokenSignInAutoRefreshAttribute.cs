@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc;
 using Silmoon.Extension;
-using Silmoon.AspNetCore.Services.Interfaces;
+using Silmoon.AspNetCore.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using System.Web;
 

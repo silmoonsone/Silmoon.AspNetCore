@@ -184,12 +184,49 @@ namespace Silmoon.AspNetCore.Encryption.Services
             await httpContext.Response.WriteJObjectAsync(stateFlag);
         }
 
-
+        /// <summary>
+        /// 用户创建WebAuthn时获取客户端配置
+        /// </summary>
+        /// <param name="httpContext"></param>
+        /// <returns></returns>
         public abstract Task<StateSet<bool, ClientWebAuthnOptions.ClientWebAuthnUser>> GetClientCreateWebAuthnOptions(HttpContext httpContext);
+        /// <summary>
+        /// 用户启动WebAuthn验证时获取客户端配置，根据userId获取用户的WebAuthn信息，或者userId为空时不指定信息
+        /// </summary>
+        /// <param name="httpContext"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
         public abstract Task<AllowUserCredential> GetAllowCredentials(HttpContext httpContext, string userId);
+        /// <summary>
+        /// 当用户浏览器已经创建WebAuthn后，服务器端执行保存操作
+        /// </summary>
+        /// <param name="httpContext"></param>
+        /// <param name="webAuthnCreateResponse"></param>
+        /// <returns></returns>
         public abstract Task<StateSet<bool>> OnCreate(HttpContext httpContext, WebAuthnCreateResponse webAuthnCreateResponse);
+        /// <summary>
+        /// 当验证过程完成后，执行的操作，通过result参数判断验证是否成功
+        /// </summary>
+        /// <param name="httpContext"></param>
+        /// <param name="webAuthnAuthenticateResponse"></param>
+        /// <param name="result"></param>
+        /// <param name="flagData"></param>
+        /// <returns></returns>
         public abstract Task<StateSet<bool>> OnAuthenticateCompleted(HttpContext httpContext, WebAuthnAuthenticateResponse webAuthnAuthenticateResponse, StateSet<bool> result, object flagData);
+        /// <summary>
+        /// 删除WebAuthn
+        /// </summary>
+        /// <param name="httpContext"></param>
+        /// <param name="credentialId"></param>
+        /// <returns></returns>
         public abstract Task<StateSet<bool>> OnDelete(HttpContext httpContext, byte[] credentialId);
+        /// <summary>
+        /// 执行验证过程中获取公钥信息
+        /// </summary>
+        /// <param name="httpContext"></param>
+        /// <param name="rawId"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
         public abstract Task<PublicKeyInfo> OnGetPublicKeyInfo(HttpContext httpContext, byte[] rawId, string userId = null);
     }
 }

@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
 using Silmoon.AspNetCore.Extensions;
-using Silmoon.AspNetCore.Services.Interfaces;
+using Silmoon.AspNetCore.Interfaces;
 using Silmoon.Extension;
 using Silmoon.Extension.Interfaces;
 using Silmoon.Extension.Enums;

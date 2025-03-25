@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 
-namespace Silmoon.AspNetCore.Services.Interfaces
+namespace Silmoon.AspNetCore.Interfaces
 {
     public interface ISilmoonConfigureService
     {

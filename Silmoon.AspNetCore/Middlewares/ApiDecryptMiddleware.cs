@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Silmoon.AspNetCore.Extensions;
 using Silmoon.AspNetCore.Services;
-using Silmoon.AspNetCore.Services.Interfaces;
+using Silmoon.AspNetCore.Interfaces;
 using Silmoon.Collections;
 using Silmoon.Extension;
 using Silmoon.Extension.Models;

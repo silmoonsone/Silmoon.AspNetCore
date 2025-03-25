@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Silmoon.AspNetCore.Services;
 using Silmoon.Extension.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Silmoon.AspNetCore.Services.Interfaces
+namespace Silmoon.AspNetCore.Interfaces
 {
     public interface ISilmoonAuthService
     {

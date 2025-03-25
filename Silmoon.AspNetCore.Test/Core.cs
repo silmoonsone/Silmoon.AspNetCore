@@ -1,6 +1,6 @@
 ﻿using MongoDB.Bson;
 using Silmoon.AspNetCore.Encryption.Models;
-using Silmoon.AspNetCore.Services.Interfaces;
+using Silmoon.AspNetCore.Interfaces;
 using Silmoon.AspNetCore.Test.Models;
 using Silmoon.AspNetCore.Test.Services;
 using Silmoon.Data.LiteDB;

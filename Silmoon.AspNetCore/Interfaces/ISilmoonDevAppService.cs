@@ -1,7 +1,7 @@
 ﻿using Silmoon.Models;
 using System.Threading.Tasks;
 
-namespace Silmoon.AspNetCore.Services.Interfaces
+namespace Silmoon.AspNetCore.Interfaces
 {
     /// <summary>
     /// 为应用程序提供AppId和Key

@@ -7,7 +7,7 @@ using Silmoon.Extension;
 using System.Security.Cryptography.Xml;
 using Microsoft.Extensions.DependencyInjection;
 using Silmoon.AspNetCore.Services;
-using Silmoon.AspNetCore.Services.Interfaces;
+using Silmoon.AspNetCore.Interfaces;
 using Silmoon.Extension.Enums;
 using Silmoon.Extension.Models;
 

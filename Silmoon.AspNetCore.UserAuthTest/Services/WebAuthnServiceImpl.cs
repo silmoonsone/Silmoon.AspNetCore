@@ -4,7 +4,7 @@ using Newtonsoft.Json.Linq;
 using Silmoon.AspNetCore.Encryption.ClientModels;
 using Silmoon.AspNetCore.Encryption.Models;
 using Silmoon.AspNetCore.Encryption.Services;
-using Silmoon.AspNetCore.Services.Interfaces;
+using Silmoon.AspNetCore.Interfaces;
 using Silmoon.AspNetCore.UserAuthTest.Models;
 using Silmoon.AspNetCore.UserAuthTest.Models.SubModels;
 using Silmoon.Extension;

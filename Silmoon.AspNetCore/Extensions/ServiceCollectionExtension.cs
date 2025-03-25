@@ -2,29 +2,13 @@
 using Microsoft.AspNetCore.Components.Server;
 using Microsoft.Extensions.DependencyInjection;
 using Silmoon.AspNetCore.Services;
-using Silmoon.AspNetCore.Services.Interfaces;
+using Silmoon.AspNetCore.Interfaces;
 using System;
 
 namespace Silmoon.AspNetCore.Extensions
 {
     public static class ServiceCollectionExtension
     {
-        public static void AddSilmoonDevApp<TSilmoonDevAppService>(this IServiceCollection services) where TSilmoonDevAppService : SilmoonDevAppService
-        {
-            ArgumentNullException.ThrowIfNull(services);
-
-            services.Configure<SilmoonDevAppServiceOptions>(o => o.KeyCacheSecoundTimeout = 3600);
-            services.AddSingleton<ISilmoonDevAppService, TSilmoonDevAppService>();
-        }
-        public static void AddSilmoonDevApp<TSilmoonDevAppService>(this IServiceCollection services, Action<SilmoonDevAppServiceOptions> options) where TSilmoonDevAppService : SilmoonDevAppService
-        {
-            ArgumentNullException.ThrowIfNull(services);
-            ArgumentNullException.ThrowIfNull(options);
-
-            services.Configure(options);
-            services.AddSingleton<ISilmoonDevAppService, TSilmoonDevAppService>();
-        }
-
         public static void AddSilmoonAuth<TSilmoonAuthService>(this IServiceCollection services) where TSilmoonAuthService : class, ISilmoonAuthService
         {
             ArgumentNullException.ThrowIfNull(services);

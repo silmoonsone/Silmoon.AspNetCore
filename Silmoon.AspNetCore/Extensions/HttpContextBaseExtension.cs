@@ -12,7 +12,7 @@ namespace Silmoon.AspNetCore.Extensions
 {
     public static class HttpContextBaseExtension
     {
-        public static IPAddress GetClientIPAddress(this HttpContext httpContext)
+        public static IPAddress GetClientIpAddress(this HttpContext httpContext)
         {
             IPAddress result = null;
 

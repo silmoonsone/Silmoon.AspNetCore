@@ -21,10 +21,6 @@ namespace Silmoon.AspNetCore.Extensions
         /// <param name="app"></param>
         /// <param name="AppIdRenameTo"></param>
         /// <param name="KeyCacheSecound"></param>
-        public static void UseApiDecrypt(this IApplicationBuilder app, string AppIdRenameTo = "AppId", int KeyCacheSecound = 3600)
-        {
-            app.UseMiddleware<ApiDecryptMiddleware>(AppIdRenameTo, KeyCacheSecound);
-        }
         public static void UseSilmoonAuth(this IApplicationBuilder app)
         {
             app.UseMiddleware<SilmoonAuthMiddleware>();

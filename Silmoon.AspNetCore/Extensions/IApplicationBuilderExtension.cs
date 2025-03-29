@@ -18,9 +18,6 @@ namespace Silmoon.AspNetCore.Extensions
         /// <summary>
         /// 使用基于 SilmoonDevApp 请求的API解密中间件，需要 ISilmoonDevAppService 服务
         /// </summary>
-        /// <param name="app"></param>
-        /// <param name="AppIdRenameTo"></param>
-        /// <param name="KeyCacheSecound"></param>
         public static void UseSilmoonAuth(this IApplicationBuilder app)
         {
             app.UseMiddleware<SilmoonAuthMiddleware>();

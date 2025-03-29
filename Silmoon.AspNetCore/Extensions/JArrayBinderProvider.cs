@@ -1,24 +1,21 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
-using MongoDB.Bson;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Threading.Tasks;
 
-namespace Silmoon.AspNetCore.Extension.Binders
+namespace Silmoon.AspNetCore.Extensions
 {
-    public class ObjectIdBinderProvider : IModelBinderProvider
+    public class JArrayBinderProvider : IModelBinderProvider
     {
         public IModelBinder? GetBinder(ModelBinderProviderContext context)
         {
-            if (context.Metadata.ModelType == typeof(ObjectId))
-                return new BinderTypeModelBinder(typeof(ObjectIdBinder));
-            else if (context.Metadata.ModelType == typeof(ObjectId?))
-                return new BinderTypeModelBinder(typeof(ObjectIdBinder));
-            else
-                return null;
+            if (context.Metadata.ModelType == typeof(JArray))
+                return new BinderTypeModelBinder(typeof(JArrayBinder));
+            else return null;
         }
     }
-    public class ObjectIdBinder : IModelBinder
+    public class JArrayBinder : IModelBinder
     {
         public Task BindModelAsync(ModelBindingContext bindingContext)
         {
@@ -33,7 +30,7 @@ namespace Silmoon.AspNetCore.Extension.Binders
             var value = valueProviderResult.FirstValue;
             if (string.IsNullOrEmpty(value)) return Task.CompletedTask;
 
-            bindingContext.Result = ModelBindingResult.Success(ObjectId.Parse(value));
+            bindingContext.Result = ModelBindingResult.Success(JArray.Parse(value));
             return Task.CompletedTask;
         }
     }

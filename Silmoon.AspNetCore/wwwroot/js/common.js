@@ -76,6 +76,15 @@ function switchDisplay(element1, element2) {
         });
     }
 }
+function showUploadSelectedImage(fileInput, showElement) {
+    if (fileInput.files && fileInput.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            showElement.innerHTML = '<img src="' + e.target.result + '" style="width: 100%; height: 100%; object-fit: cover;"/>';
+        };
+        reader.readAsDataURL(fileInput.files[0]);
+    }
+}
 
 function ajaxFileUploadPost(elementId, url, successCallback, errorCallback, processCallback) {
     var fileObj = $(elementId)[0];

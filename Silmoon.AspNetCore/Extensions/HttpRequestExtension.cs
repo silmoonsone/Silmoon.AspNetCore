@@ -42,10 +42,10 @@ namespace Silmoon.AspNetCore.Extensions
 
             return ClientBrowserType.Other;
         }
-        public static JObject ReadToJson(this HttpRequest httpRequest) => JsonConvert.DeserializeObject<JObject>(httpRequest.Body.MakeToString());
-        public static XmlDocument ReadToXml(this HttpRequest httpRequest)
+        public static async Task<JObject> ReadToJson(this HttpRequest httpRequest) => JsonConvert.DeserializeObject<JObject>(await httpRequest.Body.ReadToEndAsync());
+        public static async Task<XmlDocument> ReadToXml(this HttpRequest httpRequest)
         {
-            var requestBody = httpRequest.Body.MakeToString();
+            var requestBody = await httpRequest.Body.ReadToEndAsync();
             XmlDocument xml = new XmlDocument();
             xml.LoadXmlWithoutException(requestBody);
             return xml;
@@ -136,7 +136,7 @@ namespace Silmoon.AspNetCore.Extensions
             }
 
             httpRequest.Body.Position = 0;
-            return await httpRequest.Body.ToBytesAsync(httpRequest.ContentLength).ConfigureAwait(false);
+            return await httpRequest.Body.GetByteArrayAsync(httpRequest.ContentLength).ConfigureAwait(false);
         }
         public static string GetBearerToken(this HttpRequest request)
         {

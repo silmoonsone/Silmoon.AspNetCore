@@ -203,13 +203,13 @@ namespace Silmoon.AspNetCore.Services
             return claimsPrincipal.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToArray();
         }
 
-        public void SetUserSessionFlag<T>(string Name, T Data)
+        public virtual void SetUserSessionFlag<T>(string FlagName, T Data)
         {
-            HttpContextAccessor.HttpContext.Session.SetString("SessionCache:Flag:" + Name, Data.ToJsonString());
+            HttpContextAccessor.HttpContext.Session.SetString("SessionCache:Flag:" + FlagName, Data.ToJsonString());
         }
-        public T GetUserSessionFlag<T>(string Name)
+        public virtual T GetUserSessionFlag<T>(string FlagName)
         {
-            string json = HttpContextAccessor.HttpContext.Session.GetString("SessionCache:Flag:" + Name);
+            string json = HttpContextAccessor.HttpContext.Session.GetString("SessionCache:Flag:" + FlagName);
             if (json.IsNullOrEmpty()) return default;
             else return JsonConvert.DeserializeObject<T>(json);
         }

@@ -1,8 +1,8 @@
 ﻿using Newtonsoft.Json;
 
-namespace Silmoon.AspNetCore.Extensions.OAuth
+namespace Silmoon.AspNetCore.RequestModels
 {
-    public class TokenResponse
+    public class AccessTokenResponse
     {
         [JsonProperty("access_token")]
         public string AccessToken { get; set; }

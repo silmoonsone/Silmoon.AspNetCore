@@ -1,16 +1,16 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace Silmoon.AspNetCore.Extensions.OAuth
+namespace Silmoon.AspNetCore.RequestModels
 {
-    public class TokenErrorResponse
+    public class AccessTokenErrorResponse
     {
         [JsonProperty("error")]
         public string Error { get; set; }
         [JsonProperty("error_description")]
         public string ErrorDescription { get; set; }
 
-        public TokenErrorResponse(TokenErrorCode errorCode)
+        public AccessTokenErrorResponse(TokenErrorCode errorCode)
         {
             var dict = ErrorDescriptions[errorCode];
             Error = dict.Key;

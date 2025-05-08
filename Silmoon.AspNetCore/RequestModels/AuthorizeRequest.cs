@@ -1,4 +1,4 @@
-﻿namespace Silmoon.AspNetCore.Extensions.OAuth
+﻿namespace Silmoon.AspNetCore.RequestModels
 {
     public class AuthorizeRequest
     {

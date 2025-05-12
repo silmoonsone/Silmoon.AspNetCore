@@ -6,7 +6,7 @@ namespace Silmoon.AspNetCore.Encryption.ClientModels
     {
         [JsonProperty("challenge")]
         public byte[] Challenge { get; set; }
-        [JsonProperty("rpId")]
+        [JsonProperty("rpId", NullValueHandling = NullValueHandling.Ignore)]
         public string RpId { get; set; }
         [JsonProperty("allowCredentials")]
         public Credential[] AllowCredentials { get; set; }

@@ -3,7 +3,7 @@
     public class WebAuthnServiceOptions
     {
         public string AppName { get; set; } = "LocalhostTest";
-        public string Host { get; set; } = "localhost";
+        public string Host { get; set; } = null;
         public string GetWebAuthnOptionsUrl { get; set; } = "/_webAuthn/getWebAuthnOptions";
         public string CreateWebAuthnUrl { get; set; } = "/_webAuthn/createWebAuthn";
         public string DeleteWebAuthnUrl { get; set; } = "/_webAuthn/deleteWebAuthn";

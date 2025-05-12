@@ -30,7 +30,7 @@ namespace Silmoon.AspNetCore.Encryption.ClientModels
         {
             [JsonProperty("name")]
             public string Name { get; set; }
-            [JsonProperty("id")]
+            [JsonProperty("id", NullValueHandling = NullValueHandling.Ignore)]
             public string Id { get; set; }
         }
         public class ClientWebAuthnUser

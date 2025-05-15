@@ -1,5 +1,6 @@
 using Microsoft.JSInterop;
 using Silmoon.Models;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Silmoon.AspNetCore.Blazor.JsComponents
 {
@@ -26,17 +27,25 @@ namespace Silmoon.AspNetCore.Blazor.JsComponents
             var module = await moduleTask.Value;
             await module.InvokeVoidAsync("alert", message);
         }
-
         public async ValueTask<bool> Confirm(string message)
         {
             var module = await moduleTask.Value;
             return await module.InvokeAsync<bool>("confirm", message);
         }
-
         public async ValueTask<string> Prompt(string message)
         {
             var module = await moduleTask.Value;
             return await module.InvokeAsync<string>("showPrompt", message);
+        }
+        public async ValueTask CopyText(string text)
+        {
+            var module = await moduleTask.Value;
+            await module.InvokeVoidAsync("copyText", text);
+        }
+        public async ValueTask<bool> CopyElementText(string elementId, bool clearSelected = true)
+        {
+            var module = await moduleTask.Value;
+            return await module.InvokeAsync<bool>("copyElementText", elementId, clearSelected);
         }
 
         public async ValueTask Toast(string message, int delay = 1000)

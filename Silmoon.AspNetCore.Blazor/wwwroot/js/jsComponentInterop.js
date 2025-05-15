@@ -67,6 +67,31 @@ export function toast(msg, delay = 1000) {
     }, delay);
 }
 
+export async function copyText(text) {
+    await navigator.clipboard.writeText(text);
+}
+
+export function copyElementText(elementId, clearSelected) {
+    const element = document.getElementById(elementId);
+    if (!element) return false;
+
+    const selection = window.getSelection();
+    const range = document.createRange();
+    range.selectNodeContents(element);
+
+    selection.removeAllRanges();
+    selection.addRange(range);
+
+    try {
+        const success = document.execCommand('copy');
+        return success;
+    } catch (err) {
+        return false;
+    } finally {
+        if (clearSelected)
+            selection.removeAllRanges();
+    }
+}
 
 /**
  * Blazor call web browser download file

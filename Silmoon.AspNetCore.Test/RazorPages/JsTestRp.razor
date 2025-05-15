@@ -10,7 +10,10 @@
     <button @onclick="Alert">Alert</button>
     <button @onclick="Confirm">Confirm</button>
     <button @onclick="Download">Download</button>
+    <button @onclick="Copy">Copy</button>
+    <button @onclick="CopyElement">CopyElement</button>
 </div>
+<div id="text">@DateTime.Now.ToString()</div>
 
 @code {
     private async Task Toast()
@@ -52,5 +55,14 @@
         // var result = await Jsc.Download("data.json", "{\"id\":1}".GetBytes(), "application/json");
         var result = await Jsc.Download("data.json", "{\"id\":1}", "application/json");
         await Jsc.MetroUIConfirm("download", result.State ? "success" : "fail", false);
+    }
+    private async Task Copy()
+    {
+        await Jsc.CopyText(DateTime.Now.ToString());
+    }
+    private async Task CopyElement()
+    {
+        var result = await Jsc.CopyElementText("text", false);
+        await Jsc.Toast("result: " + result);
     }
 }

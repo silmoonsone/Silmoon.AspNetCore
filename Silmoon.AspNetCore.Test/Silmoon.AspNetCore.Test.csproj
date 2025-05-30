@@ -30,7 +30,7 @@
     <PackageReference Include="Silmoon.Data.LiteDB" Version="1.8.0" />
     <PackageReference Include="Silmoon.Graphics" Version="0.0.2" />
     <PackageReference Include="Silmoon" Version="1.8.2" />
-    <PackageReference Include="Silmoon.Data.MongoDB" Version="1.8.0" />
+    <PackageReference Include="Silmoon.Data.MongoDB" Version="1.8.1" />
     <PackageReference Include="Silmoon.Extension" Version="1.7.4" />
   </ItemGroup>
 

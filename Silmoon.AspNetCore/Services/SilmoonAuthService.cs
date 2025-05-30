@@ -27,8 +27,8 @@ namespace Silmoon.AspNetCore.Services
             ServiceProvider = serviceProvider;
             HttpContextAccessor = httpContextAccessor;
         }
-        public async Task SignIn<TUser>(TUser User, bool AddEnumRole) where TUser : class, IDefaultUserIdentity => await SignIn(User, AddEnumRole, (string[])null, null);
-        public async Task SignIn<TUser>(TUser User, string NameIdentifier = null) where TUser : class, IDefaultUserIdentity => await SignIn(User, true, (string[])null, NameIdentifier);
+        public async Task SignIn<TUser>(TUser User, bool AddEnumRole) where TUser : class, IDefaultUserIdentity => await SignIn(User, AddEnumRole, null, null);
+        public async Task SignIn<TUser>(TUser User, string NameIdentifier = null) where TUser : class, IDefaultUserIdentity => await SignIn(User, true, null, NameIdentifier);
         public async Task SignIn<TUser, TTCustomerRoles>(TUser User, bool AddEnumRole, TTCustomerRoles CustomerRoles, string NameIdentifier = null) where TUser : class, IDefaultUserIdentity where TTCustomerRoles : Enum => await SignIn(User, AddEnumRole, CustomerRoles.GetFlagStringArray(), NameIdentifier);
         public async Task SignIn<TUser, TTCustomerRoles>(TUser User, bool AddEnumRole, TTCustomerRoles[] CustomerRoles, string NameIdentifier = null) where TUser : class, IDefaultUserIdentity where TTCustomerRoles : Enum => await SignIn(User, AddEnumRole, CustomerRoles.GetStringArray(), NameIdentifier);
         public async Task SignIn<TUser>(TUser User, bool AddEnumRole, string[] CustomerRoles, string NameIdentifier = null) where TUser : class, IDefaultUserIdentity
@@ -267,7 +267,7 @@ namespace Silmoon.AspNetCore.Services
                 {
                     if (gotUser.Username == username && gotUser.Password == PasswordHash(password))
                     {
-                        await SignIn(gotUser);
+                        await SignIn(gotUser, true);
                         await httpContext.Response.WriteJObjectAsync(true.ToStateFlag());
                     }
                     else await httpContext.Response.WriteJObjectAsync(false.ToStateFlag("用户名不存在或者密码错误"));

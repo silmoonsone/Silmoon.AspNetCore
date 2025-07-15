@@ -24,7 +24,8 @@
         </div>
         <div>
             <button class="btn btn-primary btn-sm" id="enroll" @onclick="CreateWebAuthn">Add passkey</button>
-            <button class="btn btn-primary btn-sm" id="signout" @onclick="AuthenticateWebAuthn">Verify</button>
+            <button class="btn btn-primary btn-sm" id="signout" @onclick="() => AuthenticateWebAuthn(true)">Verify(All user)</button>
+            <button class="btn btn-primary btn-sm" id="signout" @onclick="() => AuthenticateWebAuthn(false)">Verify</button>
         </div>
     </div>
     <hr />
@@ -77,17 +78,17 @@
     {
         var challenge = HashHelper.RandomNumbers(32);
         ClientBlazorWebAuthnOptions clientBlazorWebAuthnOptions = new ClientBlazorWebAuthnOptions()
+        {
+            Challenge = challenge,
+            Rp = new ClientWebAuthnOptions.ClientWebAuthnRp() { Id = new Uri(NavigationManager.BaseUri).Host, Name = "LocalhostTest" },
+            User = new ClientBlazorWebAuthnOptions.ClientWebAuthnUser()
             {
-                Challenge = challenge,
-                Rp = new ClientBlazorWebAuthnOptions.ClientWebAuthnRp() { Id = new Uri(NavigationManager.BaseUri).Host, Name = "LocalhostTest" },
-                User = new ClientBlazorWebAuthnOptions.ClientWebAuthnUser()
-                {
-                    Name = CurrentUser.Username,
-                    DisplayName = $"{CurrentUser.Username}({CurrentUser.Nickname})",
-                    Id = CurrentUser._id.ToByteArray().GetBase64String(),
-                },
-                AuthenticatorSelection = new ClientBlazorWebAuthnOptions.ClientWebAuthnAuthenticatorSelection(),
-            };
+                Name = CurrentUser.Username,
+                DisplayName = $"{CurrentUser.Username}({CurrentUser.Nickname})",
+                Id = CurrentUser._id.ToByteArray().GetBase64String(),
+            },
+            AuthenticatorSelection = new ClientWebAuthnOptions.ClientWebAuthnAuthenticatorSelection(),
+        };
 
         var response = await Wac.Create(clientBlazorWebAuthnOptions);
         if (response.State)
@@ -101,15 +102,16 @@
             await Jsc.MetroUIConfirm("Result", "Error (" + response.Message + ")");
 
     }
-    async void AuthenticateWebAuthn()
+    async void AuthenticateWebAuthn(bool allUser = false)
     {
         var challenge = HashHelper.RandomNumbers(32);
         ClientBlazorWebAuthnAuthenticateOptions options = new ClientBlazorWebAuthnAuthenticateOptions()
-            {
-                Challenge = challenge,
-                RpId = new Uri(NavigationManager.BaseUri).Host,
-                // AllowCredentials = UserWebAuthnInfos.Select(x => new Credential() { Id = x.CredentialId.GetBase64String() }).ToArray(),
-            };
+        {
+            Challenge = challenge,
+            RpId = new Uri(NavigationManager.BaseUri).Host,
+        };
+        if (!allUser) options.AllowCredentials = UserWebAuthnInfos.Select(x => new Credential() { Id = x.CredentialId.GetBase64String() }).ToArray();
+
         var webAuthnAuthenticateResponse = await Wac.Authenticate(options);
 
         if (webAuthnAuthenticateResponse.State)

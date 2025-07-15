@@ -11,31 +11,24 @@ namespace Silmoon.AspNetCore.Encryption.ClientModels
         [JsonProperty("challenge")]
         required public string Challenge { get; set; }
         [JsonProperty("rp")]
-        required public ClientWebAuthnRp Rp { get; set; }
+        required public ClientWebAuthnOptions.ClientWebAuthnRp Rp { get; set; }
         [JsonProperty("user")]
         required public ClientWebAuthnUser User { get; set; }
 
         [JsonProperty("pubKeyCredParams")]
-        public List<ClientWebAuthnPubKeyCredParams> PubKeyCredParams { get; set; } = new List<ClientWebAuthnPubKeyCredParams>()
+        public List<ClientWebAuthnOptions.ClientWebAuthnPubKeyCredParams> PubKeyCredParams { get; set; } = new List<ClientWebAuthnOptions.ClientWebAuthnPubKeyCredParams>()
         {
-            new ClientWebAuthnPubKeyCredParams() { Alg = -7, Type = "public-key" },
-            new ClientWebAuthnPubKeyCredParams() { Alg = -257, Type = "public-key" }
+            new ClientWebAuthnOptions.ClientWebAuthnPubKeyCredParams() { Alg = -7, Type = "public-key" },
+            new ClientWebAuthnOptions.ClientWebAuthnPubKeyCredParams() { Alg = -257, Type = "public-key" }
         };
         [JsonProperty("authenticatorSelection")]
-        required public ClientWebAuthnAuthenticatorSelection AuthenticatorSelection { get; set; } = new ClientWebAuthnAuthenticatorSelection();
+        required public ClientWebAuthnOptions.ClientWebAuthnAuthenticatorSelection AuthenticatorSelection { get; set; } = new ClientWebAuthnOptions.ClientWebAuthnAuthenticatorSelection();
         [JsonProperty("timeout")]
         public int Timeout { get; set; } = 60000;
         [JsonProperty("attestation")]
         public string Attestation { get; set; } = "direct";
 
 
-        public class ClientWebAuthnRp
-        {
-            [JsonProperty("name")]
-            required public string Name { get; set; }
-            [JsonProperty("id")]
-            required public string Id { get; set; }
-        }
         public class ClientWebAuthnUser
         {
             /// <summary>
@@ -47,20 +40,6 @@ namespace Silmoon.AspNetCore.Encryption.ClientModels
             required public string Name { get; set; }
             [JsonProperty("displayName")]
             required public string DisplayName { get; set; }
-        }
-        public class ClientWebAuthnPubKeyCredParams
-        {
-            [JsonProperty("type")]
-            public string Type { get; set; }
-            [JsonProperty("alg")]
-            public int Alg { get; set; }
-        }
-        public class ClientWebAuthnAuthenticatorSelection
-        {
-            [JsonProperty("authenticatorAttachment")]
-            public string AuthenticatorAttachment { get; set; }
-            [JsonProperty("userVerification")]
-            public string UserVerification { get; set; } = "preferred";
         }
     }
 }

@@ -26,13 +26,6 @@ namespace Silmoon.AspNetCore.Encryption.ClientModels
         public string Attestation { get; set; } = "direct";
 
 
-        public class ClientWebAuthnRp
-        {
-            [JsonProperty("name")]
-            public string Name { get; set; }
-            [JsonProperty("id", NullValueHandling = NullValueHandling.Ignore)]
-            public string Id { get; set; }
-        }
         public class ClientWebAuthnUser
         {
             [JsonProperty("id")]
@@ -41,6 +34,13 @@ namespace Silmoon.AspNetCore.Encryption.ClientModels
             required public string Name { get; set; }
             [JsonProperty("displayName")]
             required public string DisplayName { get; set; }
+        }
+        public class ClientWebAuthnRp
+        {
+            [JsonProperty("name")]
+            required public string Name { get; set; }
+            [JsonProperty("id", NullValueHandling = NullValueHandling.Ignore)]
+            required public string Id { get; set; }
         }
         public class ClientWebAuthnPubKeyCredParams
         {
@@ -51,10 +51,12 @@ namespace Silmoon.AspNetCore.Encryption.ClientModels
         }
         public class ClientWebAuthnAuthenticatorSelection
         {
-            [JsonProperty("authenticatorAttachment")]
+            [JsonProperty("authenticatorAttachment", NullValueHandling = NullValueHandling.Ignore)]
             public string AuthenticatorAttachment { get; set; }
             [JsonProperty("userVerification")]
             public string UserVerification { get; set; } = "preferred";
+            [JsonProperty("residentKey")]
+            public string ResidentKey { get; set; } = "preferred";
         }
     }
 }

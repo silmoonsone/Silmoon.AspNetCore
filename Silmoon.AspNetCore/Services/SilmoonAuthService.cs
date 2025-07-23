@@ -33,6 +33,7 @@ namespace Silmoon.AspNetCore.Services
         public async Task SignIn<TUser, TTCustomerRoles>(TUser User, bool AddEnumRole, TTCustomerRoles[] CustomerRoles, string NameIdentifier = null) where TUser : class, IDefaultUserIdentity where TTCustomerRoles : Enum => await SignIn(User, AddEnumRole, CustomerRoles.GetStringArray(), NameIdentifier);
         public async Task SignIn<TUser>(TUser User, bool AddEnumRole, string[] CustomerRoles, string NameIdentifier = null) where TUser : class, IDefaultUserIdentity
         {
+            if (HttpContextAccessor.HttpContext is null) throw new ArgumentNullException("当前不在HTTP上下文中，无法执行操作。");
             if (User is null) throw new ArgumentNullException(nameof(User));
             if (User.Username.IsNullOrEmpty() && NameIdentifier.IsNullOrEmpty()) throw new ArgumentNullException(nameof(User.Username), "Username或者NameIdentifier必选最少一个参数。");
 
@@ -59,6 +60,7 @@ namespace Silmoon.AspNetCore.Services
         }
         public async Task<bool> SignOut()
         {
+            if (HttpContextAccessor.HttpContext is null) throw new ArgumentNullException("当前不在HTTP上下文中，无法执行操作。");
             if (await IsSignIn())
             {
                 var NameIdentifier = HttpContextAccessor.HttpContext.User.Claims.Where(c => c.Type == ClaimTypes.NameIdentifier).FirstOrDefault()?.Value;
@@ -132,6 +134,7 @@ namespace Silmoon.AspNetCore.Services
 
         public async Task<TUser> GetUser<TUser>() where TUser : class, IDefaultUserIdentity
         {
+            if (HttpContextAccessor.HttpContext is null) return null;
             if (await IsSignIn())
             {
                 var NameIdentifier = HttpContextAccessor.HttpContext.User.Claims.Where(c => c.Type == ClaimTypes.NameIdentifier).FirstOrDefault()?.Value;
@@ -160,11 +163,14 @@ namespace Silmoon.AspNetCore.Services
         }
         public async Task<TUser> GetUser<TUser>(string UserToken, string Name = null, string NameIdentifier = null) where TUser : class, IDefaultUserIdentity
         {
+            if (HttpContextAccessor.HttpContext is null) return null;
             TUser result = (TUser)await GetUserData(Name, NameIdentifier, UserToken);
             return result;
         }
         public async Task ReloadUser<TUser>() where TUser : class, IDefaultUserIdentity
         {
+            if (HttpContextAccessor.HttpContext is null) throw new ArgumentNullException("当前不在HTTP上下文中，无法执行操作。");
+
             var NameIdentifier = HttpContextAccessor.HttpContext.User.Claims.Where(c => c.Type == ClaimTypes.NameIdentifier).FirstOrDefault()?.Value;
             var Name = HttpContextAccessor.HttpContext.User.Claims.Where(c => c.Type == nameof(IDefaultUserIdentity.Username)).FirstOrDefault()?.Value;
             TUser user = default;
@@ -174,6 +180,8 @@ namespace Silmoon.AspNetCore.Services
         }
         public async Task<bool> IsSignIn()
         {
+            if (HttpContextAccessor.HttpContext is null) throw new ArgumentNullException("当前不在HTTP上下文中，无法执行操作。");
+
             var result = await HttpContextAccessor.HttpContext.AuthenticateAsync();
             return result.Succeeded;
         }

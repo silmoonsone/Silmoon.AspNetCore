@@ -18,6 +18,8 @@
             <button class="btn btn-primary" onclick="onCreatePasskey()">Create</button>
             <button class="btn btn-primary" onclick="onVerify('@user._id', {do: 'verifyUser'})">Verify(User)</button>
             <button class="btn btn-primary" onclick="onVerify(null, {do: 'verifyAllUser'})">Verify(AllUser)</button>
+            <button class="btn btn-primary ms-3" onclick="onInitWebAuthnRequest('@user._id', {do: 'verifyUser'})">onInitWebAuthnRequest(User)</button>
+            <button class="btn btn-primary" onclick="onValidateWebAuthnData()">onValidateWebAuthnData(User)</button>
         </div>
     </div>
     <hr />
@@ -73,6 +75,43 @@
             location.reload();
         } else {
             alert("Failed to delete passkey\r" + result.Message);
+        }
+    }
+</script>
+
+<script>
+    async function onInitWebAuthnRequest(userId, flagData) {
+        var result = await initWebAuthnRequest(userId, flagData);
+        if (result.Success) {
+            console.log(JSON.stringify(result));
+            Data = result.Data;
+            alert("Passkey verified successfully, flagData: " + JSON.stringify(result.Data));
+        } else {
+            alert("Failed to verify passkey\r" + result.Message);
+        }
+        console.log(result);
+    }
+
+    async function onValidateWebAuthnData() {
+        try {
+            const formData = new FormData();
+            formData.append('webAuthnData', JSON.stringify(Data));
+            const result = await fetch("/Api/ValidateWebAuthnData", {
+                method: 'POST',
+                body: formData
+            });
+            if (result.ok) {
+                const resultJson = await result.json();
+                if(resultJson.Success){
+                    alert("Passkey data validated successfully");
+                }else{
+                    alert("Failed to validate passkey data\r" + resultJson.Message);
+                }
+            } else {
+                alert("Failed to validate passkey data\r" + result.statusText);
+            }
+        } catch (err) {
+            alert("Failed to validate passkey data\r" + err);
         }
     }
 </script>

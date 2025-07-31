@@ -140,6 +140,50 @@ async function authenticateWebAuthn(userId, flagData) {
     }
 }
 
+async function initWebAuthnRequest(userId, flagData) {
+    try {
+        if (typeof flagData == "undefined") flagData = null;
+        // 1. 向服务器请求挑战 (challenge) 和其他验证选项
+        const response = await fetch(webAuthnClientOptions.getWebAuthnAuthenticateOptions + '?UserId=' + userId);
+        const responseData = await response.json();
+
+        const options = responseData.Data;
+        // 2. 将 challenge 和允许的凭证ID (allowedCredentials.id) 转换为 Uint8Array
+        options.challenge = base64ToUint8Array(options.challenge);
+        options.allowCredentials = options.allowCredentials.map(cred => {
+            return {
+                ...cred,
+                id: base64ToUint8Array(cred.id)
+            };
+        });
+
+        // 3. 调用 navigator.credentials.get() 获取签名
+        const assertion = await navigator.credentials.get({
+            publicKey: options
+        });
+
+        // 4. 获取相关信息
+        const authenticatorData = new Uint8Array(assertion.response.authenticatorData);
+        const clientDataJSON = new Uint8Array(assertion.response.clientDataJSON);
+        const signature = new Uint8Array(assertion.response.signature);
+        const rawId = new Uint8Array(assertion.rawId);
+
+        // 5. 将数据发送到服务器进行验证
+        const data = {
+            rawId: arrayBufferToBase64(rawId),
+            type: assertion.type,
+            response: {
+                authenticatorData: arrayBufferToBase64(authenticatorData),
+                clientDataJSON: arrayBufferToBase64(clientDataJSON),
+                signature: arrayBufferToBase64(signature),
+            },
+            flagData: flagData
+        };
+        return { Success: true, Data: data }
+    } catch (err) {
+        return { Success: false, Message: err.message, Data: err }
+    }
+}
 
 function arrayBufferToBase64(buffer) {
     // 创建一个 Uint8Array 视图，表示原始 ArrayBuffer 的字节内容

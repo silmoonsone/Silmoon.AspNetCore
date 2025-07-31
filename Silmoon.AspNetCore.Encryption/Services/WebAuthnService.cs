@@ -1,21 +1,22 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Silmoon.AspNetCore.Encryption.ClientModels;
-using Silmoon.AspNetCore.Encryption.Services.Interfaces;
-using Silmoon.Models;
-using Silmoon.Runtime.Cache;
-using System.Linq;
-using System;
-using System.Threading.Tasks;
-using Silmoon.Extension;
-using System.Security.Claims;
-using Silmoon.AspNetCore.Extensions;
 using Silmoon.AspNetCore.Encryption.Models;
-using Newtonsoft.Json;
+using Silmoon.AspNetCore.Encryption.Services.Interfaces;
+using Silmoon.AspNetCore.Extensions;
+using Silmoon.Extension;
+using Silmoon.Models;
+using Silmoon.Runtime;
+using Silmoon.Runtime.Cache;
+using System;
+using System.Linq;
+using System.Net.Http;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using Silmoon.Runtime;
+using System.Threading.Tasks;
 
 namespace Silmoon.AspNetCore.Encryption.Services
 {
@@ -151,9 +152,9 @@ namespace Silmoon.AspNetCore.Encryption.Services
             var clientData = verifyWebAuthnResponse.Response.GetClientJson();
 
             var userIdResult = GlobalCaching<string, string>.Get("______passkey_challenge:" + clientData["challenge"].Value<string>().Base64UrlToBase64());
+            GlobalCaching<string, string>.Remove("______passkey_challenge:" + clientData["challenge"].Value<string>().Base64UrlToBase64());
 
             StateSet<bool> result = new StateSet<bool>();
-
             if (!userIdResult.Matched)
             {
                 result.State = false;
@@ -182,6 +183,52 @@ namespace Silmoon.AspNetCore.Encryption.Services
             var newResult = await OnAuthenticateCompleted(httpContext, verifyWebAuthnResponse, result, verifyWebAuthnResponse.FlagData);
             StateFlag<object> stateFlag = new StateFlag<object>() { Success = newResult.State, Data = verifyWebAuthnResponse.FlagData, Message = newResult.Message };
             await httpContext.Response.WriteJObjectAsync(stateFlag);
+        }
+
+        public async Task<StateSet<bool>> ValidateData(HttpContext httpContext, string jsonStringData)
+        {
+            var bodyStr = jsonStringData;
+            WebAuthnAuthenticateResponse verifyWebAuthnResponse = JsonConvert.DeserializeObject<WebAuthnAuthenticateResponse>(bodyStr);
+
+            byte[] rawId = verifyWebAuthnResponse.RawId;
+            byte[] clientDataJSON = verifyWebAuthnResponse.Response.ClientDataJson;
+            byte[] authenticatorData = verifyWebAuthnResponse.Response.AuthenticatorData;
+            byte[] signature = verifyWebAuthnResponse.Response.Signature;
+
+            var clientData = verifyWebAuthnResponse.Response.GetClientJson();
+
+            var userIdResult = GlobalCaching<string, string>.Get("______passkey_challenge:" + clientData["challenge"].Value<string>().Base64UrlToBase64());
+            GlobalCaching<string, string>.Remove("______passkey_challenge:" + clientData["challenge"].Value<string>().Base64UrlToBase64());
+
+            StateSet<bool> result = new StateSet<bool>();
+            if (!userIdResult.Matched)
+            {
+                result.State = false;
+                result.Message = "Challenge failed";
+            }
+            else
+            {
+                var publicKeyInfo = await OnGetPublicKeyInfo(httpContext, rawId, userIdResult.Value);
+                if (publicKeyInfo is null)
+                {
+                    result.State = false;
+                    result.Message = "Credential not found";
+                }
+                else
+                {
+                    // 组合签名数据：authenticatorData + SHA256(clientDataJSON)
+                    var signedData = verifyWebAuthnResponse.SignedData;
+
+                    // 验证签名
+                    var validSignatureResult = verifyWebAuthnResponse.VerifySignature(publicKeyInfo);
+
+                    result.State = validSignatureResult.State;
+                    result.Message = validSignatureResult.Message;
+                }
+            }
+            var newResult = await OnAuthenticateCompleted(httpContext, verifyWebAuthnResponse, result, verifyWebAuthnResponse.FlagData);
+
+            return newResult;
         }
 
         /// <summary>

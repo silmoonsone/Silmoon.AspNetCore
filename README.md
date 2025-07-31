@@ -16,12 +16,7 @@ Many JS calls return objects that are generally the following.
 ```
 ---
 
-## User session or user authentication
 
-POST **/_session/signIn** to sign in with Username and Password QueryString or FormData.POST **/_session/signOut** to sign out.
+[User session or user authentication](README/Userauth.md)
 
-or
-
-import **/_content/Silmoon.AspNetCore.Blazor/js/jsSilmoonAuthInterop.js**
-
-call **doSignIn(username, password)** and **doSignOut()**.
+[Passkey authentication](README/Passkey.md)

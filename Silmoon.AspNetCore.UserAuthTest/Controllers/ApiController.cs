@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Silmoon.AspNetCore.Encryption.Services.Interfaces;
 using Silmoon.AspNetCore.Extensions;
 using Silmoon.AspNetCore.UserAuthTest.Models;
 using Silmoon.AspNetCore.UserAuthTest.Models.SubModels;
 using Silmoon.Secure;
+using System.Threading.Tasks;
 
 namespace Silmoon.AspNetCore.UserAuthTest.Controllers
 {
@@ -25,6 +27,12 @@ namespace Silmoon.AspNetCore.UserAuthTest.Controllers
                 Password = Password.GetMD5Hash()
             };
             var result = core.AddUser(user);
+            return this.JsonStateFlag(result.State, result.Message);
+        }
+        [HttpPost]
+        public async Task<IActionResult> ValidateWebAuthnData([FromForm] string webAuthnData, [FromServices] IWebAuthnService webAuthnService)
+        {
+            var result = await webAuthnService.ValidateData(HttpContext, webAuthnData);
             return this.JsonStateFlag(result.State, result.Message);
         }
     }

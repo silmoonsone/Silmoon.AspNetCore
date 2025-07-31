@@ -7,9 +7,12 @@ namespace Silmoon.AspNetCore.Test.Services
     public class SilmoonConfigureServiceImpl : SilmoonConfigureService
     {
         public string MongoDBConnectionString { get; private set; }
-        public SilmoonConfigureServiceImpl(IOptions<SilmoonConfigureServiceOption> options) : base(options)
+        public ILogger<SilmoonConfigureService> Logger { get; private set; }
+        public SilmoonConfigureServiceImpl(IOptions<SilmoonConfigureServiceOption> options, ILogger<SilmoonConfigureService> logger) : base(options)
         {
             MongoDBConnectionString = ConfigJson["mongodb"].Value<string>();
+            Logger = logger;
+            Logger.LogInformation($"Config file is {CurrentConfigFilePath}.");
         }
     }
 }

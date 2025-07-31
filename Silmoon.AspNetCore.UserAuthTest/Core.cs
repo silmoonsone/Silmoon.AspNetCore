@@ -28,23 +28,11 @@ namespace Silmoon.AspNetCore.UserAuthTest
 
         public User GetUser(ObjectId id) => Get<User>(x => x._id == id);
         public User GetUser(string username) => Get<User>(x => x.Username == username);
-        public void AddUserWebAuthnInfo(UserWebAuthnInfo userWebAuthnInfo)
-        {
-            Add(userWebAuthnInfo);
-        }
-        public int DeleteUserWebAuthnInfo(ObjectId UserObjectId, byte[] CredentialId)
-        {
-            return Deletes<UserWebAuthnInfo>(x => x.CredentialId == CredentialId && x.UserObjectId == UserObjectId);
-        }
+        public void AddUserWebAuthnInfo(UserWebAuthnInfo userWebAuthnInfo) => Add(userWebAuthnInfo);
+        public int DeleteUserWebAuthnInfo(ObjectId userObjectId, byte[] credentialId) => Deletes<UserWebAuthnInfo>(x => x.CredentialId == credentialId && x.UserObjectId == userObjectId);
 
-        public UserWebAuthnInfo[] GetUserWebAuthnInfos(ObjectId UserObjectId)
-        {
-            return Gets<UserWebAuthnInfo>(x => x.UserObjectId == UserObjectId).ToArray();
-        }
-        public UserWebAuthnInfo GetUserWebAuthnInfo(byte[] CredentialId)
-        {
-            return Get<UserWebAuthnInfo>(x => x.CredentialId == CredentialId);
-        }
+        public UserWebAuthnInfo[] GetUserWebAuthnInfos(ObjectId userObjectId) => [.. Gets<UserWebAuthnInfo>(x => x.UserObjectId == userObjectId)];
+        public UserWebAuthnInfo GetUserWebAuthnInfo(byte[] credentialId) => Get<UserWebAuthnInfo>(x => x.CredentialId == credentialId);
 
     }
 }

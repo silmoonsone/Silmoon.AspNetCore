@@ -1,4 +1,5 @@
 ﻿using PeterO.Cbor;
+using Silmoon.AspNetCore.Encryption.Enums;
 using Silmoon.AspNetCore.Encryption.Models;
 using Silmoon.Extension;
 using System;
@@ -32,7 +33,7 @@ namespace Silmoon.AspNetCore.Encryption
             var cborKey = CBORObject.DecodeFromBytes(coseKey);
 
             // 提取公钥算法
-            string publicKeyAlgorithm = ExtractPublicKeyAlgorithm(cborKey);
+            WebAuthnPublicKeyAlgorithm publicKeyAlgorithm = ExtractPublicKeyAlgorithm(cborKey);
 
             // 提取公钥
             byte[] publicKey = ExtractPublicKey(cborKey, publicKeyAlgorithm);
@@ -62,20 +63,20 @@ namespace Silmoon.AspNetCore.Encryption
             };
         }
 
-        private static string ExtractPublicKeyAlgorithm(CBORObject cborKey)
+        private static WebAuthnPublicKeyAlgorithm ExtractPublicKeyAlgorithm(CBORObject cborKey)
         {
             int alg = cborKey[CBORObject.FromObject(3)].AsInt32();
             return alg switch
             {
-                -7 => "ES256",  // ECDSA w/ SHA-256
-                -257 => "RS256", // RSASSA-PKCS1-v1_5 w/ SHA-256
-                _ => "Unknown"
+                -7 => WebAuthnPublicKeyAlgorithm.ES256,  // ECDSA w/ SHA-256
+                -257 => WebAuthnPublicKeyAlgorithm.RS256, // RSASSA-PKCS1-v1_5 w/ SHA-256
+                _ => WebAuthnPublicKeyAlgorithm.None,
             };
         }
 
-        private static byte[] ExtractPublicKey(CBORObject cborKey, string algorithm)
+        private static byte[] ExtractPublicKey(CBORObject cborKey, WebAuthnPublicKeyAlgorithm algorithm)
         {
-            if (algorithm == "ES256")
+            if (algorithm == WebAuthnPublicKeyAlgorithm.ES256)
             {
                 // 提取 EC2 公钥（适用于 ES256）
                 byte[] x = cborKey[CBORObject.FromObject(-2)].GetByteString();  // X coordinate
@@ -103,7 +104,7 @@ namespace Silmoon.AspNetCore.Encryption
 
                 return writer.Encode();
             }
-            else if (algorithm == "RS256")
+            else if (algorithm == WebAuthnPublicKeyAlgorithm.RS256)
             {
                 byte[] n = cborKey[CBORObject.FromObject(-1)].GetByteString();  // Modulus
                 byte[] e = cborKey[CBORObject.FromObject(-2)].GetByteString();  // Exponent

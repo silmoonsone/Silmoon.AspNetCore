@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Silmoon.AspNetCore.Encryption.Enums;
+using System.Collections.Generic;
 
 namespace Silmoon.AspNetCore.Encryption.Models
 {
@@ -12,7 +13,7 @@ namespace Silmoon.AspNetCore.Encryption.Models
         public string AttestationFormat { get; set; }
         public Dictionary<string, object> AttestationStatement { get; set; }
         public byte[] CredentialId { get; set; }
-        public string PublicKeyAlgorithm { get; set; }
+        public WebAuthnPublicKeyAlgorithm PublicKeyAlgorithm { get; set; }
         public byte[] PublicKey { get; set; }
         public int SignCount { get; set; }
         public bool UserVerified { get; set; }

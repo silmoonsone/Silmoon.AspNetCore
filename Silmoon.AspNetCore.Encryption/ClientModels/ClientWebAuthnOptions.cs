@@ -37,8 +37,14 @@ namespace Silmoon.AspNetCore.Encryption.ClientModels
         }
         public class ClientWebAuthnRp
         {
+            /// <summary>
+            /// 当前的WebAuthn RP名称，通常是应用或网站的名称。
+            /// </summary>
             [JsonProperty("name")]
             required public string Name { get; set; }
+            /// <summary>
+            /// 当前认证请求的Relying Party (RP) ID，通常是域名或应用名称。
+            /// </summary>
             [JsonProperty("id", NullValueHandling = NullValueHandling.Ignore)]
             required public string Id { get; set; }
         }

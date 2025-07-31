@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Silmoon.AspNetCore.Encryption.Enums;
 using Silmoon.Extension;
 using Silmoon.Models;
 using System.Security.Cryptography;
@@ -42,7 +43,7 @@ namespace Silmoon.AspNetCore.Encryption.Models
         }
         public StateSet<bool> VerifySignature(PublicKeyInfo publicKeyInfo)
         {
-            if (publicKeyInfo.PublicKeyAlgorithm == "ES256")
+            if (publicKeyInfo.PublicKeyAlgorithm == WebAuthnPublicKeyAlgorithm.ES256)
             {
                 using var ecdsa = ECDsa.Create();
                 ecdsa.ImportSubjectPublicKeyInfo(publicKeyInfo.PublicKey, out _);
@@ -50,7 +51,7 @@ namespace Silmoon.AspNetCore.Encryption.Models
                 if (result) return true.ToStateSet();
                 else return false.ToStateSet("Signature verification failed");
             }
-            else if (publicKeyInfo.PublicKeyAlgorithm == "RS256")
+            else if (publicKeyInfo.PublicKeyAlgorithm == WebAuthnPublicKeyAlgorithm.RS256)
             {
                 var rsa = RSA.Create();
                 rsa.ImportRSAPublicKey(publicKeyInfo.PublicKey, out _);
@@ -61,15 +62,15 @@ namespace Silmoon.AspNetCore.Encryption.Models
             else
                 return false.ToStateSet("Unsupported public key algorithm");
         }
-        public StateSet<bool> VerifySignature(byte[] publicKey, string publicKeyAlgorithm)
+        public StateSet<bool> VerifySignature(byte[] publicKey, WebAuthnPublicKeyAlgorithm publicKeyAlgorithm)
         {
-            if (publicKeyAlgorithm == "ES256")
+            if (publicKeyAlgorithm == WebAuthnPublicKeyAlgorithm.ES256)
             {
                 using var ecdsa = ECDsa.Create();
                 ecdsa.ImportSubjectPublicKeyInfo(publicKey, out _);
                 return true.ToStateSet();
             }
-            else if (publicKeyAlgorithm == "RS256")
+            else if (publicKeyAlgorithm == WebAuthnPublicKeyAlgorithm.RS256)
             {
                 var rsa = RSA.Create();
                 rsa.ImportRSAPublicKey(publicKey, out _);

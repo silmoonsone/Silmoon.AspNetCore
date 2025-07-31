@@ -85,7 +85,7 @@
         if (result.Success) {
             console.log(JSON.stringify(result));
             Data = result.Data;
-            alert("Passkey verified successfully, flagData: " + JSON.stringify(result.Data));
+            alert("Data: " + JSON.stringify(result.Data));
         } else {
             alert("Failed to verify passkey\r" + result.Message);
         }

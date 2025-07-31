@@ -17,6 +17,6 @@ Many JS calls return objects that are generally the following.
 ---
 
 
-[User session or user authentication](README/Userauth.md)
+[User session or user authentication](README/UserAuthentication.md)
 
 [Passkey authentication](README/Passkey.md)

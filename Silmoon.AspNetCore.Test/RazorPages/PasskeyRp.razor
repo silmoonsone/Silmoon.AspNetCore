@@ -8,7 +8,7 @@
 @rendermode InteractiveServer
 @attribute [Authorize]
 @inject Core Core
-@inject WebAuthnComponentInterop Wac
+@inject WebAuthnComponentInterop webAuthnInterop
 @inject JsComponentInterop Jsc
 @inject ISilmoonAuthService SilmoonAuthService
 @inject NavigationManager NavigationManager
@@ -87,10 +87,9 @@
                 DisplayName = $"{CurrentUser.Username}({CurrentUser.Nickname})",
                 Id = CurrentUser._id.ToByteArray().GetBase64String(),
             },
-            AuthenticatorSelection = new ClientWebAuthnOptions.ClientWebAuthnAuthenticatorSelection(),
         };
 
-        var response = await Wac.Create(clientBlazorWebAuthnOptions);
+        var response = await webAuthnInterop.Create(clientBlazorWebAuthnOptions);
         if (response.State)
         {
             var userWebAuthInfo = response.Data.WebAuthnInfo;
@@ -112,7 +111,7 @@
         };
         if (!allUser) options.AllowCredentials = UserWebAuthnInfos.Select(x => new Credential() { Id = x.CredentialId.GetBase64String() }).ToArray();
 
-        var webAuthnAuthenticateResponse = await Wac.Authenticate(options);
+        var webAuthnAuthenticateResponse = await webAuthnInterop.Authenticate(options);
 
         if (webAuthnAuthenticateResponse.State)
         {

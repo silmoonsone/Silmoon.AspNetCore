@@ -2,149 +2,258 @@
 
 ## 概述
 
-WebAuthn（Web Authentication）是一种基于标准的Web API，允许网站使用公钥密码学来注册和认证用户，无需密码。本库提供了完整的WebAuthn认证解决方案，支持两种认证模式：
+WebAuthn（Web Authentication）是一种基于标准的Web API，允许网站使用公钥密码学来注册和认证用户，无需密码。本库提供了完整的WebAuthn认证解决方案，支持三种使用模式：
 
-1. **直接认证模式**：客户端直接与WebAuthn服务进行认证
-2. **分阶段认证模式**：客户端先获取认证数据，然后提交到后端API进行验证
-
-## 功能特性
-
-- ✅ 创建和管理Passkey
-- ✅ 用户身份验证
-- ✅ 支持多种认证器类型
-- ✅ 安全的挑战-响应机制
-- ✅ 灵活的认证流程
+1. **简单认证模式**：一步完成用户身份验证
+2. **分阶段认证模式**：先获取认证数据，再提交到后端API验证
+3. **自定义签名模式**：对特定业务数据进行数字签名（类似密钥系统）
 
 ## 快速开始
 
-### 1. 配置服务
+### 后端配置
 
-在您的ASP.NET Core应用程序中配置WebAuthn服务：
-
+#### 1. 注册服务
 ```csharp
 // Program.cs
+builder.Services.AddWebAuthn<WebAuthnServiceImpl>();
 builder.Services.Configure<WebAuthnServiceOptions>(options =>
 {
     options.AppName = "您的应用名称";
     options.Host = "您的域名";
 });
-
-// 注册WebAuthn中间件
-app.UseMiddleware<WebAuthnMiddleware>();
+app.UseWebAuthn();
 ```
 
-### 2. 引入JavaScript库
+#### 2. 实现服务类
+继承`WebAuthnService`抽象类，实现以下方法：
 
-在您的页面中引入WebAuthn支持脚本：
+```csharp
+public class WebAuthnServiceImpl : WebAuthnService
+{
+    // 依赖注入您的数据访问层和用户服务
+    public WebAuthnServiceImpl(YourDataService dataService, YourUserService userService, IOptions<WebAuthnServiceOptions> options) 
+        : base(options) { }
 
+    // 获取用户凭证列表（认证时调用）
+    public override async Task<AllowUserCredential> GetAllowCredentials(HttpContext httpContext, string userId)
+    {
+        // 注意：以下方法调用需要您自己实现
+        var user = await GetUser(userId);  // 根据userId获取用户信息
+        AllowUserCredential result = new()
+        {
+            UserId = user.Id,                    // 必填：用户ID字符串
+            Credentials = user.WebAuthnCredentials.Select(c => new Credential
+            {
+                Id = Convert.ToBase64String(c.CredentialId),  // 必填：凭证ID的Base64编码
+                Type = "public-key"                           // 必填：固定值"public-key"
+            }).ToArray()
+        };
+        return result;
+    }
+
+    // 获取用户信息（创建Passkey时调用）
+    public override async Task<StateSet<bool, ClientWebAuthnOptions.ClientWebAuthnUser>> GetClientCreateWebAuthnOptions(HttpContext httpContext)
+    {
+        // 注意：以下方法调用需要您自己实现
+        var user = await GetCurrentUser();  // 获取当前登录用户
+        var userInfo = new ClientWebAuthnOptions.ClientWebAuthnUser
+        {
+            Id = user.Id.ToByteArray(),          // 必填：用户ID转换为字节数组
+            Name = user.Username,                // 必填：用户名
+            DisplayName = user.DisplayName       // 必填：显示名称
+        };
+        return true.ToStateSet(userInfo);
+    }
+
+    // 保存新创建的Passkey（创建流程的最后一步）
+    public override async Task<StateSet<bool>> OnCreate(HttpContext httpContext, WebAuthnCreateResponse webAuthnCreateResponse)
+    {
+        // 注意：以下方法调用需要您自己实现
+        var user = await GetCurrentUser();  // 获取当前登录用户
+        var webAuthnInfo = webAuthnCreateResponse.WebAuthnInfo;  // 包含完整的WebAuthn凭证信息
+        
+        // 保存到数据库
+        await SaveWebAuthnCredential(user.Id, webAuthnInfo);  // 保存WebAuthn凭证到数据库
+        return true.ToStateSet();
+    }
+
+    // 删除Passkey
+    public override async Task<StateSet<bool>> OnDelete(HttpContext httpContext, byte[] credentialId)
+    {
+        // 注意：以下方法调用需要您自己实现
+        var user = await GetCurrentUser();  // 获取当前登录用户
+        var deleted = await DeleteWebAuthnCredential(user.Id, credentialId);  // 从数据库删除凭证
+        return deleted ? true.ToStateSet() : false.ToStateSet("凭证不存在");
+    }
+
+    // 获取公钥信息（验证签名时调用）
+    public override async Task<PublicKeyInfo> OnGetPublicKeyInfo(HttpContext httpContext, byte[] rawId, string userId = null)
+    {
+        // 注意：以下方法调用需要您自己实现
+        var credential = await GetWebAuthnCredential(rawId, userId);  // 根据凭证ID获取凭证信息
+        if (credential == null) return null;
+        
+        return new PublicKeyInfo
+        {
+            PublicKey = credential.PublicKey,                    // 必填：公钥字节数组
+            PublicKeyAlgorithm = credential.PublicKeyAlgorithm   // 必填：公钥算法标识
+        };
+    }
+
+    // 认证完成处理（可选）
+    public override Task<StateSet<bool>> OnAuthenticateCompleted(HttpContext httpContext, WebAuthnAuthenticateResponse webAuthnAuthenticateResponse, StateSet<bool> result, object flagData)
+    {
+        // flagData包含前端传递的业务数据，如 {do: 'verifyUser'}
+        // 可以在这里处理认证完成后的业务逻辑
+        return Task.FromResult(result);
+    }
+}
+```
+
+#### 3. 创建验证API（分阶段模式需要）
+```csharp
+[HttpPost]
+public async Task<IActionResult> ValidateWebAuthnData(
+    [FromForm] string webAuthnData, 
+    [FromForm] string challenge = null)
+{
+    var result = await webAuthnService.ValidateData(HttpContext, webAuthnData, challenge);
+    return this.JsonStateFlag(result.State, result.Message);
+}
+```
+
+### 前端配置
 ```html
-<script src="/js/webauthnSupport.js"></script>
+<script src="~/_content/Silmoon.AspNetCore.Encryption/js/webauthnSupport.js"></script>
 ```
 
 ## 使用方法
 
 ### 创建Passkey
 
-用户可以通过以下方式创建新的Passkey：
-
 ```javascript
-async function createPasskey() {
-    const result = await createWebAuthn();
-    if (result.Success) {
-        console.log("Passkey创建成功");
-        // 刷新页面或更新UI
-        location.reload();
-    } else {
-        console.error("Passkey创建失败:", result.Message);
-    }
+// 创建Passkey
+const result = await createWebAuthn();
+if (result.Success) {
+    console.log("Passkey创建成功");
+    location.reload();
+} else {
+    console.error("Passkey创建失败:", result.Message);
 }
 ```
 
-### 直接认证模式
+**创建流程**：
+1. 前端调用`createWebAuthn()`函数
+2. 系统预生成挑战数据和用户信息
+3. 浏览器调用`navigator.credentials.create()`
+4. 用户通过生物识别或PIN码确认
+5. 浏览器生成凭证并自动提交到后端的`OnCreate`方法
+6. 后端验证并保存Passkey信息
 
-直接与WebAuthn服务进行认证，适用于大多数场景：
+### 1. 简单认证模式
+
+适用于基本的用户身份验证：
 
 ```javascript
-async function authenticateUser(userId, flagData) {
-    const result = await authenticateWebAuthn(userId, flagData);
-    if (result.Success) {
-        console.log("认证成功，返回数据:", result.Data);
-        // 处理认证成功逻辑
-    } else {
-        console.error("认证失败:", result.Message);
-    }
+// 验证用户
+const authResult = await authenticateWebAuthn('userId', {do: 'verifyUser'});
+if (authResult.Success) {
+    console.log("认证成功");
 }
-
-// 示例调用
-// 验证特定用户
-authenticateUser('user123', {do: 'verifyUser'});
-
-// 验证所有用户
-authenticateUser(null, {do: 'verifyAllUser'});
 ```
 
-### 分阶段认证模式
+### 2. 分阶段认证模式（推荐）
 
 适用于需要自定义验证逻辑的场景：
 
 ```javascript
-// 第一步：初始化认证请求
-async function initAuthentication(userId, flagData) {
-    const result = await initWebAuthnRequest(userId, flagData);
-    if (result.Success) {
-        // 保存认证数据供后续使用
-        window.authData = result.Data;
-        console.log("认证数据已准备就绪");
-    } else {
-        console.error("初始化认证失败:", result.Message);
-    }
-}
+// 第一步：获取认证数据
+const authData = await initWebAuthnRequest('userId', null, {do: 'verifyUser'});
 
-// 第二步：提交到后端API验证
-async function validateWithBackend() {
-    if (!window.authData) {
-        console.error("请先初始化认证");
-        return;
-    }
-
-    const formData = new FormData();
-    formData.append('webAuthnData', JSON.stringify(window.authData));
-    
-    const response = await fetch("/Api/ValidateWebAuthnData", {
-        method: 'POST',
-        body: formData
-    });
-    
-    if (response.ok) {
-        const result = await response.json();
-        if (result.Success) {
-            console.log("后端验证成功");
-        } else {
-            console.error("后端验证失败:", result.Message);
-        }
-    }
-}
+// 第二步：提交到后端验证
+const formData = new FormData();
+formData.append('webAuthnData', JSON.stringify(authData.Data));
+const response = await fetch("/Api/ValidateWebAuthnData", {
+    method: 'POST',
+    body: formData
+});
 ```
 
-### 管理Passkey
+### 3. 自定义签名模式（高级功能）
 
-#### 删除Passkey
+**重要功能**：对特定业务数据进行数字签名，类似密钥系统。
+
+**⚠️ 安全警告**：使用此功能时必须防范重放攻击！
 
 ```javascript
-async function deletePasskey(credentialId) {
-    const result = await deleteWebAuthn(credentialId);
-    if (result.Success) {
-        console.log("Passkey删除成功");
-        location.reload();
-    } else {
-        console.error("Passkey删除失败:", result.Message);
-    }
+// 对转账数据进行签名
+const transferData = `${targetAccount}|${amount}|${memo}|${Date.now()}`;
+const hashedData = await sha256Hash(transferData); // 需要自己实现哈希函数
+
+const authData = await initWebAuthnRequest('userId', hashedData);
+
+// 提交签名验证
+const formData = new FormData();
+formData.append('webAuthnData', JSON.stringify(authData.Data));
+formData.append('challenge', await sha256Hash(transferData));
+const response = await fetch("/Api/ValidateWebAuthnData", {
+    method: 'POST',
+    body: formData
+});
+```
+
+## 应用场景
+
+### 简单认证
+- 用户登录验证
+- 操作权限确认
+
+### 分阶段认证
+- 需要自定义业务逻辑的验证
+- 多步骤认证流程
+
+### 自定义签名
+- **转账请求签名**：确保转账数据的完整性和用户授权
+- **重要操作确认**：删除账户、修改关键设置等
+- **文档签名**：对重要文档进行数字签名
+
+## 防重放攻击措施
+
+使用自定义签名模式时，必须包含以下安全元素：
+
+1. **时间戳**：确保请求时效性
+2. **随机数**：防止重放攻击
+3. **唯一标识**：确保每次请求唯一性
+
+```javascript
+// 安全的数据格式示例
+const secureData = `${operation}|${target}|${Date.now()}|${generateNonce()}|${userId}`;
+```
+
+## 管理Passkey
+
+### 删除Passkey
+
+```javascript
+// 删除指定的Passkey
+const result = await deleteWebAuthn('credentialId');
+if (result.Success) {
+    console.log("Passkey删除成功");
+    location.reload();
+} else {
+    console.error("Passkey删除失败:", result.Message);
 }
 ```
 
-#### 查看Passkey列表
+**删除流程**：
+1. 前端调用`deleteWebAuthn()`函数
+2. 系统调用后端的`OnDelete`方法
+3. 后端从数据库中删除对应的WebAuthn凭证
+4. 返回删除结果
 
-Passkey列表通常由后端提供，前端展示：
+### 查看Passkey列表
+
+Passkey列表通常由后端提供数据，前端展示：
 
 ```html
 <!-- 示例：显示用户的所有Passkey -->
@@ -161,86 +270,36 @@ Passkey列表通常由后端提供，前端展示：
 </div>
 ```
 
-## 认证流程说明
+## 注意事项
 
-### 创建Passkey流程
+1. **HTTPS要求**：WebAuthn只能在HTTPS环境下工作（localhost除外）
+2. **设备要求**：用户需要支持生物识别或PIN码的设备
+3. **浏览器兼容**：支持Chrome 67+、Firefox 60+、Safari 13+、Edge 18+
+4. **安全提醒**：自定义签名模式需要特别注意重放攻击防护
 
-1. 用户点击"创建Passkey"按钮
-2. 系统生成挑战（Challenge）和用户信息
-3. 浏览器调用`navigator.credentials.create()`
-4. 用户通过生物识别或PIN码确认
-5. 浏览器生成凭证并发送到服务器
-6. 服务器验证并保存Passkey信息
+## 完整示例
 
-### 认证流程
+参考 `Silmoon.AspNetCore.UserAuthTest` 项目中的 `Passkey.cshtml` 页面，该页面展示了所有三种使用模式的完整实现示例。
 
-1. 用户点击"验证"按钮
-2. 系统生成新的挑战和允许的凭证列表
-3. 浏览器调用`navigator.credentials.get()`
-4. 用户通过生物识别或PIN码确认
-5. 浏览器生成认证断言
-6. 服务器验证签名和挑战
+**项目地址**：`Silmoon.AspNetCore.UserAuthTest.csproj`
 
-## 参数说明
+## API端点
 
-### authenticateWebAuthn(userId, flagData)
-
-- `userId`: 用户ID，如果为null则验证所有用户
-- `flagData`: 自定义数据，会在认证成功后返回
-
-### initWebAuthnRequest(userId, flagData)
-
-- `userId`: 用户ID
-- `flagData`: 自定义数据，会在认证数据中保留
+| 端点 | 说明 | 参数 |
+|------|------|------|
+| `/_webAuthn/getWebAuthnOptions` | 获取创建Passkey选项 | - |
+| `/_webAuthn/createWebAuthn` | 创建Passkey | - |
+| `/_webAuthn/deleteWebAuthn` | 删除Passkey | credentialId |
+| `/_webAuthn/getWebAuthnAuthenticateOptions` | 获取认证选项 | UserId, Challenge (POST FormData) |
+| `/_webAuthn/authenticateWebAuthn` | 执行认证 | UserId (POST FormData) |
 
 ## 错误处理
 
-所有WebAuthn操作都会返回统一的结果格式：
-
+所有操作返回统一格式：
 ```javascript
 {
     Success: boolean,    // 操作是否成功
-    Message: string,     // 错误信息（如果失败）
-    Data: object         // 返回数据（如果成功）
+    Message: string,     // 错误信息
+    Data: object         // 返回数据
 }
 ```
-
-常见错误情况：
-- 用户取消操作
-- 浏览器不支持WebAuthn
-- 网络连接问题
-- 服务器验证失败
-
-## 最佳实践
-
-1. **用户体验**：在认证过程中显示加载状态
-2. **错误处理**：为用户提供清晰的错误提示
-3. **降级方案**：为不支持WebAuthn的浏览器提供替代方案
-4. **安全性**：确保所有通信都通过HTTPS进行
-5. **测试**：在不同设备和浏览器上测试认证流程
-
-## 浏览器兼容性
-
-WebAuthn支持所有现代浏览器：
-- Chrome 67+
-- Firefox 60+
-- Safari 13+
-- Edge 18+
-
-## 注意事项
-
-1. WebAuthn只能在HTTPS环境下工作（localhost除外）
-2. 用户需要支持生物识别或PIN码的设备
-3. 每个域名的Passkey是独立的
-4. 建议为用户提供多种认证方式作为备选
-
-## 示例页面
-
-参考 `Passkey.cshtml` 页面了解完整的使用示例，该页面展示了：
-- Passkey列表展示
-- 创建新Passkey
-- 直接认证
-- 分阶段认证
-- 删除Passkey
-
-这个示例页面可以作为您实现WebAuthn功能的参考模板。

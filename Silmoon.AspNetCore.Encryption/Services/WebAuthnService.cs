@@ -10,6 +10,7 @@ using Silmoon.Extension;
 using Silmoon.Models;
 using Silmoon.Runtime;
 using Silmoon.Runtime.Cache;
+using Silmoon.Secure;
 using System;
 using System.Linq;
 using System.Net.Http;
@@ -40,7 +41,7 @@ namespace Silmoon.AspNetCore.Encryption.Services
                     AuthenticatorSelection = new ClientWebAuthnOptions.ClientWebAuthnAuthenticatorSelection() { UserVerification = "preferred" },
                     Timeout = 60000
                 };
-                GlobalCaching<string, string>.Set("______passkey_challenge:" + result.Data.Challenge.GetBase64String(), getResult.Data.Id.GetBase64String(), TimeSpan.FromSeconds(300));
+                GlobalCaching<string, string>.Set("_passkey_challenge:" + result.Data.Challenge.GetBase64String(), getResult.Data.Id.GetBase64String(), TimeSpan.FromSeconds(300));
             }
             else
             {
@@ -53,8 +54,9 @@ namespace Silmoon.AspNetCore.Encryption.Services
         {
             StateFlag<ClientWebAuthnAuthenticateOptions> result = new StateFlag<ClientWebAuthnAuthenticateOptions>();
 
-            var challenge = Guid.NewGuid().ToByteArray();
-            string userId = httpContext.Request.Query["UserId"];
+            string userId = httpContext.Request.Form["UserId"];
+            string challengeStr = httpContext.Request.Form["Challenge"];
+            var challenge = challengeStr.IsNullOrEmpty() ? HashHelper.RandomChars(32).GetBytes() : challengeStr.GetBytes();
             var allowUserCredential = await GetAllowCredentials(httpContext, userId);
 
             if (allowUserCredential is null)
@@ -71,7 +73,10 @@ namespace Silmoon.AspNetCore.Encryption.Services
                     RpId = Options.Host,
                     AllowCredentials = allowUserCredential.Credentials,
                 };
-                GlobalCaching<string, string>.Set("______passkey_challenge:" + challenge.GetBase64String(), allowUserCredential.UserId, TimeSpan.FromSeconds(300));
+
+                var a = challenge.GetBase64String();
+                if (challengeStr.IsNullOrEmpty()) GlobalCaching<string, string>.Set("_passkey_challenge:" + challenge.GetBase64String(), allowUserCredential.UserId, TimeSpan.FromSeconds(300));
+                else GlobalCaching<string, string>.Set("__passkey_challenge:" + challenge.GetBase64String(), allowUserCredential.UserId, TimeSpan.FromSeconds(300));
             }
             await httpContext.Response.WriteJObjectAsync(result);
         }
@@ -82,7 +87,7 @@ namespace Silmoon.AspNetCore.Encryption.Services
             var clientDataJSON = createWebAuthnKeyResponse.Response.ClientDataJson.GetString();
             var clientJson = JObject.Parse(clientDataJSON);
 
-            var userIdResult = GlobalCaching<string, string>.Get("______passkey_challenge:" + clientJson["challenge"].Value<string>().Base64UrlToBase64());
+            var userIdResult = GlobalCaching<string, string>.Get("_passkey_challenge:" + clientJson["challenge"].Value<string>().Base64UrlToBase64());
 
             StateFlag<bool> result = new StateFlag<bool>();
             if (!userIdResult.Matched)
@@ -151,8 +156,8 @@ namespace Silmoon.AspNetCore.Encryption.Services
 
             var clientData = verifyWebAuthnResponse.Response.GetClientJson();
 
-            var userIdResult = GlobalCaching<string, string>.Get("______passkey_challenge:" + clientData["challenge"].Value<string>().Base64UrlToBase64());
-            GlobalCaching<string, string>.Remove("______passkey_challenge:" + clientData["challenge"].Value<string>().Base64UrlToBase64());
+            var userIdResult = GlobalCaching<string, string>.Get("_passkey_challenge:" + clientData["challenge"].Value<string>().Base64UrlToBase64());
+            GlobalCaching<string, string>.Remove("_passkey_challenge:" + clientData["challenge"].Value<string>().Base64UrlToBase64());
 
             StateSet<bool> result = new StateSet<bool>();
             if (!userIdResult.Matched)
@@ -185,20 +190,22 @@ namespace Silmoon.AspNetCore.Encryption.Services
             await httpContext.Response.WriteJObjectAsync(stateFlag);
         }
 
-        public async Task<StateSet<bool>> ValidateData(HttpContext httpContext, string jsonStringData)
+        public async Task<StateSet<bool>> ValidateData(HttpContext httpContext, string jsonStringData, string challenge)
         {
-            var bodyStr = jsonStringData;
-            WebAuthnAuthenticateResponse verifyWebAuthnResponse = JsonConvert.DeserializeObject<WebAuthnAuthenticateResponse>(bodyStr);
+            challenge = challenge?.GetBytes().GetBase64String();
+            WebAuthnAuthenticateResponse verifyWebAuthnResponse = JsonConvert.DeserializeObject<WebAuthnAuthenticateResponse>(jsonStringData);
 
             byte[] rawId = verifyWebAuthnResponse.RawId;
-            byte[] clientDataJSON = verifyWebAuthnResponse.Response.ClientDataJson;
-            byte[] authenticatorData = verifyWebAuthnResponse.Response.AuthenticatorData;
-            byte[] signature = verifyWebAuthnResponse.Response.Signature;
+            //byte[] clientDataJSON = verifyWebAuthnResponse.Response.ClientDataJson;
+            //byte[] authenticatorData = verifyWebAuthnResponse.Response.AuthenticatorData;
+            //byte[] signature = verifyWebAuthnResponse.Response.Signature;
 
             var clientData = verifyWebAuthnResponse.Response.GetClientJson();
 
-            var userIdResult = GlobalCaching<string, string>.Get("______passkey_challenge:" + clientData["challenge"].Value<string>().Base64UrlToBase64());
-            GlobalCaching<string, string>.Remove("______passkey_challenge:" + clientData["challenge"].Value<string>().Base64UrlToBase64());
+            if (!challenge.IsNullOrEmpty() && clientData["challenge"].Value<string>() != challenge) return new StateSet<bool> { State = false, Message = "Signature challenge not match." };
+            var cacheKey = challenge.IsNullOrEmpty() ? "_passkey_challenge:" + clientData["challenge"].Value<string>().Base64UrlToBase64() : "__passkey_challenge:" + clientData["challenge"].Value<string>().Base64UrlToBase64();
+            var userIdResult = GlobalCaching<string, string>.Get(cacheKey);
+            GlobalCaching<string, string>.Remove(cacheKey);
 
             StateSet<bool> result = new StateSet<bool>();
             if (!userIdResult.Matched)
@@ -226,9 +233,7 @@ namespace Silmoon.AspNetCore.Encryption.Services
                     result.Message = validSignatureResult.Message;
                 }
             }
-            var newResult = await OnAuthenticateCompleted(httpContext, verifyWebAuthnResponse, result, verifyWebAuthnResponse.FlagData);
-
-            return newResult;
+            return result;
         }
 
         /// <summary>

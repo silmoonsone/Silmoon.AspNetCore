@@ -12,14 +12,21 @@
 }
 <div>
     <div class="d-flex justify-content-between align-items-center">
-
         <div>Passkey list</div>
         <div>
-            <button class="btn btn-primary" onclick="onCreatePasskey()">Create</button>
-            <button class="btn btn-primary" onclick="onVerify('@user._id', {do: 'verifyUser'})">Verify(User)</button>
-            <button class="btn btn-primary" onclick="onVerify(null, {do: 'verifyAllUser'})">Verify(AllUser)</button>
-            <button class="btn btn-primary ms-3" onclick="onInitWebAuthnRequest('@user._id', {do: 'verifyUser'})">onInitWebAuthnRequest(User)</button>
-            <button class="btn btn-primary" onclick="onValidateWebAuthnData()">onValidateWebAuthnData(User)</button>
+            <div style="text-align: end">
+                <button class="btn btn-primary" onclick="onCreatePasskey()">Create</button>
+                <button class="btn btn-primary" onclick="onVerify('@user._id', {do: 'verifyUser'})">Verify(User)</button>
+                <button class="btn btn-primary" onclick="onVerify(null, {do: 'verifyAllUser'})">Verify(AllUser)</button>
+            </div>
+            <div class="pt-1" style="text-align: end">
+                <button class="btn btn-primary ms-3" onclick="onInitWebAuthnRequest('@user._id', null, {do: 'verifyUser'})">onInitWebAuthnRequest</button>
+                <button class="btn btn-primary" onclick="onValidateWebAuthnData()">onValidateWebAuthnData</button>
+            </div>
+            <div class="pt-1" style="text-align: end">
+                <button class="btn btn-primary ms-3" onclick="onInitWebAuthnRequest('@user._id', 'diy', {do: 'verifyUser'})">onInitWebAuthnRequest with challenge</button>
+                <button class="btn btn-primary" onclick="onValidateWebAuthnData('diy')">onValidateWebAuthnData with challenge</button>
+            </div>
         </div>
     </div>
     <hr />
@@ -80,8 +87,8 @@
 </script>
 
 <script>
-    async function onInitWebAuthnRequest(userId, flagData) {
-        var result = await initWebAuthnRequest(userId, flagData);
+    async function onInitWebAuthnRequest(userId, challenge = null, flagData = null) {
+        var result = await initWebAuthnRequest(userId, challenge, flagData);
         if (result.Success) {
             console.log(JSON.stringify(result));
             Data = result.Data;
@@ -92,10 +99,11 @@
         console.log(result);
     }
 
-    async function onValidateWebAuthnData() {
+    async function onValidateWebAuthnData(challenge = null) {
         try {
             const formData = new FormData();
             formData.append('webAuthnData', JSON.stringify(Data));
+            if(typeof challenge == 'string' && challenge.length > 0) formData.append('challenge', challenge);
             const result = await fetch("/Api/ValidateWebAuthnData", {
                 method: 'POST',
                 body: formData

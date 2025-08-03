@@ -92,7 +92,7 @@ namespace Silmoon.AspNetCore.Encryption.Services
                 if (challengeStr.IsNullOrEmpty()) GlobalCaching<string, string>.Set("_passkey_challenge:" + challenge.GetBase64String(), allowUserCredential.UserId, TimeSpan.FromSeconds(300));
                 else GlobalCaching<string, string>.Set("__passkey_challenge:" + challenge.GetBase64String(), allowUserCredential.UserId, TimeSpan.FromSeconds(300));
             }
-        fin:
+            fin:
             await httpContext.Response.WriteJObjectAsync(result);
         }
         public async Task Create(HttpContext httpContext, RequestDelegate requestDelegate)

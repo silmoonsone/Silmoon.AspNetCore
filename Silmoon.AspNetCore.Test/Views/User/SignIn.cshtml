@@ -30,12 +30,12 @@
     }
     function signin_OnComplete(e, status) {
         var btn = $("#signinSubmit");
-        if (e.responseJSON.Success) {
+        if (e.responseJSON.success) {
             btn[0].innerText = "稍等...";
             toast("成功，转跳中...", 1000);
             setTimeout(function () { location.href = "/Home" }, 1000);
         } else {
-            toast("失败：" + e.responseJSON.Message, 3000);
+            toast("失败：" + e.responseJSON.message, 3000);
             btn[0].disabled = false;
         }
     }

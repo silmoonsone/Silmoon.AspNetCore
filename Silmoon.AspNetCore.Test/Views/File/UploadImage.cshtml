@@ -35,7 +35,7 @@
         methods: {
             uploadImage: function (uploaderId, fileName) {
                 ajaxFileUploadPost("#" + uploaderId, "../WebApi/UploadTempImage?UserId=@Model.Username", function (e) {
-                    if (e.Success) {
+                    if (e.success) {
                         v.getImages();
                         $(".smm-uploader-status").hide();
                         $(".smm-uploader-new").show();
@@ -55,10 +55,10 @@
             },
             getImages: function () {
                 $.get("../WebApi/GetTempImageNames?UserId=@Model.Username", function (e) {
-                    if (e.Success) {
+                    if (e.success) {
                         v.images = [];
-                        for (var i = 0; i < e.Data.length; i++) {
-                            v.images[i] = e.Data[i];
+                        for (var i = 0; i < e.data.length; i++) {
+                            v.images[i] = e.data[i];
                         }
                     } else {
                         // error
@@ -68,7 +68,7 @@
             deleteImage: function (fileName) {
                 if (confirm("删除图片？")) {
                     $.get("../WebApi/DeleteTempImage?UserId=@Model.Username&fileName=" + fileName, function (e) {
-                        if (e.Success) {
+                        if (e.success) {
                             v.getImages();
                         } else {
                             // error

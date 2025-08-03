@@ -1,4 +1,5 @@
 ﻿using Microsoft.JSInterop;
+using Silmoon.Extension.Models;
 using Silmoon.Models;
 using System;
 using System.Collections.Generic;
@@ -17,15 +18,15 @@ namespace Silmoon.AspNetCore.Blazor.JsComponents
             moduleTask = new(() => jsRuntime.InvokeAsync<IJSObjectReference>(
                 "import", "./_content/Silmoon.AspNetCore.Blazor/js/jsSilmoonAuthInterop.js").AsTask());
         }
-        public async ValueTask<StateFlag<object>> SignIn(string username, string password)
+        public async ValueTask<StateResult> SignIn(string username, string password)
         {
             var module = await moduleTask.Value;
-            return await module.InvokeAsync<StateFlag<object>>("doSignIn", username, password);
+            return await module.InvokeAsync<StateResult>("doSignIn", username, password);
         }
-        public async ValueTask<StateFlag<object>> SignOut()
+        public async ValueTask<StateResult> SignOut()
         {
             var module = await moduleTask.Value;
-            return await module.InvokeAsync<StateFlag<object>>("doSignOut");
+            return await module.InvokeAsync<StateResult>("doSignOut");
         }
         public async ValueTask DisposeAsync()
         {

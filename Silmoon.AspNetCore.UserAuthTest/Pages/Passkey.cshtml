@@ -59,30 +59,30 @@
 <script>
     async function onCreatePasskey() {
         var result = await createWebAuthn();
-        if (result.Success) {
+        if (result.success) {
             alert("Passkey created successfully");
             location.reload();
         } else {
-            alert("Failed to create passkey\r" + result.Message);
+            alert("Failed to create passkey\r" + result.message);
         }
     }
 
     async function onVerify(userId, flagData) {
         var result = await authenticateWebAuthn(userId, flagData);
-        if (result.Success) {
-            alert("Passkey verified successfully, flagData: " + JSON.stringify(result.Data));
+        if (result.success) {
+            alert("Passkey verified successfully, flagData: " + JSON.stringify(result.data));
         } else {
-            alert("Failed to verify passkey\r" + result.Message);
+            alert("Failed to verify passkey\r" + result.message);
         }
     }
 
     async function onDeletePasskey(credentialId) {
         var result = await deleteWebAuthn(credentialId);
-        if (result.Success) {
+        if (result.success) {
             alert("Passkey deleted successfully");
             location.reload();
         } else {
-            alert("Failed to delete passkey\r" + result.Message);
+            alert("Failed to delete passkey\r" + result.message);
         }
     }
 </script>
@@ -90,12 +90,12 @@
 <script>
     async function onInitWebAuthnRequest(userId, challenge = null, flagData = null) {
         var result = await initWebAuthnRequest(userId, challenge, flagData);
-        if (result.Success) {
+        if (result.success) {
             console.log(JSON.stringify(result));
-            Data = result.Data;
-            alert("Data: " + JSON.stringify(result.Data));
+            Data = result.data;
+            alert("Data: " + JSON.stringify(result.data));
         } else {
-            alert("Failed to verify passkey\r" + result.Message);
+            alert("Failed to verify passkey\r" + result.message);
         }
         console.log(result);
     }
@@ -111,10 +111,10 @@
             });
             if (result.ok) {
                 const resultJson = await result.json();
-                if(resultJson.Success){
+                if(resultJson.success){
                     alert("Passkey data validated successfully");
                 }else{
-                    alert("Failed to validate passkey data\r" + resultJson.Message);
+                    alert("Failed to validate passkey data\r" + resultJson.message);
                 }
             } else {
                 alert("Failed to validate passkey data\r" + result.statusText);

@@ -43,7 +43,7 @@
         methods: {
             uploadPic: function (uploaderId, blockId, fileName) {
                 ajaxFileUploadPost("#" + uploaderId, "../WebApi/UploadTempImage?FileName=" + fileName + "&UserId=@(Model.Username)", function (e) {
-                    if (e.Success) {
+                    if (e.success) {
                         $("#" + blockId + " .smm-uploader-block-title").hide();
                         $("#" + blockId + " .smm-uploader-block-ok").show();
                         $("#" + blockId + " .smm-uploader-block-status").hide();
@@ -67,7 +67,7 @@
             deletePic: function (fileName, blockId) {
                 if (confirm("删除图片？")) {
                     $.get("../WebApi/DeleteTempImage?UserId=@Model.Username&fileName=" + fileName, function (e) {
-                        if (e.Success) {
+                        if (e.success) {
                             $("#" + blockId + " .smm-uploader-block-title").show();
                             $("#" + blockId + " .smm-uploader-block-ok").hide();
                             $("#" + blockId + " .smm-uploader-block-delete").hide();

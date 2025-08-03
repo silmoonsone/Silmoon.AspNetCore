@@ -37,14 +37,14 @@ namespace Silmoon.AspNetCore.Test.Controllers
                 Username = Username,
                 Password = EncryptHelper.RsaEncrypt(Password),
             };
-            return this.JsonStateFlag(true, user);
+            return this.JsonStateResult(true, user);
         }
 
         [Authorize]
         public IActionResult DashboardApi()
         {
             var result = User.Identity.IsAuthenticated;
-            return this.JsonStateFlag(true, $"You IsAuthenticated is {result}.", data: result);
+            return this.JsonStateResult(true, $"You IsAuthenticated is {result}.", data: result);
         }
 
         public async Task<IActionResult> UploadTempImage(string UserId, string fileName)
@@ -66,17 +66,17 @@ namespace Silmoon.AspNetCore.Test.Controllers
             else
                 GlobalCaching<string, NameObjectCollection<byte[]>>.Set(UserId + ":temp_images", new NameObjectCollection<byte[]>() { { fileName, compressedImageData } });
 
-            return this.JsonStateFlag(true);
+            return this.JsonStateResult(true);
         }
         public IActionResult GetTempImageNames(string UserId)
         {
             var files = GlobalCaching<string, NameObjectCollection<byte[]>>.Get(UserId + ":temp_images");
             if (files.Matched)
             {
-                return this.JsonStateFlag(true, data: files.Value.GetAllKeys());
+                return this.JsonStateResult(true, data: files.Value.GetAllKeys());
             }
             else
-                return this.JsonStateFlag(true, data: 0);
+                return this.JsonStateResult(true, data: 0);
         }
         public IActionResult DeleteTempImage(string UserId, string fileName)
         {
@@ -84,10 +84,10 @@ namespace Silmoon.AspNetCore.Test.Controllers
             if (files.Matched)
             {
                 files.Value.Remove(fileName);
-                return this.JsonStateFlag(true);
+                return this.JsonStateResult(true);
             }
             else
-                return this.JsonStateFlag(false);
+                return this.JsonStateResult(false);
         }
         //[OutputCache(Duration = 3600)]
         public IActionResult ShowTempImage(string UserId, string fileName)
@@ -113,17 +113,17 @@ namespace Silmoon.AspNetCore.Test.Controllers
             else
                 GlobalCaching<string, NameObjectCollection<byte[]>>.Set(UserId + ":temp_files", new NameObjectCollection<byte[]>() { { fileName.IsNullOrEmpty() ? Request.Form.Files[0].FileName : fileName, data } });
 
-            return this.JsonStateFlag(true);
+            return this.JsonStateResult(true);
         }
         public IActionResult GetTempFileNames(string UserId)
         {
             var files = GlobalCaching<string, NameObjectCollection<byte[]>>.Get(UserId + ":temp_files");
             if (files.Matched)
             {
-                return this.JsonStateFlag(true, data: files.Value.GetAllKeys());
+                return this.JsonStateResult(true, data: files.Value.GetAllKeys());
             }
             else
-                return this.JsonStateFlag(true, data: 0);
+                return this.JsonStateResult(true, data: 0);
         }
         public IActionResult DeleteTempFile(string UserId, string fileName)
         {
@@ -131,10 +131,10 @@ namespace Silmoon.AspNetCore.Test.Controllers
             if (files.Matched)
             {
                 files.Value.Remove(fileName);
-                return this.JsonStateFlag(true);
+                return this.JsonStateResult(true);
             }
             else
-                return this.JsonStateFlag(false);
+                return this.JsonStateResult(false);
         }
         public IActionResult ShowTempFile(string UserId, string fileName)
         {

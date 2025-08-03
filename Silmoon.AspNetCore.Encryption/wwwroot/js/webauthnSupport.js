@@ -12,9 +12,9 @@ async function createWebAuthn() {
         // 1. 向服务器请求创建挑战 (challenge) 和 RP 信息
         const response = await fetch(webAuthnClientOptions.getWebAuthnOptionsUrl);
         const result = await response.json();
-        const options = result.Data;
+        const options = result.data;
 
-        if (!result.Success) return { Success: false, Message: result.Message }
+        if (!result.success) return { success: false, message: result.Message }
 
         // 2. 将 challenge 和 user.id 转换为 Uint8Array
         options.challenge = base64ToUint8Array(options.challenge);
@@ -54,10 +54,10 @@ async function createWebAuthn() {
             const responseData = await createResponse.json();
             return responseData;
         } else {
-            return { Success: false, Message: createResponse.statusText }
+            return { success: false, message: createResponse.statusText }
         }
     } catch (err) {
-        return { Success: false, Message: err.message, Data: err }
+        return { success: false, message: err.message, data: err }
     }
 }
 async function deleteWebAuthn(credentialId) {
@@ -74,12 +74,12 @@ async function deleteWebAuthn(credentialId) {
                 const responseData = await response.json();
                 return responseData;
             } else {
-                return { Success: false, Message: response.statusText }
+                return { success: false, message: response.statusText }
             }
         } catch (err) {
-            return { Success: false, Message: err.message, Data: err }
+            return { success: false, Message: err.message, data: err }
         }
-    } else return { Success: false, Message: "Delete canceled.", Data: null }
+    } else return { success: false, message: "Delete canceled.", data: null }
 }
 async function authenticateWebAuthn(userId, flagData) {
     try {
@@ -93,7 +93,7 @@ async function authenticateWebAuthn(userId, flagData) {
         });
         const responseData = await response.json();
 
-        const options = responseData.Data;
+        const options = responseData.data;
         // 2. 将 challenge 和允许的凭证ID (allowedCredentials.id) 转换为 Uint8Array
         options.challenge = base64ToUint8Array(options.challenge);
         options.allowCredentials = options.allowCredentials.map(cred => {
@@ -138,10 +138,10 @@ async function authenticateWebAuthn(userId, flagData) {
             const result = await verificationResponse.json();
             return result;
         } else {
-            return { Success: false, Message: verificationResponse.statusText }
+            return { success: false, message: verificationResponse.statusText }
         }
     } catch (err) {
-        return { Success: false, Message: err.message, Data: err }
+        return { success: false, message: err.message, data: err }
     }
 }
 
@@ -160,7 +160,7 @@ async function initWebAuthnRequest(userId, challenge = null, flagData = null) {
         });
         const responseData = await response.json();
 
-        const options = responseData.Data;
+        const options = responseData.data;
         // 2. 将 challenge 和允许的凭证ID (allowedCredentials.id) 转换为 Uint8Array
         options.challenge = base64ToUint8Array(options.challenge);
         options.allowCredentials = options.allowCredentials.map(cred => {
@@ -192,9 +192,9 @@ async function initWebAuthnRequest(userId, challenge = null, flagData = null) {
             },
             flagData: flagData
         };
-        return { Success: true, Data: data }
+        return { success: true, data: data }
     } catch (err) {
-        return { Success: false, Message: err.message, Data: err }
+        return { success: false, message: err.message, data: err }
     }
 }
 

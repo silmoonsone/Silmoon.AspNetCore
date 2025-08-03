@@ -27,13 +27,13 @@ namespace Silmoon.AspNetCore.UserAuthTest.Controllers
                 Password = Password.GetMD5Hash()
             };
             var result = core.AddUser(user);
-            return this.JsonStateFlag(result.State, result.Message);
+            return this.JsonStateResult(result.State, result.Message);
         }
         [HttpPost]
         public async Task<IActionResult> ValidateWebAuthnData([FromForm] string webAuthnData, [FromServices] IWebAuthnService webAuthnService, [FromForm] string challenge = null)
         {
             var result = await webAuthnService.ValidateData(HttpContext, webAuthnData, challenge);
-            return this.JsonStateFlag(result.State, result.Message);
+            return this.JsonStateResult(result.State, result.Message);
         }
     }
 }

@@ -7,6 +7,7 @@ using Silmoon.AspNetCore.Encryption.Models;
 using Silmoon.AspNetCore.Encryption.Services.Interfaces;
 using Silmoon.AspNetCore.Extensions;
 using Silmoon.Extension;
+using Silmoon.Extension.Models;
 using Silmoon.Models;
 using Silmoon.Runtime;
 using Silmoon.Runtime.Cache;
@@ -28,7 +29,7 @@ namespace Silmoon.AspNetCore.Encryption.Services
         public async Task GetCreateOptions(HttpContext httpContext, RequestDelegate requestDelegate)
         {
             var getResult = await GetClientCreateWebAuthnOptions(httpContext);
-            StateFlag<ClientWebAuthnOptions> result = new StateFlag<ClientWebAuthnOptions>();
+            StateResult<ClientWebAuthnOptions> result = new StateResult<ClientWebAuthnOptions>();
 
             if (getResult.State)
             {
@@ -43,29 +44,23 @@ namespace Silmoon.AspNetCore.Encryption.Services
                 };
                 GlobalCaching<string, string>.Set("_passkey_challenge:" + result.Data.Challenge.GetBase64String(), getResult.Data.Id.GetBase64String(), TimeSpan.FromSeconds(300));
             }
-            else
-            {
-                result.Success = false;
-                result.Message = getResult.Message;
-            }
+            else result.Set(false, getResult.Message);
             await httpContext.Response.WriteJObjectAsync(result);
         }
         public async Task GetAuthenticateOptions(HttpContext httpContext, RequestDelegate requestDelegate)
         {
-            StateFlag<ClientWebAuthnAuthenticateOptions> result = new StateFlag<ClientWebAuthnAuthenticateOptions>();
+            StateResult<ClientWebAuthnAuthenticateOptions> result = new StateResult<ClientWebAuthnAuthenticateOptions>();
 
             string userId = httpContext.Request.Form["UserId"];
             string challengeStr = httpContext.Request.Form["Challenge"];
             byte[] challenge;
 
-            if (challengeStr.IsNullOrEmpty())
-                challenge = HashHelper.RandomChars(32).GetBytes();
+            if (challengeStr.IsNullOrEmpty()) challenge = HashHelper.RandomChars(32).GetBytes();
             else
             {
                 if (challengeStr.Length > 1024)
                 {
-                    result.Success = false;
-                    result.Message = "Challenge must be less than 1024 characters.";
+                    result.Set(false, "Challenge must be less than 1024 characters.");
                     goto fin;
                 }
                 else challenge = challengeStr.GetBytes();
@@ -73,11 +68,7 @@ namespace Silmoon.AspNetCore.Encryption.Services
 
             var allowUserCredential = await GetAllowCredentials(httpContext, userId);
 
-            if (allowUserCredential is null)
-            {
-                result.Success = false;
-                result.Message = "User not found";
-            }
+            if (allowUserCredential is null) result.Set(false, "User not found");
             else
             {
                 result.Success = true;
@@ -88,7 +79,6 @@ namespace Silmoon.AspNetCore.Encryption.Services
                     AllowCredentials = allowUserCredential.Credentials,
                 };
 
-                var a = challenge.GetBase64String();
                 if (challengeStr.IsNullOrEmpty()) GlobalCaching<string, string>.Set("_passkey_challenge:" + challenge.GetBase64String(), allowUserCredential.UserId, TimeSpan.FromSeconds(300));
                 else GlobalCaching<string, string>.Set("__passkey_challenge:" + challenge.GetBase64String(), allowUserCredential.UserId, TimeSpan.FromSeconds(300));
             }
@@ -102,30 +92,17 @@ namespace Silmoon.AspNetCore.Encryption.Services
             var clientDataJSON = createWebAuthnKeyResponse.Response.ClientDataJson.GetString();
             var clientJson = JObject.Parse(clientDataJSON);
 
-            var userIdResult = GlobalCaching<string, string>.Get("_passkey_challenge:" + clientJson["challenge"].Value<string>().Base64UrlToBase64());
+            var (isFindUserId, findedUserId) = GlobalCaching<string, string>.Get("_passkey_challenge:" + clientJson["challenge"].Value<string>().Base64UrlToBase64());
 
-            StateFlag<bool> result = new StateFlag<bool>();
-            if (!userIdResult.Matched)
-            {
-                result.Success = false;
-                result.Message = "Challenge failed";
-            }
+            StateResult<bool> result = new StateResult<bool>();
+            if (!isFindUserId) result.Set(false, "Challenge failed");
             else
             {
                 createWebAuthnKeyResponse.AttestationObjectData = WebAuthnParser.ParseAttestationObject(createWebAuthnKeyResponse.Response.AttestationObject);
                 createWebAuthnKeyResponse.WebAuthnInfo = WebAuthnInfo.Create(createWebAuthnKeyResponse);
 
                 var createResult = await OnCreate(httpContext, createWebAuthnKeyResponse);
-
-                if (createResult.State)
-                {
-                    result.Success = true;
-                }
-                else
-                {
-                    result.Success = false;
-                    result.Message = createResult.Message;
-                }
+                result.Set(createResult.State, createResult.Message);
             }
             await httpContext.Response.WriteJObjectAsync(result);
         }
@@ -135,29 +112,16 @@ namespace Silmoon.AspNetCore.Encryption.Services
             if (credentialId.IsNullOrEmpty()) credentialId = httpContext.Request.Query["CredentialId"];
 
 
-            StateFlag result = new StateFlag();
+            StateResult result = new StateResult();
 
-            if (credentialId.IsNullOrEmpty())
-            {
-                result.Success = false;
-                result.Message = "CredentialId is empty";
-                await httpContext.Response.WriteJObjectAsync(result);
-            }
+            if (credentialId.IsNullOrEmpty()) result.Set(false, "CredentialId is empty");
             else
             {
                 var deleteResult = await OnDelete(httpContext, Convert.FromBase64String(credentialId));
-                if (deleteResult.State)
-                {
-                    result.Success = true;
-                }
-                else
-                {
-                    result.Success = false;
-                    result.Message = deleteResult.Message;
-                }
-                await httpContext.Response.WriteJObjectAsync(result);
-
+                if (deleteResult.State) result.Set(true, deleteResult.Message);
+                else result.Set(false, deleteResult.Message);
             }
+            await httpContext.Response.WriteJObjectAsync(result);
         }
         public async Task Authenticate(HttpContext httpContext, RequestDelegate requestDelegate)
         {
@@ -165,9 +129,9 @@ namespace Silmoon.AspNetCore.Encryption.Services
             WebAuthnAuthenticateResponse verifyWebAuthnResponse = JsonConvert.DeserializeObject<WebAuthnAuthenticateResponse>(bodyStr);
 
             byte[] rawId = verifyWebAuthnResponse.RawId;
-            byte[] clientDataJSON = verifyWebAuthnResponse.Response.ClientDataJson;
-            byte[] authenticatorData = verifyWebAuthnResponse.Response.AuthenticatorData;
-            byte[] signature = verifyWebAuthnResponse.Response.Signature;
+            //byte[] clientDataJSON = verifyWebAuthnResponse.Response.ClientDataJson;
+            //byte[] authenticatorData = verifyWebAuthnResponse.Response.AuthenticatorData;
+            //byte[] signature = verifyWebAuthnResponse.Response.Signature;
 
             var clientData = verifyWebAuthnResponse.Response.GetClientJson();
 
@@ -175,34 +139,23 @@ namespace Silmoon.AspNetCore.Encryption.Services
             GlobalCaching<string, string>.Remove("_passkey_challenge:" + clientData["challenge"].Value<string>().Base64UrlToBase64());
 
             StateSet<bool> result = new StateSet<bool>();
-            if (!userIdResult.Matched)
-            {
-                result.State = false;
-                result.Message = "Challenge failed";
-            }
+            if (!userIdResult.Matched) result.Set(false, "Challenge failed");
             else
             {
                 var publicKeyInfo = await OnGetPublicKeyInfo(httpContext, rawId, userIdResult.Value);
-                if (publicKeyInfo is null)
-                {
-                    result.State = false;
-                    result.Message = "Credential not found";
-                }
+                if (publicKeyInfo is null) result.Set(false, "Credential not found");
                 else
                 {
                     // 组合签名数据：authenticatorData + SHA256(clientDataJSON)
                     var signedData = verifyWebAuthnResponse.SignedData;
-
                     // 验证签名
                     var validSignatureResult = verifyWebAuthnResponse.VerifySignature(publicKeyInfo);
-
-                    result.State = validSignatureResult.State;
-                    result.Message = validSignatureResult.Message;
+                    result.Set(validSignatureResult.State, validSignatureResult.Message);
                 }
             }
             var newResult = await OnAuthenticateCompleted(httpContext, verifyWebAuthnResponse, result, verifyWebAuthnResponse.FlagData);
-            StateFlag<object> stateFlag = new StateFlag<object>() { Success = newResult.State, Data = verifyWebAuthnResponse.FlagData, Message = newResult.Message };
-            await httpContext.Response.WriteJObjectAsync(stateFlag);
+            StateResult<object> stateResult = new StateResult<object>() { Success = newResult.State, Data = verifyWebAuthnResponse.FlagData, Message = newResult.Message };
+            await httpContext.Response.WriteJObjectAsync(stateResult);
         }
 
         public async Task<StateSet<bool>> ValidateData(HttpContext httpContext, string jsonStringData, string challenge = null)

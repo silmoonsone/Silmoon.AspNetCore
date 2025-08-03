@@ -26,10 +26,10 @@
         methods: {
             uploadFile: function(uploaderId) {
                 ajaxFileUploadPost("#" + uploaderId, "../WebApi/UploadFile", function(e) {
-                    if (e.Success) {
+                    if (e.success) {
                         v.getFiles();
                     } else {
-                        toast("上传错误：" + e.Message);
+                        toast("上传错误：" + e.message);
                     }
                 }, function(e) {
                 }, function(e) {
@@ -38,10 +38,10 @@
             },
             getFiles: function() {
                 $.get("../WebApi/GetTempFileNames", function(e) {
-                    if (e.Success) {
+                    if (e.success) {
                         v.files = [];
-                        for (var i = 0; i < e.Data.length; i++) {
-                            v.files[i] = e.Data[i];
+                        for (var i = 0; i < e.data.length; i++) {
+                            v.files[i] = e.data[i];
                         }
                     } else {
                         // error
@@ -51,7 +51,7 @@
             deleteImage: function(fileName) {
                 if (confirm("删除图片？")) {
                     $.get("../WebApi/DeleteTempFile?fileName=" + fileName, function(e) {
-                        if (e.Success) {
+                        if (e.success) {
                             v.getFiles();
                         } else {
                             // error

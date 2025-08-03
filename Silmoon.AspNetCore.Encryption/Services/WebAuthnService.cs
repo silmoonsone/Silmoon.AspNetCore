@@ -56,7 +56,21 @@ namespace Silmoon.AspNetCore.Encryption.Services
 
             string userId = httpContext.Request.Form["UserId"];
             string challengeStr = httpContext.Request.Form["Challenge"];
-            var challenge = challengeStr.IsNullOrEmpty() ? HashHelper.RandomChars(32).GetBytes() : challengeStr.GetBytes();
+            byte[] challenge;
+
+            if (challengeStr.IsNullOrEmpty())
+                challenge = HashHelper.RandomChars(32).GetBytes();
+            else
+            {
+                if (challengeStr.Length > 1024)
+                {
+                    result.Success = false;
+                    result.Message = "Challenge must be less than 1024 characters.";
+                    goto fin;
+                }
+                else challenge = challengeStr.GetBytes();
+            }
+
             var allowUserCredential = await GetAllowCredentials(httpContext, userId);
 
             if (allowUserCredential is null)
@@ -78,6 +92,7 @@ namespace Silmoon.AspNetCore.Encryption.Services
                 if (challengeStr.IsNullOrEmpty()) GlobalCaching<string, string>.Set("_passkey_challenge:" + challenge.GetBase64String(), allowUserCredential.UserId, TimeSpan.FromSeconds(300));
                 else GlobalCaching<string, string>.Set("__passkey_challenge:" + challenge.GetBase64String(), allowUserCredential.UserId, TimeSpan.FromSeconds(300));
             }
+        fin:
             await httpContext.Response.WriteJObjectAsync(result);
         }
         public async Task Create(HttpContext httpContext, RequestDelegate requestDelegate)
@@ -190,50 +205,45 @@ namespace Silmoon.AspNetCore.Encryption.Services
             await httpContext.Response.WriteJObjectAsync(stateFlag);
         }
 
-        public async Task<StateSet<bool>> ValidateData(HttpContext httpContext, string jsonStringData, string challenge)
+        public async Task<StateSet<bool>> ValidateData(HttpContext httpContext, string jsonStringData, string challenge = null)
         {
             challenge = challenge?.GetBytes().GetBase64String();
             WebAuthnAuthenticateResponse verifyWebAuthnResponse = JsonConvert.DeserializeObject<WebAuthnAuthenticateResponse>(jsonStringData);
 
             byte[] rawId = verifyWebAuthnResponse.RawId;
+            var clientData = verifyWebAuthnResponse.Response.GetClientJson();
+            var clientChallengeData = clientData["challenge"].Value<string>().Base64UrlToBase64();
             //byte[] clientDataJSON = verifyWebAuthnResponse.Response.ClientDataJson;
             //byte[] authenticatorData = verifyWebAuthnResponse.Response.AuthenticatorData;
             //byte[] signature = verifyWebAuthnResponse.Response.Signature;
 
-            var clientData = verifyWebAuthnResponse.Response.GetClientJson();
-
-            if (!challenge.IsNullOrEmpty() && clientData["challenge"].Value<string>() != challenge) return new StateSet<bool> { State = false, Message = "Signature challenge not match." };
-            var cacheKey = challenge.IsNullOrEmpty() ? "_passkey_challenge:" + clientData["challenge"].Value<string>().Base64UrlToBase64() : "__passkey_challenge:" + clientData["challenge"].Value<string>().Base64UrlToBase64();
-            var userIdResult = GlobalCaching<string, string>.Get(cacheKey);
+            var cacheKey = challenge.IsNullOrEmpty() ? "_passkey_challenge:" + clientChallengeData : "__passkey_challenge:" + clientChallengeData;
+            var (isFindUserId, findedUserId) = GlobalCaching<string, string>.Get(cacheKey);
             GlobalCaching<string, string>.Remove(cacheKey);
 
-            StateSet<bool> result = new StateSet<bool>();
-            if (!userIdResult.Matched)
+            if (!challenge.IsNullOrEmpty() && clientChallengeData != challenge)
             {
-                result.State = false;
-                result.Message = "Challenge failed";
+                return false.ToStateSet("Signature challenge not match.");
             }
             else
             {
-                var publicKeyInfo = await OnGetPublicKeyInfo(httpContext, rawId, userIdResult.Value);
-                if (publicKeyInfo is null)
-                {
-                    result.State = false;
-                    result.Message = "Credential not found";
-                }
+                if (!isFindUserId)
+                    return false.ToStateSet("Challenge failed");
                 else
                 {
-                    // 组合签名数据：authenticatorData + SHA256(clientDataJSON)
-                    var signedData = verifyWebAuthnResponse.SignedData;
-
-                    // 验证签名
-                    var validSignatureResult = verifyWebAuthnResponse.VerifySignature(publicKeyInfo);
-
-                    result.State = validSignatureResult.State;
-                    result.Message = validSignatureResult.Message;
+                    var publicKeyInfo = await OnGetPublicKeyInfo(httpContext, rawId, findedUserId);
+                    if (publicKeyInfo is null)
+                        return false.ToStateSet("Credential not found");
+                    else
+                    {
+                        // 组合签名数据：authenticatorData + SHA256(clientDataJSON)
+                        var signedData = verifyWebAuthnResponse.SignedData;
+                        // 验证签名
+                        var validSignatureResult = verifyWebAuthnResponse.VerifySignature(publicKeyInfo);
+                        return validSignatureResult;
+                    }
                 }
             }
-            return result;
         }
 
         /// <summary>

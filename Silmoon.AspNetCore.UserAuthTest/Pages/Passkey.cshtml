@@ -44,7 +44,8 @@
                         <div>
                             <span class="mark">[@item.PublicKeyAlgorithm]</span>
                             <span class="mark">[@item.AuthenticatorAttachment]</span>
-                            <span>@item.CredentialId.GetBase64String()</span>
+                            <span class="mark">[@item.created_at.ToChineseFormat()]</span>
+                            <span>@item.GetDeviceDescription()</span>
                         </div>
                         <div>
                             <button class="btn btn-sm btn-danger deleteButton" onclick="onDeletePasskey('@item.CredentialId.GetBase64String()')">DELETE</button>

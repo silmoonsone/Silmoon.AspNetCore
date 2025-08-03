@@ -9,7 +9,7 @@
   <PropertyGroup>
     <IsPackable>true</IsPackable>
     <PackageId>Silmoon.AspNetCore.Encryption</PackageId>
-    <Version>1.0.12</Version>
+    <Version>1.0.13</Version>
     <Authors>SILMOON</Authors>
     <Company>SILMOON LLC</Company>
     <Description>Silmoon SDK</Description>

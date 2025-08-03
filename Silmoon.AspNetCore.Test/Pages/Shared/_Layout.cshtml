@@ -85,7 +85,7 @@
         }
         function signOut_OnComplete(e, s) {
             $("#userMenuLink").html("退出中");
-            if (e.responseJSON.Success) {
+            if (e.responseJSON.success) {
                 $("#userMenuLink").html("已退出");
                 setTimeout(function () { location.reload(); }, 1000);
             }

@@ -7,7 +7,7 @@
  * 发起创建会话请求
  * @param {string} username
  * @param {string} password
- * @returns {object} StateFlag类型的JSON。
+ * @returns {object} StateResult类型的JSON。
  */
 async function doSignIn(username, password) {
     var formData = new FormData();
@@ -21,7 +21,7 @@ async function doSignIn(username, password) {
         });
 
         if (!response.ok) {
-            return { Success: false, Data: null, Message: await response.text() }
+            return { success: false, data: null, message: await response.text() }
         }
         else {
             const data = await response.json();
@@ -30,7 +30,7 @@ async function doSignIn(username, password) {
 
     } catch (error) {
         console.error(error);
-        return { Success: false, Data: null, Message: error.message }
+        return { success: false, data: null, message: error.message }
     }
 }
 
@@ -43,7 +43,7 @@ async function doSignOut() {
         const response = await fetch(silmoonAuthOptions.signOutUrl);
 
         if (!response.ok) {
-            return { Success: false, Data: null, Message: await response.text() }
+            return { success: false, data: null, message: await response.text() }
         }
 
         const data = await response.json();
@@ -51,6 +51,6 @@ async function doSignOut() {
 
     } catch (error) {
         console.error('发送数据出错:', error);
-        return { Success: false, Data: null, Message: error.message }
+        return { success: false, data: null, message: error.message }
     }
 }

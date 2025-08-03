@@ -14,38 +14,6 @@ namespace Silmoon.AspNetCore.Extensions
 {
     public static class ControllerBaseExtension
     {
-        [Obsolete("Use JsonStateFlag or JsonStateResult instead.")]
-        public static IActionResult JsonStateFlag(this ControllerBase controller, bool success) => JsonStateFlag(controller, success, 0, null);
-        [Obsolete("Use JsonStateFlag or JsonStateResult instead.")]
-        public static IActionResult JsonStateFlag(this ControllerBase controller, bool success, string message) => JsonStateFlag(controller, success, 0, message);
-        [Obsolete("Use JsonStateFlag or JsonStateResult instead.")]
-        public static IActionResult JsonStateFlag(this ControllerBase controller, bool success, int code) => JsonStateFlag(controller, success, code, null);
-        [Obsolete("Use JsonStateFlag or JsonStateResult instead.")]
-        public static IActionResult JsonStateFlag(this ControllerBase controller, bool success, int code, string message) => JsonStateFlag(controller, StateFlag.Create(success, code, message));
-        [Obsolete("Use JsonStateFlag or JsonStateResult instead.")]
-        public static IActionResult JsonStateFlag(this ControllerBase controller, StateFlag stateFlag) => controller.Content(stateFlag.ToJsonString(), "application/json");
-
-        [Obsolete("Use JsonStateFlag or JsonStateResult instead.")]
-        public static IActionResult JsonStateFlag<T>(this ControllerBase controller, bool success) => JsonStateFlag<T>(controller, success, 0, string.Empty, default);
-        [Obsolete("Use JsonStateFlag or JsonStateResult instead.")]
-        public static IActionResult JsonStateFlag<T>(this ControllerBase controller, bool success, string message) => JsonStateFlag<T>(controller, success, 0, message, default);
-        [Obsolete("Use JsonStateFlag or JsonStateResult instead.")]
-        public static IActionResult JsonStateFlag<T>(this ControllerBase controller, bool success, int code) => JsonStateFlag<T>(controller, success, code, string.Empty, default);
-        [Obsolete("Use JsonStateFlag or JsonStateResult instead.")]
-        public static IActionResult JsonStateFlag<T>(this ControllerBase controller, bool success, int code, string message) => JsonStateFlag<T>(controller, success, code, message, default);
-        [Obsolete("Use JsonStateFlag or JsonStateResult instead.")]
-        public static IActionResult JsonStateFlag<T>(this ControllerBase controller, bool success, T data) => JsonStateFlag(controller, success, 0, string.Empty, data);
-        [Obsolete("Use JsonStateFlag or JsonStateResult instead.")]
-        public static IActionResult JsonStateFlag<T>(this ControllerBase controller, bool success, string message, T data) => JsonStateFlag(controller, success, 0, message, data);
-        [Obsolete("Use JsonStateFlag or JsonStateResult instead.")]
-        public static IActionResult JsonStateFlag<T>(this ControllerBase controller, bool success, int code, T data) => JsonStateFlag(controller, success, code, string.Empty, data);
-        [Obsolete("Use JsonStateFlag or JsonStateResult instead.")]
-        public static IActionResult JsonStateFlag<T>(this ControllerBase controller, bool success, int code, string message, T data) => JsonStateFlag(controller, StateFlag<T>.Create(success, code, data, message));
-        [Obsolete("Use JsonStateFlag or JsonStateResult instead.")]
-        public static IActionResult JsonStateFlag<T>(this ControllerBase controller, StateFlag<T> stateFlag) => controller.Content(stateFlag.ToJsonString(), "application/json");
-
-
-
         public static IActionResult JsonStateResult(this ControllerBase controller, bool success) => JsonStateResult(controller, success, 0, null);
         public static IActionResult JsonStateResult(this ControllerBase controller, bool success, string message) => JsonStateResult(controller, success, 0, message);
         public static IActionResult JsonStateResult(this ControllerBase controller, bool success, int code) => JsonStateResult(controller, success, code, null);

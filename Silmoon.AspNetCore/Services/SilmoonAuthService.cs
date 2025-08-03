@@ -265,27 +265,27 @@ namespace Silmoon.AspNetCore.Services
 
         public virtual async Task OnSignIn(HttpContext httpContext, RequestDelegate requestDelegate, string username, string password)
         {
-            if (username.IsNullOrEmpty() || password.IsNullOrEmpty()) await httpContext.Response.WriteJObjectAsync(false.ToStateFlag("用户名或密码为空"));
+            if (username.IsNullOrEmpty() || password.IsNullOrEmpty()) await httpContext.Response.WriteJObjectAsync(false.ToStateResult("用户名或密码为空"));
             else
             {
                 var gotUser = await GetUserData(username, null);
                 if (gotUser is null)
-                    await httpContext.Response.WriteJObjectAsync(false.ToStateFlag("用户名不存在或者密码错误"));
+                    await httpContext.Response.WriteJObjectAsync(false.ToStateResult("用户名不存在或者密码错误"));
                 else
                 {
                     if (gotUser.Username == username && gotUser.Password == PasswordHash(password))
                     {
                         await SignIn(gotUser, true);
-                        await httpContext.Response.WriteJObjectAsync(true.ToStateFlag());
+                        await httpContext.Response.WriteJObjectAsync(true.ToStateResult());
                     }
-                    else await httpContext.Response.WriteJObjectAsync(false.ToStateFlag("用户名不存在或者密码错误"));
+                    else await httpContext.Response.WriteJObjectAsync(false.ToStateResult("用户名不存在或者密码错误"));
                 }
             }
         }
         public virtual async Task OnSignOut(HttpContext httpContext, RequestDelegate requestDelegate)
         {
             var result = await SignOut();
-            await httpContext.Response.WriteJObjectAsync(result.ToStateFlag());
+            await httpContext.Response.WriteJObjectAsync(result.ToStateResult());
         }
     }
 }

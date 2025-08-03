@@ -30,7 +30,7 @@
         <div class="smm-row-line"></div>
         <div class="smm-input-block">
             <label>扣费（实付余额：0，赠送余额：0）</label>
-            <input class="smm-input-nooutline b" autocomplete="off" placeholder="这里填写扣费金额" onfocus="this.placeholder = '宝，这里写金额鸭~'" onblur="this.placeholder = '这里填写扣费金额'" style="font-size: 22px; color: red;" id="TotalAmount" name="TotalAmount" value="" onkeydown="return totalAmount_OnChange();" onkeyup="return totalAmount_OnChange();" onkeypress="return totalAmount_OnChange();" onchange="return totalAmount_OnChange();" />
+            <input class="smm-input-nooutline b" autocomplete="off" placeholder="这里填写扣费金额" onfocus="this.placeholder = '金额~'" onblur="this.placeholder = '这里填写扣费金额'" style="font-size: 22px; color: red;" id="TotalAmount" name="TotalAmount" value="" onkeydown="return totalAmount_OnChange();" onkeyup="return totalAmount_OnChange();" onkeypress="return totalAmount_OnChange();" onchange="return totalAmount_OnChange();" />
         </div>
         <div class="smm-row-line"></div>
         <div class="smm-input-block">
@@ -61,12 +61,12 @@
 </div>
 <script>
     function on_completed(sender, e) {
-        if (e.Data.Success) {
-            MetroUIConfirm("结果", e.Data.Message, false, function(e) {
+        if (e.Data.success) {
+            MetroUIConfirm("结果", e.Data.message, false, function(e) {
                 location.reload();
             })
         } else {
-            MetroUIConfirm("结果", "失败：" + e.Data.Message, false, function() {
+            MetroUIConfirm("结果", "失败：" + e.Data.message, false, function() {
                 cancel();
             })
         }

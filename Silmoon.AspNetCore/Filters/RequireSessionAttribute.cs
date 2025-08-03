@@ -8,6 +8,7 @@ using Silmoon.Extension.Interfaces;
 using Silmoon.Extension.Enums;
 using Silmoon.Models;
 using System.Web;
+using Silmoon.Extension.Models;
 
 namespace Silmoon.AspNetCore.Filters
 {
@@ -59,7 +60,7 @@ namespace Silmoon.AspNetCore.Filters
                     if (IsRequire)
                     {
                         if (isAjax || IsApiRequest)
-                            filterContext.Result = new ContentResult() { Content = StateFlag.Create(success: false, -9999, "No signin(SignIn, But user data is null).").ToJsonString(), ContentType = "application/json" };
+                            filterContext.Result = new ContentResult() { Content = StateResult.Create(false, -9999, "No signin(SignIn, But user data is null).").ToJsonString(), ContentType = "application/json" };
                         else
                             filterContext.Result = new RedirectResult(signUrl);
                     }
@@ -69,7 +70,7 @@ namespace Silmoon.AspNetCore.Filters
                     if (user.Role < Role)
                     {
                         if (isAjax || IsApiRequest)
-                            filterContext.Result = new ContentResult() { Content = StateFlag.Create(success: false, -9999, "Permission error.").ToJsonString(), ContentType = "application/json" };
+                            filterContext.Result = new ContentResult() { Content = StateResult.Create(false, -9999, "Permission error.").ToJsonString(), ContentType = "application/json" };
                         else
                             filterContext.Result = new ContentResult() { Content = "Permission error." };
                     }
@@ -85,7 +86,7 @@ namespace Silmoon.AspNetCore.Filters
                         if (IsRequire)
                         {
                             if (isAjax || IsApiRequest)
-                                filterContext.Result = new ContentResult() { Content = StateFlag.Create(success: false, -9999, "No signin(Error UserToken).").ToJsonString(), ContentType = "application/json" };
+                                filterContext.Result = new ContentResult() { Content = StateResult.Create(success: false, -9999, "No signin(Error UserToken).").ToJsonString(), ContentType = "application/json" };
                             else
                                 filterContext.Result = new RedirectResult(signUrl);
                         }
@@ -99,7 +100,7 @@ namespace Silmoon.AspNetCore.Filters
                 else
                 {
                     if (isAjax || IsApiRequest)
-                        filterContext.Result = new ContentResult() { Content = StateFlag.Create(success: false, -9999, "No signin.").ToJsonString(), ContentType = "application/json" };
+                        filterContext.Result = new ContentResult() { Content = StateResult.Create(success: false, -9999, "No signin.").ToJsonString(), ContentType = "application/json" };
                     else
                         filterContext.Result = new RedirectResult(signUrl);
                 }

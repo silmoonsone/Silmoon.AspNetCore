@@ -27,11 +27,11 @@
         // can by session "silmoonAuthOptions" object to request path.
         const result = await doSignIn(username, password);
 
-        if(result.Success){
+        if(result.success){
             alert("Sign in success!");
             location.href = "/PassKey";
         }else{
-            alert("Sign in failed(" + result.Message + ")!");
+            alert("Sign in failed(" + result.message + ")!");
         }
     }
 </script>

@@ -46,11 +46,11 @@
         const json = await response.json();
         if (response.ok) {
             {
-                if (json.Success) {
+                if (json.success) {
                     alert("Sign up success!");
                     location.href = "/SignIn";
                 } else {
-                    alert("Sign up failed(" + json.Message + ")!");
+                    alert("Sign up failed(" + json.message + ")!");
                 }
             }
         } else {

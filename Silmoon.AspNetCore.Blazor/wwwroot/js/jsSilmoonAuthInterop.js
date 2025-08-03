@@ -2,7 +2,7 @@
  * 发起创建会话请求
  * @param {string} username
  * @param {string} password
- * @returns {object} StateFlag类型的JSON。
+ * @returns {object} StateResult类型的JSON。
  */
 export async function doSignIn(username, password) {
     var formData = new FormData();

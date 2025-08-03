@@ -8,121 +8,56 @@ namespace Silmoon.AspNetCore.Extensions
 {
     public static class ExtensionHelper
     {
-        [Obsolete("Use GetStateFlagResult instead.")]
-        public static IActionResult GetStateFlagResult(this bool Success, string Message = null)
-        {
-            StateFlag stateFlag = StateFlag.Create(Success, 0, Message);
-            return new ContentResult() { Content = stateFlag.ToJsonString(), ContentType = "application/json" };
-        }
-        [Obsolete("Use GetStateFlagResult instead.")]
-        public static IActionResult GetStateFlagResult<T>(this bool Success, T Data = default, string Message = null)
-        {
-            StateFlag<T> stateFlag = StateFlag<T>.Create(Success, 0, Data, Message);
-            return new ContentResult() { Content = stateFlag.ToJsonString(), ContentType = "application/json" };
-        }
-        [Obsolete("Use GetStateFlagResult instead.")]
-        public static IActionResult GetStateFlagResult(this bool Success, int Code, string Message = null)
-        {
-            StateFlag stateFlag = StateFlag.Create(Success, Code, Message);
-            return new ContentResult() { Content = stateFlag.ToJsonString(), ContentType = "application/json" };
-        }
-        [Obsolete("Use GetStateFlagResult instead.")]
-        public static IActionResult GetStateFlagResult<T>(this bool Success, int Code = 0, T Data = default, string Message = null)
-        {
-            StateFlag<T> stateFlag = StateFlag<T>.Create(Success, Code, Data, Message);
-            return new ContentResult() { Content = stateFlag.ToJsonString(), ContentType = "application/json" };
-        }
-
-        [Obsolete("Use GetStateFlagResult instead.")]
-        public static IActionResult GetStateFlagResult(this (bool Success, string Message) flag)
-        {
-            StateFlag stateFlag = StateFlag.Create(flag.Success, 0, flag.Message);
-            return new ContentResult() { Content = stateFlag.ToJsonString(), ContentType = "application/json" };
-        }
-        [Obsolete("Use GetStateFlagResult instead.")]
-        public static IActionResult GetStateFlagResult(this (bool Success, int Code) flag)
-        {
-            StateFlag stateFlag = StateFlag.Create(flag.Success, flag.Code, default);
-            return new ContentResult() { Content = stateFlag.ToJsonString(), ContentType = "application/json" };
-        }
-        [Obsolete("Use GetStateFlagResult instead.")]
-        public static IActionResult GetStateFlagResult<T>(this (bool Success, T Data) flag)
-        {
-            StateFlag stateFlag = StateFlag<T>.Create(flag.Success, 0, flag.Data);
-            return new ContentResult() { Content = stateFlag.ToJsonString(), ContentType = "application/json" };
-        }
-        [Obsolete("Use GetStateFlagResult instead.")]
-        public static IActionResult GetStateFlagResult<T>(this (bool Success, T Data, string Message) flag)
-        {
-            StateFlag stateFlag = StateFlag<T>.Create(flag.Success, 0, flag.Data, flag.Message);
-            return new ContentResult() { Content = stateFlag.ToJsonString(), ContentType = "application/json" };
-        }
-        [Obsolete("Use GetStateFlagResult instead.")]
-        public static IActionResult GetStateFlagResult<T>(this (bool Success, int Code, string Message) flag)
-        {
-            StateFlag stateFlag = StateFlag<T>.Create(flag.Success, flag.Code, default, flag.Message);
-            return new ContentResult() { Content = stateFlag.ToJsonString(), ContentType = "application/json" };
-        }
-        [Obsolete("Use GetStateFlagResult instead.")]
-        public static IActionResult GetStateFlagResult<T>(this (bool Success, int Code, T Data, string Message) flag)
-        {
-            StateFlag stateFlag = StateFlag<T>.Create(flag.Success, flag.Code, flag.Data, flag.Message);
-            return new ContentResult() { Content = stateFlag.ToJsonString(), ContentType = "application/json" };
-        }
-
-
-
-
         public static IActionResult GetStateStateJsonResult(this bool Success, string Message = null)
         {
-            StateResult stateFlag = StateResult.Create(Success, 0, Message);
-            return new ContentResult() { Content = stateFlag.ToJsonString(), ContentType = "application/json" };
+            StateResult stateResult = StateResult.Create(Success, 0, Message);
+            return new ContentResult() { Content = stateResult.ToJsonString(), ContentType = "application/json" };
         }
         public static IActionResult GetStateStateJsonResult<T>(this bool Success, T Data = default, string Message = null)
         {
-            StateResult<T> stateFlag = StateResult<T>.Create(Success, Data, 0, Message);
-            return new ContentResult() { Content = stateFlag.ToJsonString(), ContentType = "application/json" };
+            StateResult<T> stateResult = StateResult<T>.Create(Success, Data, 0, Message);
+            return new ContentResult() { Content = stateResult.ToJsonString(), ContentType = "application/json" };
         }
         public static IActionResult GetStateStateJsonResult(this bool Success, int Code, string Message = null)
         {
-            StateResult stateFlag = StateResult.Create(Success, Code, Message);
-            return new ContentResult() { Content = stateFlag.ToJsonString(), ContentType = "application/json" };
+            StateResult stateResult = StateResult.Create(Success, Code, Message);
+            return new ContentResult() { Content = stateResult.ToJsonString(), ContentType = "application/json" };
         }
         public static IActionResult GetStateStateJsonResult<T>(this bool Success, T Data = default, int Code = 0, string Message = null)
         {
-            StateResult<T> stateFlag = StateResult<T>.Create(Success, Data, Code, Message);
-            return new ContentResult() { Content = stateFlag.ToJsonString(), ContentType = "application/json" };
+            StateResult<T> stateResult = StateResult<T>.Create(Success, Data, Code, Message);
+            return new ContentResult() { Content = stateResult.ToJsonString(), ContentType = "application/json" };
         }
 
         public static IActionResult GetStateStateJsonResult(this (bool Success, string Message) flag)
         {
-            StateResult stateFlag = StateResult.Create(flag.Success, 0, flag.Message);
-            return new ContentResult() { Content = stateFlag.ToJsonString(), ContentType = "application/json" };
+            StateResult stateResult = StateResult.Create(flag.Success, 0, flag.Message);
+            return new ContentResult() { Content = stateResult.ToJsonString(), ContentType = "application/json" };
         }
         public static IActionResult GetStateStateJsonResult(this (bool Success, int Code) flag)
         {
-            StateResult stateFlag = StateResult.Create(flag.Success, flag.Code, default);
-            return new ContentResult() { Content = stateFlag.ToJsonString(), ContentType = "application/json" };
+            StateResult stateResult = StateResult.Create(flag.Success, flag.Code, default);
+            return new ContentResult() { Content = stateResult.ToJsonString(), ContentType = "application/json" };
         }
         public static IActionResult GetStateStateJsonResult<T>(this (bool Success, T Data) flag)
         {
-            StateResult stateFlag = StateResult<T>.Create(flag.Success, flag.Data, 0);
-            return new ContentResult() { Content = stateFlag.ToJsonString(), ContentType = "application/json" };
+            StateResult stateResult = StateResult<T>.Create(flag.Success, flag.Data, 0);
+            return new ContentResult() { Content = stateResult.ToJsonString(), ContentType = "application/json" };
         }
         public static IActionResult GetStateStateJsonResult<T>(this (bool Success, T Data, string Message) flag)
         {
-            StateResult stateFlag = StateResult<T>.Create(flag.Success, flag.Data, 0, flag.Message);
-            return new ContentResult() { Content = stateFlag.ToJsonString(), ContentType = "application/json" };
+            StateResult stateResult = StateResult<T>.Create(flag.Success, flag.Data, 0, flag.Message);
+            return new ContentResult() { Content = stateResult.ToJsonString(), ContentType = "application/json" };
         }
         public static IActionResult GetStateStateJsonResult<T>(this (bool Success, int Code, string Message) flag)
         {
-            StateResult stateFlag = StateResult<T>.Create(flag.Success, default, flag.Code, flag.Message);
-            return new ContentResult() { Content = stateFlag.ToJsonString(), ContentType = "application/json" };
+            StateResult stateResult = StateResult<T>.Create(flag.Success, default, flag.Code, flag.Message);
+            return new ContentResult() { Content = stateResult.ToJsonString(), ContentType = "application/json" };
         }
         public static IActionResult GetStateStateJsonResult<T>(this (bool Success, T Data, int Code, string Message) flag)
         {
-            StateResult stateFlag = StateResult<T>.Create(flag.Success, flag.Data, flag.Code, flag.Message);
-            return new ContentResult() { Content = stateFlag.ToJsonString(), ContentType = "application/json" };
+            StateResult stateResult = StateResult<T>.Create(flag.Success, flag.Data, flag.Code, flag.Message);
+            return new ContentResult() { Content = stateResult.ToJsonString(), ContentType = "application/json" };
         }
     }
 }

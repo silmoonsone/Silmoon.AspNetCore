@@ -32,6 +32,12 @@ namespace Silmoon.AspNetCore.Encryption.Extensions
             services.Configure(options);
             services.AddSingleton<IWebAuthnService, TWebAuthnService>();
         }
+        public static void AddBlazorWebAuthnService<TWebAuthnService>(this IServiceCollection services) where TWebAuthnService : BlazorWebAuthnService
+        {
+            ArgumentNullException.ThrowIfNull(services);
+            services.AddScoped<BlazorWebAuthnService, TWebAuthnService>();
+            services.AddWebAuthnJsInterop();
+        }
 
     }
 }

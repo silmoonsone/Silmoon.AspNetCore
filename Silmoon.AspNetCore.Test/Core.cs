@@ -3,7 +3,6 @@ using Silmoon.AspNetCore.Encryption.Models;
 using Silmoon.AspNetCore.Interfaces;
 using Silmoon.AspNetCore.Test.Models;
 using Silmoon.AspNetCore.Test.Services;
-using Silmoon.Data.LiteDB;
 using Silmoon.Data.MongoDB;
 using Silmoon.Extension;
 using Silmoon.Models;
@@ -33,6 +32,7 @@ namespace Silmoon.AspNetCore.Test
             else
                 return false.ToStateSet("User already exists");
         }
+
         public UserAuthInfo GetUserAuthInfo(ObjectId UserObjectId)
         {
             if (GetUser(UserObjectId) is null) return null;
@@ -48,16 +48,14 @@ namespace Silmoon.AspNetCore.Test
             }
             return result;
         }
-        public WebAuthnInfo[] GetUserWebAuthnInfos(ObjectId UserObjectId)
-        {
-            return GetUserAuthInfo(UserObjectId)?.WebAuthnInfos.ToArray();
-        }
-
+        public UserAuthInfo GetUserAuthInfo(byte[] rawId) => Get<UserAuthInfo>(x => x.WebAuthnInfos.Any(c => c.CredentialId == rawId));
+        public WebAuthnInfo[] GetUserWebAuthnInfos(ObjectId UserObjectId) => GetUserAuthInfo(UserObjectId)?.WebAuthnInfos.ToArray();
         public WebAuthnInfo GetUserWebAuthnInfo(ObjectId UserObjectId, byte[] CredentialId)
         {
             var userAuthInfo = GetUserAuthInfo(UserObjectId);
             return userAuthInfo.WebAuthnInfos.FirstOrDefault(x => x.CredentialId != null && x.CredentialId.SequenceEqual(CredentialId));
         }
+
         public StateSet<bool> AddUserWebAuthnInfo(ObjectId UserObjectId, WebAuthnInfo userWebAuthnInfo)
         {
             var userAuthInfo = GetUserAuthInfo(UserObjectId);

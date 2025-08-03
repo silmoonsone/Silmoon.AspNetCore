@@ -81,7 +81,7 @@ builder.Services.AddJsComponentInterop();
 builder.Services.AddJsSilmoonAuthInterop();
 
 // ** required NuGet package for Silmoon.AspNetCore.Encryption
-builder.Services.AddWebAuthnJsInterop();
+builder.Services.AddBlazorWebAuthnService<BlazorWebAuthnServiceImpl>();
 
 //builder.Services.AddSilmoonDevApp<SilmoonDevAppServiceImpl>();
 

@@ -24,7 +24,7 @@ namespace Silmoon.AspNetCore.UserAuthTest.Services
             SilmoonAuthService = silmoonAuthService;
         }
 
-        public override Task<AllowUserCredential> GetAllowCredentials(HttpContext httpContext, string userId)
+        public override Task<Credential[]> GetAllowCredentials(HttpContext httpContext, string userId)
         {
             //var hasUserObjectId = ObjectId.TryParse(userId, out var userObjectId);
             var hasUserObjectId = false;
@@ -40,21 +40,20 @@ namespace Silmoon.AspNetCore.UserAuthTest.Services
             }
 
 
-            var allowUserCerdential = new AllowUserCredential();
+            Credential[] credentials = [];
             if (hasUserObjectId)
             {
                 var userWebAuthnInfos = Core.GetUserWebAuthnInfos(userObjectId);
                 if (!userWebAuthnInfos.IsNullOrEmpty())
                 {
-                    allowUserCerdential.UserId = userObjectId.ToString();
-                    allowUserCerdential.Credentials = userWebAuthnInfos.Select(c => new Credential()
+                    credentials = userWebAuthnInfos.Select(c => new Credential()
                     {
                         Id = Convert.ToBase64String(c.CredentialId),
                         Type = "public-key"
                     }).ToArray();
                 }
             }
-            return Task.FromResult(allowUserCerdential);
+            return Task.FromResult(credentials);
         }
         public override async Task<StateSet<bool, ClientWebAuthnOptions.ClientWebAuthnUser>> GetClientCreateWebAuthnOptions(HttpContext httpContext)
         {

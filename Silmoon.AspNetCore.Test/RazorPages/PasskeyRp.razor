@@ -2,6 +2,7 @@
 @using Silmoon.AspNetCore.Encryption.JsComponents
 @using Silmoon.AspNetCore.Encryption.ClientModels
 @using Silmoon.AspNetCore.Encryption.Models
+@using Silmoon.AspNetCore.Encryption.Services
 @using Silmoon.Models
 @using System.Security.Cryptography
 @using Silmoon.Secure
@@ -12,6 +13,7 @@
 @inject JsComponentInterop Jsc
 @inject ISilmoonAuthService SilmoonAuthService
 @inject NavigationManager NavigationManager
+@inject BlazorWebAuthnService BlazorWebAuthnService
 
 <h3>PasskeyRp</h3>
 
@@ -23,9 +25,15 @@
             <div class="text-primary fw-bold">@CurrentUser.Username</div>
         </div>
         <div>
-            <button class="btn btn-primary btn-sm" id="enroll" @onclick="CreateWebAuthn">Add passkey</button>
-            <button class="btn btn-primary btn-sm" id="signout" @onclick="() => AuthenticateWebAuthn(true)">Verify(All user)</button>
-            <button class="btn btn-primary btn-sm" id="signout" @onclick="() => AuthenticateWebAuthn(false)">Verify</button>
+            <div style="text-align: end">
+                <button class="btn btn-primary btn-sm" id="enroll" @onclick="CreateWebAuthn">Add passkey</button>
+                <button class="btn btn-primary btn-sm" id="signout" @onclick="() => RequestWebAuthn(true)">Request(All user)</button>
+                <button class="btn btn-primary btn-sm" id="signout" @onclick="() => RequestWebAuthn(false)">Request</button>
+            </div>
+            <div class="mt-1" style="text-align: end">
+                <button class="btn btn-primary btn-sm" id="signout" @onclick="() => AuthenticateWebAuthn(true)">Verify(All user)</button>
+                <button class="btn btn-primary btn-sm" id="signout" @onclick="() => AuthenticateWebAuthn(false)">Verify</button>
+            </div>
         </div>
     </div>
     <hr />
@@ -53,7 +61,6 @@
             }
         }
     </div>
-
 </div>
 
 
@@ -76,20 +83,7 @@
     }
     async void CreateWebAuthn()
     {
-        var challenge = HashHelper.RandomNumbers(32);
-        ClientBlazorWebAuthnOptions clientBlazorWebAuthnOptions = new ClientBlazorWebAuthnOptions()
-        {
-            Challenge = challenge,
-            Rp = new ClientWebAuthnOptions.ClientWebAuthnRp() { Id = new Uri(NavigationManager.BaseUri).Host, Name = "LocalhostTest" },
-            User = new ClientBlazorWebAuthnOptions.ClientWebAuthnUser()
-            {
-                Name = CurrentUser.Username,
-                DisplayName = $"{CurrentUser.Username}({CurrentUser.Nickname})",
-                Id = CurrentUser._id.ToByteArray().GetBase64String(),
-            },
-        };
-
-        var response = await webAuthnInterop.Create(clientBlazorWebAuthnOptions);
+        var response = await BlazorWebAuthnService.Create(CurrentUser.Username, $"{CurrentUser.Username}({CurrentUser.Nickname})", CurrentUser._id.ToByteArray());
         if (response.State)
         {
             var userWebAuthInfo = response.Data.WebAuthnInfo;
@@ -101,17 +95,11 @@
             await Jsc.MetroUIConfirm("Result", "Error (" + response.Message + ")");
 
     }
-    async void AuthenticateWebAuthn(bool allUser = false)
+    async void RequestWebAuthn(bool allUser = false)
     {
-        var challenge = HashHelper.RandomNumbers(32);
-        ClientBlazorWebAuthnAuthenticateOptions options = new ClientBlazorWebAuthnAuthenticateOptions()
-        {
-            Challenge = challenge,
-            RpId = new Uri(NavigationManager.BaseUri).Host,
-        };
-        if (!allUser) options.AllowCredentials = UserWebAuthnInfos.Select(x => new Credential() { Id = x.CredentialId.GetBase64String() }).ToArray();
-
-        var webAuthnAuthenticateResponse = await webAuthnInterop.Authenticate(options);
+        Credential[] cred = [];
+        if (!allUser) cred = UserWebAuthnInfos.Select(x => new Credential() { Id = x.CredentialId.GetBase64String() }).ToArray();
+        var webAuthnAuthenticateResponse = await BlazorWebAuthnService.Request(cred);
 
         if (webAuthnAuthenticateResponse.State)
         {
@@ -133,6 +121,18 @@
             await Jsc.MetroUIConfirm("Result", "Error (" + webAuthnAuthenticateResponse.Message + ")");
 
     }
+
+    async void AuthenticateWebAuthn(bool allUser = false)
+    {
+        var userId = allUser ? null : CurrentUser._id.ToString();
+        var result = await BlazorWebAuthnService.Authenticate(userId);
+        if (result.State)
+            await Jsc.MetroUIConfirm("Result", "Success");
+        else
+            await Jsc.MetroUIConfirm("Result", "Error (" + result.Message + ")");
+
+    }
+
     async void DeleteWebAuthn(byte[] credentialId)
     {
         await Jsc.MetroUIConfirm("确认", "确认删除(" + credentialId.GetBase64String() + ")？", true, async confirmd =>

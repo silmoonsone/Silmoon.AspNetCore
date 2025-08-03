@@ -19,7 +19,7 @@ namespace Silmoon.AspNetCore.Encryption.Services.Interfaces
         Task<StateSet<bool>> ValidateData(HttpContext httpContext, string jsonStringData, string challenge = null);
 
         Task<StateSet<bool, ClientWebAuthnOptions.ClientWebAuthnUser>> GetClientCreateWebAuthnOptions(HttpContext httpContext);
-        Task<AllowUserCredential> GetAllowCredentials(HttpContext httpContext, string userId);
+        Task<Credential[]> GetAllowCredentials(HttpContext httpContext, string userId);
         Task<StateSet<bool>> OnCreate(HttpContext httpContext, WebAuthnCreateResponse webAuthnCreateResponse);
         Task<StateSet<bool>> OnAuthenticateCompleted(HttpContext httpContext, WebAuthnAuthenticateResponse webAuthnAuthenticateResponse, StateSet<bool> result, object flagData);
         Task<StateSet<bool>> OnDelete(HttpContext httpContext, byte[] credentialId);

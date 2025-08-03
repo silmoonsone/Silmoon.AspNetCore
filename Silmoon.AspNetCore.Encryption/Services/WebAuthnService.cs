@@ -66,9 +66,9 @@ namespace Silmoon.AspNetCore.Encryption.Services
                 else challenge = challengeStr.GetBytes();
             }
 
-            var allowUserCredential = await GetAllowCredentials(httpContext, userId);
+            var credentials = await GetAllowCredentials(httpContext, userId);
 
-            if (allowUserCredential is null) result.Set(false, "User not found");
+            if (credentials is null) result.Set(false, "User not found");
             else
             {
                 result.Success = true;
@@ -76,11 +76,11 @@ namespace Silmoon.AspNetCore.Encryption.Services
                 {
                     Challenge = challenge,
                     RpId = Options.Host,
-                    AllowCredentials = allowUserCredential.Credentials,
+                    AllowCredentials = credentials,
                 };
 
-                if (challengeStr.IsNullOrEmpty()) GlobalCaching<string, string>.Set("_passkey_challenge:" + challenge.GetBase64String(), allowUserCredential.UserId, TimeSpan.FromSeconds(300));
-                else GlobalCaching<string, string>.Set("__passkey_challenge:" + challenge.GetBase64String(), allowUserCredential.UserId, TimeSpan.FromSeconds(300));
+                if (challengeStr.IsNullOrEmpty()) GlobalCaching<string, string>.Set("_passkey_challenge:" + challenge.GetBase64String(), userId, TimeSpan.FromSeconds(300));
+                else GlobalCaching<string, string>.Set("__passkey_challenge:" + challenge.GetBase64String(), userId, TimeSpan.FromSeconds(300));
             }
             fin:
             await httpContext.Response.WriteJObjectAsync(result);
@@ -211,7 +211,7 @@ namespace Silmoon.AspNetCore.Encryption.Services
         /// <param name="httpContext"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public abstract Task<AllowUserCredential> GetAllowCredentials(HttpContext httpContext, string userId);
+        public abstract Task<Credential[]> GetAllowCredentials(HttpContext httpContext, string userId);
         /// <summary>
         /// 当用户浏览器已经创建WebAuthn后，服务器端执行保存操作
         /// </summary>

@@ -86,7 +86,7 @@ async function authenticateWebAuthn(userId, flagData) {
         if (typeof flagData == "undefined") flagData = null;
         // 1. 向服务器请求挑战 (challenge) 和其他验证选项
         const formData = new FormData();
-        formData.append('UserId', userId);
+        if (typeof userId == 'string' && userId.length > 0) formData.append('UserId', userId);
         const response = await fetch(webAuthnClientOptions.getWebAuthnAuthenticateOptions, {
             method: 'POST',
             body: formData
@@ -150,10 +150,9 @@ async function initWebAuthnRequest(userId, challenge = null, flagData = null) {
         if (typeof flagData == "undefined") flagData = null;
         // 1. 向服务器请求挑战 (challenge) 和其他验证选项
         const formData = new FormData();
-        formData.append('UserId', userId);
-        if (typeof challenge == 'string' && challenge.length > 0) {
-            formData.append('Challenge', challenge);
-        }
+        if (typeof userId == 'string' && userId.length > 0) formData.append('UserId', userId);
+        if (typeof challenge == 'string' && challenge.length > 0) formData.append('Challenge', challenge);
+
         const response = await fetch(webAuthnClientOptions.getWebAuthnAuthenticateOptions, {
             method: 'POST',
             body: formData

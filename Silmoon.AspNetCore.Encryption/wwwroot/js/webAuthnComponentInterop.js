@@ -1,6 +1,7 @@
 // WebAuthn support script
 export async function createWebAuthn(options) {
     try {
+        if (options.rp.id == null) options.rp.id = window.location.hostname;
         options.challenge = base64ToUint8Array(options.challenge);
         options.user.id = base64ToUint8Array(options.user.id);
 
@@ -46,6 +47,8 @@ export async function authenticateWebAuthn(options) {
                 id: base64ToUint8Array(cred.id)
             };
         });
+
+        if (options.rpId == null) options.rpId = window.location.hostname;
 
         const assertion = await navigator.credentials.get({
             publicKey: options

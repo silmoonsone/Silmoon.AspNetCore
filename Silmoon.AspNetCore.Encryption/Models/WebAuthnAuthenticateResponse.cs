@@ -32,7 +32,7 @@ namespace Silmoon.AspNetCore.Encryption.Models
             {
                 return clientJson ??= JObject.Parse(ClientDataJson.GetString());
             }
-            public string Challenge => GetClientJson()["challenge"].Value<string>().Base64UrlToBase64();
+            public string Challenge => Convert.FromBase64String(GetClientJson()["challenge"].Value<string>().Base64UrlToBase64()).GetString();
         }
 
 

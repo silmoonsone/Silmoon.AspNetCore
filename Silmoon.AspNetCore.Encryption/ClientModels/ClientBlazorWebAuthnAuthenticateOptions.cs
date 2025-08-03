@@ -12,7 +12,7 @@ namespace Silmoon.AspNetCore.Encryption.ClientModels
         /// <summary>
         /// 当前认证请求的Relying Party (RP) ID，通常是域名或应用名称。
         /// </summary>
-        [JsonProperty("rpId")]
+        [JsonProperty("rpId", NullValueHandling = NullValueHandling.Ignore)]
         required public string RpId { get; set; }
         [JsonProperty("allowCredentials")]
         public Credential[] AllowCredentials { get; set; } = [];

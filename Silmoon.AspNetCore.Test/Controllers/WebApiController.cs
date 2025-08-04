@@ -28,10 +28,10 @@ namespace Silmoon.AspNetCore.Test.Controllers
 
         public IActionResult CreateUser(string Username, string Password, string Repassword)
         {
-            if (Username.IsNullOrEmpty() || Password.IsNullOrEmpty()) return (false, "用户名或密码为空").GetStateStateJsonResult();
-            if (Password != Repassword) return (false, "两次密码不一致").GetStateStateJsonResult();
+            if (Username.IsNullOrEmpty() || Password.IsNullOrEmpty()) return (false, "用户名或密码为空").GetStateResultJson();
+            if (Password != Repassword) return (false, "两次密码不一致").GetStateResultJson();
             var existUser = Core.GetUser(Username);
-            if (existUser is null) return (false, "用户名已存在").GetStateStateJsonResult();
+            if (existUser is null) return (false, "用户名已存在").GetStateResultJson();
             User user = new User()
             {
                 Username = Username,

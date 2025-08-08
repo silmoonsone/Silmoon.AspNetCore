@@ -37,10 +37,17 @@ namespace Silmoon.AspNetCore.Blazor.JsComponents
             var module = await moduleTask.Value;
             return await module.InvokeAsync<string>("showPrompt", message);
         }
-        public async ValueTask CopyText(string text)
+        public async ValueTask<bool> CopyText(string text)
         {
-            var module = await moduleTask.Value;
-            await module.InvokeVoidAsync("copyText", text);
+            try
+            {
+                var module = await moduleTask.Value;
+                return await module.InvokeAsync<bool>("copyText", text);
+            }
+            catch
+            {
+                return false;
+            }
         }
         public async ValueTask<bool> CopyElementText(string elementId, bool clearSelected = true)
         {

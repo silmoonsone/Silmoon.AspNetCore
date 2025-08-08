@@ -68,7 +68,12 @@ export function toast(msg, delay = 1000) {
 }
 
 export async function copyText(text) {
-    await navigator.clipboard.writeText(text);
+    try {
+        await navigator.clipboard.writeText(text);
+        return true;
+    } catch (e) {
+        return false;
+    }
 }
 
 export function copyElementText(elementId, clearSelected) {

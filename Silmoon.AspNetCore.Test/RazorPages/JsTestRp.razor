@@ -58,7 +58,8 @@
     }
     private async Task Copy()
     {
-        await Jsc.CopyText(DateTime.Now.ToString());
+        var result = await Jsc.CopyText(DateTime.Now.ToString());
+        await Jsc.Toast("result: " + result);
     }
     private async Task CopyElement()
     {

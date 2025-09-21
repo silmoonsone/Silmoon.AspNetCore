@@ -10,7 +10,7 @@ namespace Silmoon.AspNetCore.Services
         public bool? IsDebug { get; private set; }
 #else
         public string DefaultConfigFile { get; set; } = "config.json";
-        public string ConfigFile { get; set; } = "config-local.json";
+        public string LocalConfigFile { get; set; } = "config-local.json";
         public bool? IsDebug { get; private set; } = false;
 #endif
         public SilmoonConfigureServiceOption()

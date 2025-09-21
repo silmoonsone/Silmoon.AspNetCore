@@ -8,24 +8,24 @@ namespace Silmoon.AspNetCore.Extensions
 {
     public static class ExtensionHelper
     {
-        public static IActionResult GetStateResultJson(this bool Success, string Message = null)
+        public static IActionResult GetStateResultJson(this bool success, string message = null)
         {
-            StateResult stateResult = StateResult.Create(Success, 0, Message);
+            StateResult stateResult = StateResult.Create(success, 0, message);
             return new ContentResult() { Content = stateResult.ToJsonString(), ContentType = "application/json" };
         }
-        public static IActionResult GetStateResultJson<T>(this bool Success, T Data = default, string Message = null)
+        public static IActionResult GetStateResultJson(this bool success, int code, string message = null)
         {
-            StateResult<T> stateResult = StateResult<T>.Create(Success, Data, 0, Message);
+            StateResult stateResult = StateResult.Create(success, code, message);
             return new ContentResult() { Content = stateResult.ToJsonString(), ContentType = "application/json" };
         }
-        public static IActionResult GetStateResultJson(this bool Success, int Code, string Message = null)
+        public static IActionResult GetStateResultJson<T>(this bool success, T data, string message = null)
         {
-            StateResult stateResult = StateResult.Create(Success, Code, Message);
+            StateResult<T> stateResult = StateResult<T>.Create(success, data, 0, message);
             return new ContentResult() { Content = stateResult.ToJsonString(), ContentType = "application/json" };
         }
-        public static IActionResult GetStateResultJson<T>(this bool Success, T Data = default, int Code = 0, string Message = null)
+        public static IActionResult GetStateResultJson<T>(this bool success, T data, int code, string message = null)
         {
-            StateResult<T> stateResult = StateResult<T>.Create(Success, Data, Code, Message);
+            StateResult<T> stateResult = StateResult<T>.Create(success, data, code, message);
             return new ContentResult() { Content = stateResult.ToJsonString(), ContentType = "application/json" };
         }
 

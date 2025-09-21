@@ -10,7 +10,7 @@
   <PropertyGroup>
     <IsPackable>true</IsPackable>
     <PackageId>Silmoon.AspNetCore</PackageId>
-    <Version>1.7.2</Version>
+    <Version>2.0.0</Version>
     <Authors>SILMOON</Authors>
     <Company>SILMOON LLC</Company>
     <Description>Silmoon SDK</Description>
@@ -20,6 +20,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>silmoon</PackageTags>
     <PackageIcon>logo.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageOutputPath>..\packages_out</PackageOutputPath>
   </PropertyGroup>
 
@@ -37,10 +38,16 @@
       <PackagePath>\</PackagePath>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Silmoon" Version="1.8.7" />
-    <PackageReference Include="Silmoon.Extension" Version="1.7.7" />
+    <PackageReference Include="Silmoon" Version="2.0.0" />
+    <PackageReference Include="Silmoon.Extension" Version="2.0.0" />
   </ItemGroup>
 
   <ItemGroup>

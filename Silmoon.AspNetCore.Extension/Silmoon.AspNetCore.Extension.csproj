@@ -10,7 +10,7 @@
   <PropertyGroup>
     <IsPackable>true</IsPackable>
     <PackageId>Silmoon.AspNetCore.Extension</PackageId>
-    <Version>1.5.2</Version>
+    <Version>2.0.0</Version>
     <Authors>SILMOON</Authors>
     <Company>SILMOON LLC</Company>
     <Description>Silmoon SDK</Description>
@@ -20,6 +20,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>silmoon</PackageTags>
     <PackageIcon>logo.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageOutputPath>..\packages_out</PackageOutputPath>
   </PropertyGroup>
 
@@ -37,10 +38,16 @@
       <PackagePath>\</PackagePath>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MongoDB.Driver" Version="3.4.2" />
-    <PackageReference Include="Silmoon.Data.MongoDB" Version="1.8.1" />
+    <PackageReference Include="MongoDB.Driver" Version="3.5.0" />
+    <PackageReference Include="Silmoon.Data.MongoDB" Version="1.8.4" />
   </ItemGroup>
 
 </Project>

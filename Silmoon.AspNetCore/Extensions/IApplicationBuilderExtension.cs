@@ -22,5 +22,9 @@ namespace Silmoon.AspNetCore.Extensions
         {
             app.UseMiddleware<SilmoonAuthMiddleware>();
         }
+        public static void UseSilmoonTurnstile(this IApplicationBuilder app)
+        {
+            app.UseMiddleware<SilmoonTurnstileMiddleware>();
+        }
     }
 }

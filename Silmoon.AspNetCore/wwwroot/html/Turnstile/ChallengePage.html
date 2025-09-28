@@ -1,0 +1,618 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8" />
+    <title>安全验证 - Silmoon</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=____onTurnstileLoaded" async defer></script>
+    <style>
+        :root {
+            /* 系统明亮主题 */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-card: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --border-color: #e2e8f0;
+            --border-hover: #cbd5e1;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --accent-primary: #3b82f6;
+            --accent-hover: #2563eb;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        /* 系统暗色主题 */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-primary: #0f172a;
+                --bg-secondary: #1e293b;
+                --bg-card: #334155;
+                --text-primary: #f1f5f9;
+                --text-secondary: #cbd5e1;
+                --text-muted: #94a3b8;
+                --border-color: #475569;
+                --border-hover: #64748b;
+                --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+                --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+                --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+                --accent-primary: #60a5fa;
+                --accent-hover: #3b82f6;
+                --success: #34d399;
+                --error: #f87171;
+                --warning: #fbbf24;
+            }
+        }
+
+        /* 手动暗色主题覆盖 */
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --border-color: #475569;
+            --border-hover: #64748b;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+            --accent-primary: #60a5fa;
+            --accent-hover: #3b82f6;
+            --success: #34d399;
+            --error: #f87171;
+            --warning: #fbbf24;
+        }
+
+        /* 手动明亮主题覆盖 */
+        [data-theme="light"] {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-card: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --border-color: #e2e8f0;
+            --border-hover: #cbd5e1;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --accent-primary: #3b82f6;
+            --accent-hover: #2563eb;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            line-height: 1.6;
+        }
+
+        .container {
+            background: var(--bg-card);
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            padding: 2rem;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-primary), var(--success));
+        }
+
+        .header {
+            margin-bottom: 2rem;
+        }
+
+        .logo {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--success));
+            border-radius: 12px;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .verification-section {
+            margin: 2rem 0;
+        }
+
+        .turnstile-container {
+            display: flex;
+            justify-content: center;
+            margin: 1.5rem 0;
+            min-height: 65px;
+        }
+
+        .message {
+            margin-top: 1rem;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        .message.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .message.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .message.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .message.warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-secondary);
+        }
+
+        .theme-toggle:hover {
+            background: var(--border-hover);
+            color: var(--text-primary);
+        }
+
+        .theme-toggle svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .loading {
+            display: none;
+            margin: 1rem 0;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--border-color);
+            border-top: 2px solid var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .footer {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                margin: 1rem;
+                padding: 1.5rem;
+                max-width: calc(100vw - 2rem);
+                width: calc(100vw - 2rem);
+            }
+            
+            .title {
+                font-size: 1.25rem;
+            }
+            
+            .subtitle {
+                font-size: 0.8rem;
+            }
+            
+            .logo {
+                width: 40px;
+                height: 40px;
+                font-size: 1.25rem;
+            }
+            
+            .theme-toggle {
+                top: 0.75rem;
+                right: 0.75rem;
+                padding: 0.4rem;
+            }
+            
+            .theme-toggle svg {
+                width: 18px;
+                height: 18px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                margin: 0.5rem;
+                padding: 1.25rem;
+                border-radius: 12px;
+            }
+            
+            .title {
+                font-size: 1.125rem;
+            }
+            
+            .subtitle {
+                font-size: 0.75rem;
+            }
+            
+            .logo {
+                width: 36px;
+                height: 36px;
+                font-size: 1.125rem;
+                margin-bottom: 0.75rem;
+            }
+            
+            .verification-section {
+                margin: 1.5rem 0;
+            }
+            
+            .turnstile-container {
+                margin: 1rem 0;
+                min-height: 60px;
+            }
+            
+            .message {
+                font-size: 0.8rem;
+                padding: 0.6rem 0.8rem;
+            }
+            
+            .footer {
+                margin-top: 1.5rem;
+                font-size: 0.7rem;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .container {
+                margin: 0.25rem;
+                padding: 1rem;
+                border-radius: 8px;
+            }
+            
+            .title {
+                font-size: 1rem;
+            }
+            
+            .subtitle {
+                font-size: 0.7rem;
+            }
+            
+            .logo {
+                width: 32px;
+                height: 32px;
+                font-size: 1rem;
+                margin-bottom: 0.5rem;
+            }
+            
+            .verification-section {
+                margin: 1rem 0;
+            }
+            
+            .turnstile-container {
+                margin: 0.75rem 0;
+                min-height: 55px;
+            }
+        }
+
+        /* 动画效果 */
+        .container {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Turnstile 样式调整 */
+        .cf-turnstile {
+            transform: scale(0.9);
+        }
+
+        [data-theme="dark"] .cf-turnstile {
+            filter: brightness(0.8) contrast(1.2);
+        }
+
+        /* 移动端触摸优化 */
+        @media (hover: none) and (pointer: coarse) {
+            .theme-toggle {
+                min-height: 44px;
+                min-width: 44px;
+                padding: 0.6rem;
+            }
+            
+            .theme-toggle:active {
+                transform: scale(0.95);
+            }
+        }
+
+        /* 防止移动端缩放 */
+        @media (max-width: 768px) {
+            body {
+                -webkit-text-size-adjust: 100%;
+                -webkit-tap-highlight-color: transparent;
+            }
+        }
+
+        /* 安全区域适配（iPhone X 等设备） */
+        @supports (padding: max(0px)) {
+            .container {
+                padding-left: max(1.5rem, env(safe-area-inset-left));
+                padding-right: max(1.5rem, env(safe-area-inset-right));
+            }
+            
+            body {
+                padding-top: env(safe-area-inset-top);
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="theme-toggle" onclick="toggleTheme()" title="切换主题">
+            <svg id="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="5"/>
+                <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+            </svg>
+        </button>
+
+        <div class="header">
+            <div class="logo">S</div>
+            <h1 class="title">自动化阻挡程序</h1>
+            <p class="subtitle">请证实你是人类并且执行下列行为</p>
+        </div>
+
+        <div class="verification-section">
+            <div class="turnstile-container">
+                <div id="____turnstile"></div>
+            </div>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 0.5rem; color: var(--text-secondary);">正在验证...</p>
+            </div>
+            
+            <div id="message" class="message"></div>
+        </div>
+
+        <div class="footer">
+            <p>由 Cloudflare 提供安全保护</p>
+        </div>
+    </div>
+
+    <script>
+        // 主题管理
+        function initTheme() {
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            // 始终跟随系统主题，不保存任何偏好
+            document.documentElement.removeAttribute('data-theme');
+            updateThemeIcon(systemPrefersDark ? 'dark' : 'light', true);
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            let newTheme;
+            let isSystemTheme = false;
+            
+            if (!currentTheme) {
+                // 当前跟随系统，切换到与系统相反的主题
+                newTheme = systemPrefersDark ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-theme', newTheme);
+            } else {
+                // 当前是手动主题，切换回跟随系统
+                document.documentElement.removeAttribute('data-theme');
+                newTheme = systemPrefersDark ? 'dark' : 'light';
+                isSystemTheme = true;
+            }
+            
+            updateThemeIcon(newTheme, isSystemTheme);
+        }
+
+        function updateThemeIcon(theme, isSystemTheme = false) {
+            const icon = document.getElementById('theme-icon');
+            if (theme === 'dark') {
+                icon.innerHTML = `
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                `;
+                icon.title = isSystemTheme ? '跟随系统（暗色）' : '手动暗色模式';
+            } else {
+                icon.innerHTML = `
+                    <circle cx="12" cy="12" r="5"/>
+                    <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                `;
+                icon.title = isSystemTheme ? '跟随系统（明亮）' : '手动明亮模式';
+            }
+        }
+
+        // 监听系统主题变化
+        function setupSystemThemeListener() {
+            const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+            
+            function handleSystemThemeChange(e) {
+                // 只有在没有手动设置主题时才跟随系统变化
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                if (!currentTheme) {
+                    const systemPrefersDark = e.matches;
+                    updateThemeIcon(systemPrefersDark ? 'dark' : 'light', true);
+                }
+            }
+            
+            // 监听系统主题变化
+            mediaQuery.addEventListener('change', handleSystemThemeChange);
+            
+            // 返回清理函数
+            return () => {
+                mediaQuery.removeEventListener('change', handleSystemThemeChange);
+            };
+        }
+
+        // 消息显示函数
+        function showMessage(text, type = 'info') {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = text;
+            messageEl.className = `message ${type} show`;
+            
+            // 3秒后自动隐藏
+            setTimeout(() => {
+                messageEl.classList.remove('show');
+            }, 3000);
+        }
+
+        // 显示/隐藏加载状态
+        function toggleLoading(show) {
+            const loadingEl = document.getElementById('loading');
+            if (show) {
+                loadingEl.classList.add('show');
+            } else {
+                loadingEl.classList.remove('show');
+            }
+        }
+
+        // Turnstile 回调函数
+        function ____onTurnstileLoaded() {
+            turnstile.render('#____turnstile', {
+                sitekey: '{{SilmoonTurnstileSiteKey}}',
+                callback: function (token) {
+                    ____turnstileResultCallback(token);
+                },
+                'error-callback': function() {
+                    showMessage('验证组件加载失败，请刷新页面重试', 'error');
+                },
+                'expired-callback': function() {
+                    showMessage('验证已过期，请重新验证', 'warning');
+                }
+            });
+        }
+
+        async function ____turnstileResultCallback(token) {
+            console.log("Turnstile token: " + token);
+            toggleLoading(true);
+            
+            try {
+                const formData = new FormData();
+                formData.append('token', token);
+
+                const response = await fetch('/SilmonTurnstile/challenge', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage('验证成功！正在跳转...', 'success');
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                } else {
+                    showMessage('验证失败：' + data.message, 'error');
+                    // 重置 Turnstile
+                    turnstile.reset();
+                }
+                console.log('后端响应: ', data);
+            } catch (error) {
+                showMessage('网络错误，请检查网络连接后重试', 'error');
+                console.error('提交token失败: ', error);
+                // 重置 Turnstile
+                turnstile.reset();
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+        // 页面加载完成后初始化主题
+        document.addEventListener('DOMContentLoaded', function() {
+            initTheme();
+            setupSystemThemeListener();
+        });
+
+    </script>
+</body>
+</html>

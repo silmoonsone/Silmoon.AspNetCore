@@ -33,6 +33,7 @@ namespace Silmoon.AspNetCore.Services
         public StateSet<bool> Verify(HttpContext httpContext)
         {
             var hash = httpContext.Request.Cookies["____SilmoonTurnstile"];
+            if (hash.IsNullOrEmpty()) return false.ToStateSet("No cookie.");
             var ip = httpContext.Connection.RemoteIpAddress?.ToString();
             var ipCookies = HashedCookies.Get(ip);
             if (ipCookies is not null)

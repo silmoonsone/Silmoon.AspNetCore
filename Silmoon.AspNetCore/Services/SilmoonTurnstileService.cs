@@ -32,18 +32,21 @@ namespace Silmoon.AspNetCore.Services
         }
         public StateSet<bool> Verify(HttpContext httpContext)
         {
-            var hash = httpContext.Request.Cookies["____SilmoonTurnstile"];
-            if (hash.IsNullOrEmpty()) return false.ToStateSet("No cookie.");
+            var cookie = httpContext.Request.Cookies["____SilmoonTurnstile"];
+            if (cookie.IsNullOrEmpty()) return false.ToStateSet("No cookie.");
+            var str = EncryptHelper.AesDecryptStringV2(cookie, Option.CookieEncryptionKey);
+            if (str.IsNullOrEmpty()) return false.ToStateSet("Cookie is invalid.");
+            var strArray = str?.Split('|');
+            if (strArray.Length != 3) return false.ToStateSet("Cookie is invalid.");
+
+            var strip = strArray[0];
+            var strUserAgent = strArray[1];
+            var strRandom = strArray[2];
+
             var ip = httpContext.Connection.RemoteIpAddress?.ToString();
-            var ipCookies = HashedCookies.Get(ip);
-            if (ipCookies is not null)
-            {
-                foreach (var item in ipCookies)
-                {
-                    if (item.Contains(hash)) return true.ToStateSet();
-                }
-            }
-            return false.ToStateSet();
+            if (strip != ip) return false.ToStateSet("Cookie is invalid.");
+            if (strUserAgent != httpContext.Request.Headers.UserAgent.ToString()) return false.ToStateSet("Cookie is valid.");
+            return true.ToStateSet();
         }
         public async Task<StateSet<bool, TurnstileResult>> Challenge(HttpContext httpContext, string secret, string token)
         {
@@ -51,20 +54,20 @@ namespace Silmoon.AspNetCore.Services
             var result = (verifyResult.IsSuccess && verifyResult.Result.Success).ToStateSet(verifyResult.Result, verifyResult.Exception?.ToString() ?? "");
 
             var ip = httpContext.Connection.RemoteIpAddress?.ToString();
-            var hash = $"{ip}|{httpContext.Request.Headers.UserAgent}|{HashHelper.RandomChars(16)}".GetSHA256Hash();
+            var userAgent = httpContext.Request.Headers.UserAgent.ToString();
+            var str = $"{ip}|{userAgent}|{HashHelper.RandomChars(16)}";
+            var cookie = EncryptHelper.AesEncryptStringV2(str, Option.CookieEncryptionKey);
 
-            if (result.State)
-            {
-                httpContext.Response.Cookies.Append("____SilmoonTurnstile", hash);
-            }
+            if (result.State) httpContext.Response.Cookies.Append("____SilmoonTurnstile", cookie);
             await httpContext.Response.WriteAsJsonAsync(result.State.ToStateResult(result.Data, result.Message));
-            var ipCookies = HashedCookies.Get(ip);
-            if (ipCookies is null) HashedCookies[ip] = [];
-            else
-            {
-                if (ipCookies.Count >= 100) ipCookies.Clear();
-            }
-            HashedCookies[ip].Add(hash);
+
+            //var ipCookies = HashedCookies.Get(ip);
+            //if (ipCookies is null) HashedCookies[ip] = [];
+            //else
+            //{
+            //    if (ipCookies.Count >= 100) ipCookies.Clear();
+            //}
+            //HashedCookies[ip].Add(cookie);
             return result;
         }
     }

@@ -12,7 +12,7 @@ AspNetCore related open source projects forked from Silmoon (44876f64eeb23c16bb8
 Many JS calls return objects that are generally the following.
 
 ```json
-{ Success: "#Boolean"; Message: "#String"; Data: "#Object" }
+{ success: "#Boolean"; message: "#String"; data: "#Object" }
 ```
 ---
 

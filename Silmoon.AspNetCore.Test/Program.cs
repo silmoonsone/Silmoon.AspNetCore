@@ -75,6 +75,7 @@ builder.Services.AddSilmoonConfigure<SilmoonConfigureServiceImpl>(o =>
 
 builder.Services.AddSilmoonTurnstile(o =>
 {
+    o.CookieEncryptionKey = "PibTXpdfWdqiKkMOmrjLyujBAsnTdOBM";
     o.SiteKey = "3x00000000000000000000FF";
     o.SecretKey = "1x0000000000000000000000000000000AA";
 });
@@ -109,8 +110,8 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseSilmoonTurnstile();
 app.UseHttpsRedirection();
+app.UseSilmoonTurnstile();
 app.UseStaticFiles();
 
 //if (app.Environment.IsDevelopment())

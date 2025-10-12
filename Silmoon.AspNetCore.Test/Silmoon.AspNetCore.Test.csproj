@@ -29,7 +29,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="Silmoon.Data.LiteDB" Version="1.8.0" />
     <PackageReference Include="Silmoon.Graphics" Version="0.0.2" />
-    <PackageReference Include="Silmoon" Version="2.0.0" />
+    <PackageReference Include="Silmoon" Version="2.0.1" />
     <PackageReference Include="Silmoon.Data.MongoDB" Version="2.0.0" />
     <PackageReference Include="Silmoon.Extension" Version="2.0.0" />
   </ItemGroup>

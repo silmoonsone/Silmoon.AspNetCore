@@ -46,7 +46,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="9.0.9" />
-    <PackageReference Include="Silmoon" Version="2.0.0" />
+    <PackageReference Include="Silmoon" Version="2.0.1" />
     <PackageReference Include="Silmoon.Extension" Version="2.0.0" />
     <PackageReference Include="PeterO.Cbor" Version="4.5.5" />
   </ItemGroup>

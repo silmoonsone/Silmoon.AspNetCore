@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Silmoon" Version="2.0.1" />
+    <PackageReference Include="Silmoon" Version="2.0.2" />
     <PackageReference Include="Silmoon.Data.LiteDB" Version="1.8.0" />
     <PackageReference Include="Silmoon.Extension" Version="2.0.0" />
   </ItemGroup>

@@ -4,6 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>annotations</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <StaticWebAssetBasePath>/_content/Silmoon.AspNetCore.Encryption</StaticWebAssetBasePath>
   </PropertyGroup>
 
   <PropertyGroup>

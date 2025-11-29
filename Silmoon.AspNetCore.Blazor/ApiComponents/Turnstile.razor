@@ -25,7 +25,9 @@
     };
 
     function ____onTurnstileLoaded(){
-        ____dotNetInvokeObj.invokeMethodAsync("JsCall_OnTurnstileLoaded");
+        setTimeout(function(){
+            ____dotNetInvokeObj.invokeMethodAsync("JsCall_OnTurnstileLoaded");
+        }, 500);
     }
 
     function ____turnstileResultCallback(token) {
@@ -43,6 +45,10 @@
 
     function ____turnstileIsRendered() {
         return ____turnstileRendered;
+    }
+
+    function ____turnstileReset() {
+        return turnstile.reset();
     }
 </script>
 
@@ -93,6 +99,13 @@
         var jsInvokeObj = DotNetObjectReference.Create(this);
         await Js.InvokeVoidAsync("injectDotNetInvokeObj", jsInvokeObj);
         await base.OnAfterRenderAsync(firstRender);
+    }
+
+    public async Task Reset()
+    {
+        await Js.InvokeVoidAsync("____turnstileReset");
+        Response = null;
+        await ResponseChanged.InvokeAsync(Response);
     }
 }
 

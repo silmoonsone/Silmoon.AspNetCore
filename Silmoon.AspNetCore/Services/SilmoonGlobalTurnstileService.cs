@@ -14,11 +14,11 @@ using System.Threading.Tasks;
 
 namespace Silmoon.AspNetCore.Services
 {
-    public class SilmoonTurnstileService
+    public class SilmoonGlobalTurnstileService
     {
         Dictionary<string, List<string>> HashedCookies = [];
-        SilmoonTurnstileServiceOption Option { get; set; }
-        public SilmoonTurnstileService(IOptions<SilmoonTurnstileServiceOption> option)
+        SilmoonGlobalTurnstileServiceOption Option { get; set; }
+        public SilmoonGlobalTurnstileService(IOptions<SilmoonGlobalTurnstileServiceOption> option)
         {
             Option = option.Value;
         }
@@ -32,7 +32,7 @@ namespace Silmoon.AspNetCore.Services
         }
         public StateSet<bool> Verify(HttpContext httpContext)
         {
-            var cookie = httpContext.Request.Cookies["____SilmoonTurnstile"];
+            var cookie = httpContext.Request.Cookies["____SilmoonGlobalTurnstile"];
             if (cookie.IsNullOrEmpty()) return false.ToStateSet("No cookie.");
             var str = EncryptHelper.AesDecryptStringV2(cookie, Option.CookieEncryptionKey);
             if (str.IsNullOrEmpty()) return false.ToStateSet("Cookie is invalid.");
@@ -58,7 +58,7 @@ namespace Silmoon.AspNetCore.Services
             var str = $"{ip}|{userAgent}|{HashHelper.RandomChars(16)}";
             var cookie = EncryptHelper.AesEncryptStringV2(str, Option.CookieEncryptionKey);
 
-            if (result.State) httpContext.Response.Cookies.Append("____SilmoonTurnstile", cookie);
+            if (result.State) httpContext.Response.Cookies.Append("____SilmoonGlobalTurnstile", cookie);
             await httpContext.Response.WriteAsJsonAsync(result.State.ToStateResult(result.Data, result.Message));
 
             //var ipCookies = HashedCookies.Get(ip);

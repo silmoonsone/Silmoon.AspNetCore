@@ -12,7 +12,7 @@ using System.Threading;
 
 namespace Silmoon.AspNetCore.Middlewares
 {
-    public class SilmoonTurnstileMiddleware(RequestDelegate next, SilmoonTurnstileService turnstileService, IOptions<SilmoonTurnstileServiceOption> option, IWebHostEnvironment env)
+    public class SilmoonGlobalTurnstileMiddleware(RequestDelegate next, SilmoonGlobalTurnstileService turnstileService, IOptions<SilmoonGlobalTurnstileServiceOption> option, IWebHostEnvironment env)
     {
         // 缓存挑战页模板（包含占位符），首次读取后缓存
         private string _challengeTemplateHtml;

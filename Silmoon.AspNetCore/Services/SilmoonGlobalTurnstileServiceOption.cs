@@ -2,7 +2,7 @@
 
 namespace Silmoon.AspNetCore.Services
 {
-    public class SilmoonTurnstileServiceOption
+    public class SilmoonGlobalTurnstileServiceOption
     {
         public string SiteKey { get; set; }
         public string SecretKey { get; set; }

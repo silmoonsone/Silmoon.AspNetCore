@@ -54,11 +54,11 @@ namespace Silmoon.AspNetCore.Extensions
             services.Configure(option);
             services.AddSingleton<ISilmoonConfigureService, SilmoonConfigureService>();
         }
-        public static void AddSilmoonTurnstile(this IServiceCollection services, Action<SilmoonTurnstileServiceOption> option)
+        public static void AddSilmoonTurnstile(this IServiceCollection services, Action<SilmoonGlobalTurnstileServiceOption> option)
         {
             ArgumentNullException.ThrowIfNull(services);
             services.Configure(option);
-            services.AddSingleton<SilmoonTurnstileService>();
+            services.AddSingleton<SilmoonGlobalTurnstileService>();
         }
     }
 }

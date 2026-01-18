@@ -4,15 +4,13 @@ AspNetCore related open source projects forked from Silmoon (44876f64eeb23c16bb8
 
 # Requirement:
 
-* .net8.0 and .net9.0 SDK
-* NuGet package Silmoon
-* NuGet package Silmoon.Extension
+* .net10 SDK
 
 ---
 Many JS calls return objects that are generally the following.
 
 ```json
-{ success: "#Boolean"; message: "#String"; data: "#Object" }
+{ success: #bool; message: "#string"; data: {#object} }
 ```
 ---
 

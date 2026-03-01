@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Silmoon.AspNetCore.Services;
-using Silmoon.Extension.Interfaces;
+using Silmoon.Extensions.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;

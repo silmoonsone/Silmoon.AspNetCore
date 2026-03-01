@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Silmoon.Extension;
-using Silmoon.Extension.Models;
+using Silmoon.Extensions;
+using Silmoon.Extensions.Models;
 using Silmoon.Models;
 using System;
 

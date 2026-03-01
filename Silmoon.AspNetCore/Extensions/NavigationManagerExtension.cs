@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Primitives;
-using Silmoon.Extension;
+using Silmoon.Extensions;
 using System;
 using System.Collections.Generic;
 using System.IO;

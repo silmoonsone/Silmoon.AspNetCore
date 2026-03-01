@@ -2,7 +2,7 @@
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson;
 using Newtonsoft.Json.Linq;
-using Silmoon.Extension;
+using Silmoon.Extensions;
 using System.ComponentModel;
 using System.Numerics;
 using System.Reflection;

@@ -4,7 +4,7 @@ using MongoDB.Bson;
 using System;
 using System.Threading.Tasks;
 
-namespace Silmoon.AspNetCore.Extension.Binders
+namespace Silmoon.AspNetCore.Extensions.Binders
 {
     public class ObjectIdBinderProvider : IModelBinderProvider
     {

@@ -2,10 +2,10 @@
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
 using Silmoon.AspNetCore.Interfaces;
-using Silmoon.Extension;
-using Silmoon.Extension.Models;
-using Silmoon.Extension.Enums;
-using Silmoon.Extension.Interfaces;
+using Silmoon.Extensions;
+using Silmoon.Extensions.Models;
+using Silmoon.Extensions.Enums;
+using Silmoon.Extensions.Interfaces;
 
 namespace Silmoon.AspNetCore.Filters
 {

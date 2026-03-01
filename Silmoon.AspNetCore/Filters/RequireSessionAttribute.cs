@@ -3,12 +3,12 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
 using Silmoon.AspNetCore.Extensions;
 using Silmoon.AspNetCore.Interfaces;
-using Silmoon.Extension;
-using Silmoon.Extension.Interfaces;
-using Silmoon.Extension.Enums;
+using Silmoon.Extensions;
+using Silmoon.Extensions.Interfaces;
+using Silmoon.Extensions.Enums;
 using Silmoon.Models;
 using System.Web;
-using Silmoon.Extension.Models;
+using Silmoon.Extensions.Models;
 
 namespace Silmoon.AspNetCore.Filters
 {

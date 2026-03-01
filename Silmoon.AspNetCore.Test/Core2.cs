@@ -4,7 +4,7 @@ using Silmoon.AspNetCore.Test.Models;
 using Silmoon.AspNetCore.Test.Services;
 using Silmoon.AspNetCore.Interfaces;
 using Silmoon.Data.MongoDB;
-using Silmoon.Extension;
+using Silmoon.Extensions;
 using Silmoon.Models;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;

@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Silmoon.AspNetCore.Extensions;
 using Silmoon.AspNetCore.Interfaces;
-using Silmoon.Extension;
+using Silmoon.Extensions;
 using System.Net.Http;
 using System.Threading.Tasks;
 

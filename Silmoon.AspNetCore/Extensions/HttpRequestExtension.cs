@@ -4,7 +4,7 @@ using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Silmoon.AspNetCore.Enums;
-using Silmoon.Extension;
+using Silmoon.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;

@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Silmoon.AspNetCore.Encryption.Enums;
-using Silmoon.Extension;
+using Silmoon.Extensions;
 using Silmoon.Models;
 using System.Security.Cryptography;
 using System.Security.Cryptography.Xml;

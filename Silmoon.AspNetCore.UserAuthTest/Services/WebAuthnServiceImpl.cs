@@ -7,7 +7,7 @@ using Silmoon.AspNetCore.Encryption.Services;
 using Silmoon.AspNetCore.Interfaces;
 using Silmoon.AspNetCore.UserAuthTest.Models;
 using Silmoon.AspNetCore.UserAuthTest.Models.SubModels;
-using Silmoon.Extension;
+using Silmoon.Extensions;
 using Silmoon.Models;
 using Silmoon.Runtime;
 using System.Security.Claims;

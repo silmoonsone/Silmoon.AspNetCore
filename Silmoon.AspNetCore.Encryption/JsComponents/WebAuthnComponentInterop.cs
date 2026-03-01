@@ -1,7 +1,7 @@
 ﻿using Microsoft.JSInterop;
 using Silmoon.AspNetCore.Encryption.ClientModels;
 using Silmoon.AspNetCore.Encryption.Models;
-using Silmoon.Extension;
+using Silmoon.Extensions;
 using Silmoon.Models;
 using Silmoon.Runtime;
 using System;

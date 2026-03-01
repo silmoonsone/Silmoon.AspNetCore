@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Silmoon.Extension;
+using Silmoon.Extensions;
 using System.Threading.Tasks;
 
 namespace Silmoon.AspNetCore.Extensions

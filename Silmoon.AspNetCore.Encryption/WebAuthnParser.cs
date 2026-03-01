@@ -1,7 +1,7 @@
 ﻿using PeterO.Cbor;
 using Silmoon.AspNetCore.Encryption.Enums;
 using Silmoon.AspNetCore.Encryption.Models;
-using Silmoon.Extension;
+using Silmoon.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Formats.Asn1;

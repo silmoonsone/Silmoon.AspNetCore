@@ -1,7 +1,7 @@
 ﻿using Silmoon.AspNetCore.UserAuthTest.Models.SubModels;
 using Silmoon.Data.LiteDB.Models;
-using Silmoon.Extension.Enums;
-using Silmoon.Extension.Interfaces;
+using Silmoon.Extensions.Enums;
+using Silmoon.Extensions.Interfaces;
 
 namespace Silmoon.AspNetCore.UserAuthTest.Models
 {

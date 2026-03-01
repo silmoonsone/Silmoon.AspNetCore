@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Silmoon.Extension;
+using Silmoon.Extensions;
 using Silmoon.Models;
 using Silmoon.AspNetCore.Extensions;
 using System;
@@ -10,7 +10,7 @@ using System.Security.Claims;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web;
-using Silmoon.Extension.Interfaces;
+using Silmoon.Extensions.Interfaces;
 
 namespace Silmoon.AspNetCore
 {

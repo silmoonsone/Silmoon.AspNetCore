@@ -1,5 +1,5 @@
 ﻿using Microsoft.JSInterop;
-using Silmoon.Extension.Models;
+using Silmoon.Extensions.Models;
 using Silmoon.Models;
 using System;
 using System.Collections.Generic;

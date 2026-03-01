@@ -2,7 +2,7 @@
 using Silmoon.AspNetCore.Encryption.Models;
 using Silmoon.Data.LiteDB.Converters;
 using Silmoon.Data.LiteDB.Interfaces;
-using Silmoon.Extension;
+using Silmoon.Extensions;
 
 namespace Silmoon.AspNetCore.UserAuthTest.Models.SubModels
 {

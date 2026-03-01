@@ -4,7 +4,7 @@ using Silmoon.AspNetCore.Interfaces;
 using Silmoon.AspNetCore.Test.Models;
 using Silmoon.AspNetCore.Test.Services;
 using Silmoon.Data.MongoDB;
-using Silmoon.Extension;
+using Silmoon.Extensions;
 using Silmoon.Models;
 using System.Formats.Asn1;
 

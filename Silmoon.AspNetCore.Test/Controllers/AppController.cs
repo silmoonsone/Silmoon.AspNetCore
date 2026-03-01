@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Silmoon.AspNetCore.Extensions;
-using Silmoon.Extension.Enums;
+using Silmoon.Extensions.Enums;
 
 namespace Silmoon.AspNetCore.Test.Controllers
 {

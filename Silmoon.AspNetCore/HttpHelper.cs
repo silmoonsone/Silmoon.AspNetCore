@@ -5,7 +5,7 @@ using System.Web;
 using System.IO;
 using System.Net;
 using System.Collections.Specialized;
-using Silmoon.Extension;
+using Silmoon.Extensions;
 using Microsoft.AspNetCore.Http;
 
 namespace Silmoon.AspNetCore

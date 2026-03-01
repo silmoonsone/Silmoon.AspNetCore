@@ -3,7 +3,7 @@ using System.IO;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 using Silmoon.AspNetCore.Interfaces;
-using Silmoon.Extension;
+using Silmoon.Extensions;
 
 namespace Silmoon.AspNetCore.Services
 {

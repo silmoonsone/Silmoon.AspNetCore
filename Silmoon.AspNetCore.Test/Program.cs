@@ -10,7 +10,7 @@ using Silmoon.AspNetCore.Blazor;
 using Silmoon.AspNetCore.Blazor.Extensions;
 using Silmoon.AspNetCore.Encryption.Extensions;
 using Silmoon.AspNetCore.Encryption.Services;
-using Silmoon.AspNetCore.Extension.Binders;
+using Silmoon.AspNetCore.Extensions.Binders;
 using Silmoon.AspNetCore.Extensions;
 using Silmoon.AspNetCore.Test;
 using Silmoon.AspNetCore.Test.Components;

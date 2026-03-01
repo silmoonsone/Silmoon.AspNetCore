@@ -27,10 +27,10 @@
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="10.0.2" />
     <PackageReference Include="MongoDB.Driver" Version="3.6.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-    <PackageReference Include="Silmoon.Data.LiteDB" Version="3.0.0" />
+    <PackageReference Include="Silmoon.Data.LiteDB" Version="3.2.0" />
     <PackageReference Include="Silmoon.Graphics" Version="0.1.2" />
     <PackageReference Include="Silmoon" Version="3.0.0" />
-    <PackageReference Include="Silmoon.Data.MongoDB" Version="3.0.0" />
+    <PackageReference Include="Silmoon.Data.MongoDB" Version="3.2.0" />
     <PackageReference Include="Silmoon.Extensions" Version="3.0.0" />
   </ItemGroup>
 

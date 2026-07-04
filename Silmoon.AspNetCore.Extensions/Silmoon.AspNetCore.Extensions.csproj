@@ -46,8 +46,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MongoDB.Driver" Version="3.8.1" />
-    <PackageReference Include="Silmoon.Data.MongoDB" Version="3.2.0" />
+    <PackageReference Include="MongoDB.Driver" Version="3.9.0" />
+    <PackageReference Include="Silmoon.Data.MongoDB" Version="3.2.1" />
   </ItemGroup>
 
 </Project>

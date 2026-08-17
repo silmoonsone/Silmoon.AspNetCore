@@ -135,18 +135,16 @@
 
     async void DeleteWebAuthn(byte[] credentialId)
     {
-        await Jsc.MetroUIConfirm("确认", "确认删除(" + credentialId.GetBase64String() + ")？", true, async confirmd =>
+        var confirmed = await Jsc.MetroUIConfirm("确认", "确认删除(" + credentialId.GetBase64String() + ")？", true);
+        if (confirmed)
         {
-            if (confirmd)
+            var result = Core.DeleteUserWebAuthnInfo(CurrentUser._id, credentialId);
+            if (result.State)
             {
-                var result = Core.DeleteUserWebAuthnInfo(CurrentUser._id, credentialId);
-                if (result.State)
-                {
-                    Load();
-                    await Jsc.Toast("删除成功");
-                }
-                else await Jsc.Toast("删除失败(" + result.Message + ")", 3000);
+                Load();
+                await Jsc.Toast("删除成功");
             }
-        });
+            else await Jsc.Toast("删除失败(" + result.Message + ")", 3000);
+        }
     }
 }

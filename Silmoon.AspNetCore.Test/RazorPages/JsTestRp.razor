@@ -22,17 +22,15 @@
     }
     private async Task MetroUIConfirm()
     {
-        await Jsc.MetroUIConfirm("title", "msg: now is " + DateTime.Now, true, async result =>
+        var result = await Jsc.MetroUIConfirm("title", "msg: now is " + DateTime.Now, true);
+        if (result)
         {
-            if (result)
-            {
-                await Jsc.Toast("confirm is true");
-            }
-            else
-            {
-                await Jsc.Toast("confirm is false");
-            }
-        });
+            await Jsc.Toast("confirm is true");
+        }
+        else
+        {
+            await Jsc.Toast("confirm is false");
+        }
     }
     private async Task Alert()
     {

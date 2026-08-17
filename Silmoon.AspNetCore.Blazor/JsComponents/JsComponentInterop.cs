@@ -1,6 +1,5 @@
-using Microsoft.JSInterop;
+﻿using Microsoft.JSInterop;
 using Silmoon.Models;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Silmoon.AspNetCore.Blazor.JsComponents
 {
@@ -14,7 +13,6 @@ namespace Silmoon.AspNetCore.Blazor.JsComponents
     public class JsComponentInterop : IAsyncDisposable
     {
         private readonly Lazy<Task<IJSObjectReference>> moduleTask;
-        private DotNetObjectReference<JsInvokeStateSetHandlerDelegate> metroUIConfirmCallbackDotNetObjectRef;
 
         public JsComponentInterop(IJSRuntime jsRuntime)
         {
@@ -61,21 +59,10 @@ namespace Silmoon.AspNetCore.Blazor.JsComponents
             await module.InvokeVoidAsync("toast", message, delay);
         }
 
-        public async ValueTask MetroUIConfirm(string title, string msg, bool isConfirmDialog = false, Action<bool> callback = null)
+        public async ValueTask<bool> MetroUIConfirm(string title, string msg, bool isConfirmDialog = false, CancellationToken cancellationToken = default)
         {
             var module = await moduleTask.Value;
-            if (callback is not null)
-            {
-                metroUIConfirmCallbackDotNetObjectRef?.Dispose();
-                metroUIConfirmCallbackDotNetObjectRef = DotNetObjectReference.Create(new JsInvokeStateSetHandlerDelegate(callback));
-                await module.InvokeVoidAsync("metroUIConfirm", title, msg, isConfirmDialog, metroUIConfirmCallbackDotNetObjectRef);
-            }
-            else
-            {
-                await module.InvokeVoidAsync("metroUIConfirm", title, msg, isConfirmDialog);
-                metroUIConfirmCallbackDotNetObjectRef?.Dispose();
-                metroUIConfirmCallbackDotNetObjectRef = null;
-            }
+            return await module.InvokeAsync<bool>("metroUIConfirm", cancellationToken, title, msg, isConfirmDialog);
         }
 
         public async ValueTask<StateSet<bool>> Download(string fileName, byte[] content, string contentType, string contentTypeDescription = null)
@@ -99,12 +86,6 @@ namespace Silmoon.AspNetCore.Blazor.JsComponents
                 }
                 catch { }
             }
-            try
-            {
-                metroUIConfirmCallbackDotNetObjectRef?.Dispose();
-                metroUIConfirmCallbackDotNetObjectRef = null;
-            }
-            catch { }
         }
     }
 }

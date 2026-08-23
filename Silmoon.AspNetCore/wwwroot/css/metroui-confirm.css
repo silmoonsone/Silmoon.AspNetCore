@@ -3,7 +3,8 @@
 
 #metroUIConfirm {
     position: fixed;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: var(--metro-ui-confirm-backdrop-color, rgba(0, 0, 0, 0.5));
+    color: var(--metro-ui-confirm-text-color, var(--text-primary, #212529));
     top: 0px;
     left: 0px;
     width: 100%;
@@ -13,11 +14,12 @@
 }
 
 #metroUIConfirmOuter {
-    box-shadow: 1px 0px 100px 20px rgb(0 0 0 / 30%);
+    box-shadow: 1px 0px 100px 20px var(--metro-ui-confirm-shadow-color, var(--shadow-color, rgb(0 0 0 / 30%)));
     top: 35%;
     width: 100%;
     height: 230px;
-    background-color: #FFF;
+    background-color: var(--metro-ui-confirm-background, var(--card-bg, #FFF));
+    color: var(--metro-ui-confirm-text-color, var(--text-primary, #212529));
     position: fixed;
     padding-top: 10px;
     padding-bottom: 10px;
@@ -38,17 +40,16 @@
 }
 
 #metroUIConfirmOKButton {
-    background-color: #1269ED;
-    color: #FFF;
-    cursor: default;
+    background-color: var(--metro-ui-confirm-primary-background, var(--primary-color, #1269ED));
+    color: var(--metro-ui-confirm-primary-text-color, #FFF);
     border-radius: 5px;
 }
 
 #metroUIConfirmCancelButton {
     margin-left: 15px;
-    background-color: #999;
-    color: #FFF;
-    cursor: default;
+    background-color: var(--metro-ui-confirm-secondary-background, var(--interactive-bg, #6C757D));
+    border-color: var(--metro-ui-confirm-border-color, var(--border-color, transparent));
+    color: var(--metro-ui-confirm-secondary-text-color, var(--text-primary, #FFF));
     border-radius: 5px;
 }
 
@@ -59,13 +60,14 @@
     padding-left: 50px !important;
     padding-right: 50px !important;
     font-weight: bold;
-    cursor: default;
+    cursor: pointer;
     display: inline-block;
-    border-style: none;
+    border: 1px solid transparent;
 }
 
     .metroUIConfirmButton:focus {
-        background-color: #1269ED !important;
+        outline: none;
+        box-shadow: 0 0 0 0.2rem var(--metro-ui-confirm-focus-ring-color, var(--focus-ring-color, rgba(18, 105, 237, 0.25)));
     }
 
 #metroUIConfirmController {
@@ -74,14 +76,20 @@
     text-align: right;
 }
 
-.metroUIConfirmButton:hover {
-    color: white !important;
-    background-color: #bcd1f2 !important;
+#metroUIConfirmOKButton:hover {
+    background-color: var(--metro-ui-confirm-primary-hover-background, #0B5ED7);
 }
 
-.metroUIConfirmButton:active {
-    color: white !important;
-    background-color: #000 !important;
+#metroUIConfirmCancelButton:hover {
+    background-color: var(--metro-ui-confirm-secondary-hover-background, var(--interactive-bg-hover, #5C636A));
+}
+
+#metroUIConfirmOKButton:active {
+    background-color: var(--metro-ui-confirm-primary-active-background, #0A58CA);
+}
+
+#metroUIConfirmCancelButton:active {
+    background-color: var(--metro-ui-confirm-secondary-active-background, var(--interactive-bg-focus, #565E64));
 }
 
 #metroUIConfirmTitle {

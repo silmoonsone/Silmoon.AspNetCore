@@ -37,5 +37,6 @@ namespace Silmoon.AspNetCore.Interfaces
         Task<IDefaultUserIdentity> GetUserData(string Username, string NameIdentifier, string UserToken);
         Task OnSignIn(HttpContext httpContext, RequestDelegate requestDelegate, string username, string password);
         Task OnSignOut(HttpContext httpContext, RequestDelegate requestDelegate);
+        Task<string> GetNameIdentifier<TUser>(TUser user) where TUser : class, IDefaultUserIdentity;
     }
 }

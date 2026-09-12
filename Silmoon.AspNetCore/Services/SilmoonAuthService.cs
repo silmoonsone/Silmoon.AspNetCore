@@ -37,11 +37,11 @@ namespace Silmoon.AspNetCore.Services
             if (User is null) throw new ArgumentNullException(nameof(User));
             if (User.Username.IsNullOrEmpty() && NameIdentifier.IsNullOrEmpty()) throw new ArgumentNullException(nameof(User.Username), "Username或者NameIdentifier必选最少一个参数。");
 
-            NameIdentifier = NameIdentifier.IsNullOrEmpty() ? User.Username : NameIdentifier;
+            NameIdentifier = NameIdentifier.IsNullOrEmpty() ? await GetNameIdentifier(User) : NameIdentifier;
 
             var claimsIdentity = new ClaimsIdentity("Customer");
             claimsIdentity.AddClaim(new Claim(ClaimTypes.NameIdentifier, NameIdentifier));
-            claimsIdentity.AddClaim(new Claim(nameof(IDefaultUserIdentity.Username), User.Username ?? ""));
+            claimsIdentity.AddClaim(new Claim(nameof(IDefaultUserIdentity.Username), User.Username ?? string.Empty));
 
             if (AddEnumRole) claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, User.Role.ToString()));
 
@@ -63,8 +63,8 @@ namespace Silmoon.AspNetCore.Services
             if (HttpContextAccessor.HttpContext is null) throw new ArgumentNullException("当前不在HTTP上下文中，无法执行操作。");
             if (await IsSignIn())
             {
-                var NameIdentifier = HttpContextAccessor.HttpContext.User.Claims.Where(c => c.Type == ClaimTypes.NameIdentifier).FirstOrDefault()?.Value;
-                var Name = HttpContextAccessor.HttpContext.User.Claims.Where(c => c.Type == nameof(IDefaultUserIdentity.Username)).FirstOrDefault()?.Value;
+                var NameIdentifier = HttpContextAccessor.HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+                var Name = HttpContextAccessor.HttpContext.User.Claims.FirstOrDefault(c => c.Type == nameof(IDefaultUserIdentity.Username))?.Value;
                 HttpContextAccessor.HttpContext.Session.Keys.Each(key =>
                 {
                     if (key.StartsWith("SessionCache"))
@@ -137,8 +137,8 @@ namespace Silmoon.AspNetCore.Services
             if (HttpContextAccessor.HttpContext is null) return null;
             if (await IsSignIn())
             {
-                var NameIdentifier = HttpContextAccessor.HttpContext.User.Claims.Where(c => c.Type == ClaimTypes.NameIdentifier).FirstOrDefault()?.Value;
-                var Name = HttpContextAccessor.HttpContext.User.Claims.Where(c => c.Type == nameof(IDefaultUserIdentity.Username)).FirstOrDefault()?.Value;
+                var NameIdentifier = HttpContextAccessor.HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+                var Name = HttpContextAccessor.HttpContext.User.Claims.FirstOrDefault(c => c.Type == nameof(IDefaultUserIdentity.Username))?.Value;
 
                 var cachedUser = GetUserCache<TUser>(NameIdentifier, Name);
                 if (cachedUser is null)
@@ -171,8 +171,8 @@ namespace Silmoon.AspNetCore.Services
         {
             if (HttpContextAccessor.HttpContext is null) throw new ArgumentNullException("当前不在HTTP上下文中，无法执行操作。");
 
-            var NameIdentifier = HttpContextAccessor.HttpContext.User.Claims.Where(c => c.Type == ClaimTypes.NameIdentifier).FirstOrDefault()?.Value;
-            var Name = HttpContextAccessor.HttpContext.User.Claims.Where(c => c.Type == nameof(IDefaultUserIdentity.Username)).FirstOrDefault()?.Value;
+            var NameIdentifier = HttpContextAccessor.HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            var Name = HttpContextAccessor.HttpContext.User.Claims.FirstOrDefault(c => c.Type == nameof(IDefaultUserIdentity.Username))?.Value;
             TUser user = default;
             user = (TUser)await GetUserData(Name, NameIdentifier);
             if (user is null) await SignOut();
@@ -286,6 +286,10 @@ namespace Silmoon.AspNetCore.Services
         {
             var result = await SignOut();
             await httpContext.Response.WriteJObjectAsync(result.ToStateResult());
+        }
+        public virtual async Task<string> GetNameIdentifier<TUser>(TUser user) where TUser : class, IDefaultUserIdentity
+        {
+            return user.Username;
         }
     }
 }

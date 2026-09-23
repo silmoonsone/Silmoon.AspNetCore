@@ -43,7 +43,13 @@ namespace Silmoon.AspNetCore.Services
             claimsIdentity.AddClaim(new Claim(ClaimTypes.NameIdentifier, NameIdentifier));
             claimsIdentity.AddClaim(new Claim(nameof(IDefaultUserIdentity.Username), User.Username ?? string.Empty));
 
-            if (AddEnumRole) claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, User.Role.ToString()));
+            if (AddEnumRole)
+            {
+                foreach (var role in User.Role.GetFlagEnumArray())
+                {
+                    claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, role.ToString()));
+                }
+            }
 
             if (!CustomerRoles.IsNullOrEmpty())
             {

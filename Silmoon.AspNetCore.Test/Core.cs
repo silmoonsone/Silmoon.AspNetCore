@@ -62,7 +62,8 @@ namespace Silmoon.AspNetCore.Test
             if (GetUserWebAuthnInfo(UserObjectId, userWebAuthnInfo.CredentialId) is null)
             {
                 userAuthInfo.WebAuthnInfos.Add(userWebAuthnInfo);
-                Sets(new UserAuthInfo() { WebAuthnInfos = userAuthInfo.WebAuthnInfos }, x => x.UserObjectId == UserObjectId, null, x => x.WebAuthnInfos);
+                //Sets(new UserAuthInfo() { WebAuthnInfos = userAuthInfo.WebAuthnInfos }, x => x.UserObjectId == UserObjectId, null, x => x.WebAuthnInfos);
+                Sets<UserAuthInfo>(x => x.UserObjectId == UserObjectId, new UserAuthInfo() { WebAuthnInfos = userAuthInfo.WebAuthnInfos }, null, x => x.WebAuthnInfos);
                 return true.ToStateSet();
             }
             else
@@ -76,8 +77,10 @@ namespace Silmoon.AspNetCore.Test
                 return false.ToStateSet("CredentialId not found");
             else
             {
-                userAuthInfo.WebAuthnInfos.Remove(userAuthInfo.WebAuthnInfos.Where(x => x.CredentialId != null && x.CredentialId.SequenceEqual(CredentialId)).FirstOrDefault());
-                Sets(new UserAuthInfo() { WebAuthnInfos = userAuthInfo.WebAuthnInfos }, x => x.UserObjectId == UserObjectId, null, x => x.WebAuthnInfos);
+                userAuthInfo.WebAuthnInfos.Remove(userAuthInfo.WebAuthnInfos.FirstOrDefault(x => x.CredentialId != null && x.CredentialId.SequenceEqual(CredentialId)));
+                //Sets(new UserAuthInfo() { WebAuthnInfos = userAuthInfo.WebAuthnInfos }, x => x.UserObjectId == UserObjectId, null, x => x.WebAuthnInfos);
+                Sets<UserAuthInfo>(x => x.UserObjectId == UserObjectId, new UserAuthInfo() { WebAuthnInfos = userAuthInfo.WebAuthnInfos }, null, x => x.WebAuthnInfos);
+                //Sets(x)
                 return true.ToStateSet();
             }
         }

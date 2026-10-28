@@ -1,0 +1,58 @@
+﻿@typeparam TValue
+
+@inject NavigationManager Navigation
+
+<details class="dropdown-select @Class" data-dropdown-select data-align-end="@AlignEnd.ToString().ToLowerInvariant()" data-open-upward="@OpenUpward.ToString().ToLowerInvariant()" data-disabled="@Disabled.ToString().ToLowerInvariant()" data-enhance-nav="@EnhanceNavigation.ToString().ToLowerInvariant()" @attributes="AdditionalAttributes">
+    <summary class="dropdown-select-trigger" aria-label="@($"{Label}: {SelectedOption?.Text ?? Placeholder}")" aria-disabled="@Disabled.ToString().ToLowerInvariant()" tabindex="@(Disabled ? -1 : 0)">
+        @if (!string.IsNullOrEmpty(IconClass))
+        {
+            <i class="@IconClass" aria-hidden="true"></i>
+        }
+        <span lang="@SelectedOption?.Language" dir="@SelectedOption?.Direction">@(SelectedOption?.Text ?? Placeholder)</span>
+        <i class="bi bi-chevron-down dropdown-select-chevron" aria-hidden="true"></i>
+    </summary>
+    <div class="dropdown-select-options" popover="manual" role="group" aria-label="@Label">
+        @foreach (var option in Items)
+        {
+            var selected = EqualityComparer<TValue>.Default.Equals(option.Value, Value);
+            @if (option.Href is not null && !option.Disabled && !Disabled)
+            {
+                <a class="dropdown-select-option @(selected ? "active" : null)" data-dropdown-option href="@option.Href" lang="@option.Language" dir="@option.Direction" aria-current="@(selected ? "true" : null)">
+                    <span>@option.Text</span>
+                    <i class="bi bi-check2 dropdown-select-check" aria-hidden="true"></i>
+                </a>
+            }
+            else
+            {
+                <button class="dropdown-select-option @(selected ? "active" : null)" data-dropdown-option type="button" lang="@option.Language" dir="@option.Direction" aria-pressed="@selected.ToString().ToLowerInvariant()" disabled="@(Disabled || option.Disabled)" @onclick="() => SelectOption(option)">
+                    <span>@option.Text</span>
+                    <i class="bi bi-check2 dropdown-select-check" aria-hidden="true"></i>
+                </button>
+            }
+        }
+    </div>
+</details>
+<silmoon-module src="@Navigation.ToAbsoluteUri("Components/DropdownSelect.razor.js?v=3")" hidden></silmoon-module>
+
+@code {
+    [Parameter] public IReadOnlyList<DropdownSelectOption<TValue>> Items { get; set; } = [];
+    [Parameter] public TValue Value { get; set; } = default!;
+    [Parameter] public EventCallback<TValue> ValueChanged { get; set; }
+    [Parameter] public string Label { get; set; } = string.Empty;
+    [Parameter] public string Placeholder { get; set; } = string.Empty;
+    [Parameter] public string? IconClass { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool AlignEnd { get; set; }
+    [Parameter] public bool OpenUpward { get; set; }
+    [Parameter] public bool EnhanceNavigation { get; set; } = true;
+    [Parameter(CaptureUnmatchedValues = true)] public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    DropdownSelectOption<TValue>? SelectedOption => Items.FirstOrDefault(option => EqualityComparer<TValue>.Default.Equals(option.Value, Value));
+
+    async Task SelectOption(DropdownSelectOption<TValue> option)
+    {
+        if (Disabled || option.Disabled || EqualityComparer<TValue>.Default.Equals(Value, option.Value)) return;
+        await ValueChanged.InvokeAsync(option.Value);
+    }
+}

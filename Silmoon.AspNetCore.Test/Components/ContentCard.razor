@@ -1,0 +1,59 @@
+﻿<div class="content-card-container @(Centered ? "content-card-centered" : null)" style="@CardStyle">
+    <section class="content-card card @Class" aria-labelledby="@(HasTitle ? TitleId : null)" @attributes="AdditionalAttributes">
+        @if (HasTitle || !string.IsNullOrWhiteSpace(Brand) || !string.IsNullOrWhiteSpace(Icon))
+        {
+            <header class="content-card-heading">
+                @if (!string.IsNullOrWhiteSpace(Icon))
+                {
+                    <span class="content-card-icon" aria-hidden="true"><i class="bi @Icon"></i></span>
+                }
+                <div>
+                    @if (!string.IsNullOrWhiteSpace(Brand))
+                    {
+                        <div class="content-card-brand">@Brand</div>
+                    }
+                    @if (HasTitle)
+                    {
+                        @TitleHeading
+                    }
+                </div>
+            </header>
+        }
+        @if (!string.IsNullOrWhiteSpace(Description))
+        {
+            <p class="content-card-description text-secondary">@Description</p>
+        }
+        @ChildContent
+        @if (FooterContent is not null)
+        {
+            <footer class="content-card-footer">@FooterContent</footer>
+        }
+    </section>
+</div>
+
+@code {
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public string? Brand { get; set; }
+    [Parameter] public string? Description { get; set; }
+    [Parameter] public string? Icon { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public RenderFragment? FooterContent { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string Width { get; set; } = "100%";
+    [Parameter] public string MaxWidth { get; set; } = "100%";
+    [Parameter] public bool Centered { get; set; }
+    [Parameter] public int HeadingLevel { get; set; } = 2;
+    [Parameter(CaptureUnmatchedValues = true)] public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    bool HasTitle => !string.IsNullOrWhiteSpace(Title);
+    string TitleId { get; } = "content-card-title-" + Guid.NewGuid().ToString("N");
+    string CardStyle => $"--content-card-width: {(string.IsNullOrWhiteSpace(Width) ? "100%" : Width.Trim())}; --content-card-max-width: {(string.IsNullOrWhiteSpace(MaxWidth) ? "100%" : MaxWidth.Trim())};";
+    RenderFragment TitleHeading => builder =>
+    {
+        builder.OpenElement(0, $"h{Math.Clamp(HeadingLevel, 1, 6)}");
+        builder.AddAttribute(1, "id", TitleId);
+        builder.AddAttribute(2, "class", "content-card-title");
+        builder.AddContent(3, Title);
+        builder.CloseElement();
+    };
+}

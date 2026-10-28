@@ -54,3 +54,22 @@ window.onload = function () {
 }
 
 // jsclickable_end
+(function () {
+    // Custom elements also connect after static SSR enhanced navigation.
+    // Components own their module URLs; import() caches modules across instances.
+    if (!customElements.get("silmoon-module")) {
+        customElements.define("silmoon-module", class extends HTMLElement {
+            static observedAttributes = ["src"];
+
+            connectedCallback() { this.load(); }
+            attributeChangedCallback(name, previous, current) {
+                if (previous !== current && this.isConnected) this.load();
+            }
+
+            load() {
+                const src = this.getAttribute("src");
+                if (src) import(src).catch(error => console.error("Component module load failed: " + src, error));
+            }
+        });
+    }
+})();

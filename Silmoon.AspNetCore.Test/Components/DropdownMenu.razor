@@ -1,0 +1,98 @@
+﻿@inject NavigationManager Navigation
+
+<silmoon-dropdown-menu @key="Items" class="dropdown-menu-control dropdown @Class" data-dropdown-menu data-menu-width="@MenuWidthValue" data-auto-width="@((MenuWidthValue == "max-content").ToString().ToLowerInvariant())" data-align-end="@AlignEnd.ToString().ToLowerInvariant()" data-open-upward="@OpenUpward.ToString().ToLowerInvariant()" data-enhance-nav="@EnhanceNavigation.ToString().ToLowerInvariant()" @attributes="AdditionalAttributes">
+    <button class="dropdown-menu-trigger" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" data-bs-display="static" disabled="@Disabled" aria-expanded="false" aria-controls="@MenuId" aria-label="@Label" title="@Label">
+        @if (!string.IsNullOrEmpty(IconClass))
+        {
+            <i class="@IconClass" aria-hidden="true"></i>
+        }
+        @if (!string.IsNullOrEmpty(TriggerText))
+        {
+            <span>@TriggerText</span>
+        }
+    </button>
+    <div id="@MenuId" class="dropdown-menu dropdown-menu-popup" style="--dropdown-menu-width: @MenuWidthValue" popover="manual" role="group" aria-label="@Label">
+        <div class="dropdown-menu-viewport">
+            @foreach (var panel in GetPanels(Items))
+            {
+                <div id="@(MenuId + "-" + panel.Id)" data-dropdown-menu-panel="@panel.Id" hidden="@(panel.Id != "root")">
+                    @if (panel.ParentId is not null)
+                    {
+                        <button class="dropdown-item dropdown-menu-back" type="button" data-dropdown-menu-back="@panel.ParentId" aria-label="@BackLabel"><i class="bi bi-chevron-left" aria-hidden="true"></i><span>@panel.Title</span></button>
+                    }
+                    @for (var index = 0; index < panel.Items.Count; index++)
+                    {
+                        var item = panel.Items[index];
+                        var submenu = panel.Id + "-" + index;
+                        @if (item.Children.Count > 0)
+                        {
+                            <button class="dropdown-item dropdown-menu-option @item.Class" type="button" data-dropdown-menu-open="@submenu" aria-controls="@(MenuId + "-" + submenu)" disabled="@(Disabled || item.Disabled)" @attributes="item.AdditionalAttributes">@ItemContent(item)<i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+                        }
+                        else if (item.Href is not null && !item.Disabled && !Disabled)
+                        {
+                            <a class="dropdown-item dropdown-menu-option @item.Class @(item.Selected == true ? "active" : null)" data-dropdown-menu-item href="@item.Href" aria-current="@(item.Selected == true ? "true" : null)" @attributes="item.AdditionalAttributes">@ItemContent(item)@CheckContent(item)</a>
+                        }
+                        else
+                        {
+                            <button class="dropdown-item dropdown-menu-option @item.Class @(item.Selected == true ? "active" : null)" data-dropdown-menu-item type="button" aria-pressed="@item.Selected?.ToString().ToLowerInvariant()" disabled="@(Disabled || item.Disabled)" @onclick="() => SelectItem(item)" @attributes="item.AdditionalAttributes">@ItemContent(item)@CheckContent(item)</button>
+                        }
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</silmoon-dropdown-menu>
+<silmoon-module src="@Navigation.ToAbsoluteUri("Components/DropdownMenu.razor.js?v=4")" hidden></silmoon-module>
+
+@code {
+    [Parameter] public IReadOnlyList<DropdownMenuItem> Items { get; set; } = [];
+    [Parameter] public EventCallback<DropdownMenuItem> ItemSelected { get; set; }
+    [Parameter] public string Label { get; set; } = "更多操作";
+    [Parameter] public string BackLabel { get; set; } = "返回上一级";
+    [Parameter] public string? TriggerText { get; set; }
+    [Parameter] public string? IconClass { get; set; } = "bi bi-list";
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string MenuWidth { get; set; } = "12.5rem";
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool AlignEnd { get; set; }
+    [Parameter] public bool OpenUpward { get; set; }
+    [Parameter] public bool EnhanceNavigation { get; set; } = true;
+    [Parameter(CaptureUnmatchedValues = true)] public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    string MenuId { get; } = "dropdown-menu-" + Guid.NewGuid().ToString("N");
+    string MenuWidthValue => string.IsNullOrWhiteSpace(MenuWidth) ? "12.5rem" : string.Equals(MenuWidth.Trim(), "auto", StringComparison.OrdinalIgnoreCase) ? "max-content" : MenuWidth.Trim();
+
+    async Task SelectItem(DropdownMenuItem item)
+    {
+        if (Disabled || item.Disabled) return;
+        await ItemSelected.InvokeAsync(item);
+    }
+
+    static IEnumerable<MenuPanel> GetPanels(IReadOnlyList<DropdownMenuItem> items, string id = "root", string? parentId = null, string? title = null)
+    {
+        yield return new(id, parentId, title, items);
+        for (var index = 0; index < items.Count; index++)
+        {
+            var item = items[index];
+            if (item.Children.Count == 0) continue;
+            foreach (var panel in GetPanels(item.Children, id + "-" + index, id, item.Text)) yield return panel;
+        }
+    }
+
+    static RenderFragment ItemContent(DropdownMenuItem item) => @<text>
+        @if (!string.IsNullOrEmpty(item.IconClass))
+        {
+            <i class="@item.IconClass dropdown-menu-icon" aria-hidden="true"></i>
+        }
+        <span>@item.Text</span>
+    </text>;
+
+    static RenderFragment CheckContent(DropdownMenuItem item) => @<text>
+        @if (item.Selected.HasValue)
+        {
+            <i class="bi bi-check2 dropdown-menu-check" aria-hidden="true"></i>
+        }
+    </text>;
+
+    sealed record MenuPanel(string Id, string? ParentId, string? Title, IReadOnlyList<DropdownMenuItem> Items);
+}

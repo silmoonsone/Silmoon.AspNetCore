@@ -35,12 +35,7 @@ namespace Silmoon.AspNetCore.Encryption.JsComponents
                     response.Data.WebAuthnInfo = WebAuthnInfo.Create(response.Data);
                     return response;
                 }
-                else
-                {
-                    response.State = false;
-                    response.Message = "Challenge failed";
-                    return response;
-                }
+                else return response.Set(false, "Challenge failed");
             }
             else
                 return response;

@@ -1,0 +1,74 @@
+﻿.data-grid {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+}
+
+.data-grid-filter {
+    box-sizing: border-box;
+    display: block;
+    width: 100%;
+    margin-bottom: .375rem;
+    padding: .25rem .5rem;
+    border: 1px solid var(--data-grid-border-color, color-mix(in srgb, currentColor 25%, transparent));
+    border-radius: .25rem;
+    background: Field;
+    color: FieldText;
+    font: inherit;
+    font-size: .875rem;
+    line-height: 1.5;
+}
+
+.data-grid-scroll {
+    max-height: var(--data-grid-max-height, 22rem);
+    overflow: auto;
+}
+
+.data-grid table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: var(--data-grid-font-size, .8125rem);
+}
+
+.data-grid ::deep th,
+.data-grid ::deep td {
+    padding: var(--data-grid-cell-padding, .3rem .5rem);
+    border-bottom: 1px solid var(--data-grid-border-color, color-mix(in srgb, currentColor 20%, transparent));
+    text-align: start;
+    white-space: nowrap;
+}
+
+.data-grid ::deep th {
+    position: sticky;
+    z-index: 1;
+    top: 0;
+    background: var(--data-grid-header-bg, color-mix(in srgb, CanvasText 5%, Canvas));
+}
+
+.data-grid ::deep [data-grid-sort] {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+
+.data-grid ::deep [data-grid-sort]::after { content: "↕"; margin-inline-start: .3em; opacity: .5; }
+.data-grid ::deep [aria-sort="ascending"] [data-grid-sort]::after { content: "↑"; opacity: 1; }
+.data-grid ::deep [aria-sort="descending"] [data-grid-sort]::after { content: "↓"; opacity: 1; }
+.data-grid ::deep tbody tr:hover { background: var(--data-grid-hover-bg, color-mix(in srgb, currentColor 6%, transparent)); }
+.data-grid[data-single-select="true"] ::deep tbody tr { cursor: pointer; }
+.data-grid[data-single-select="true"] ::deep tbody tr[aria-selected="true"] {
+    background: var(--data-grid-selected-bg, color-mix(in srgb, Highlight 18%, transparent));
+}
+.data-grid ::deep tbody tr:focus-visible { outline: 2px solid var(--data-grid-focus-color, Highlight); outline-offset: -2px; }
+.data-grid[aria-disabled="true"] ::deep tbody tr { cursor: default; }
+
+.data-grid-empty {
+    padding: .55rem;
+    color: var(--data-grid-muted-color, color-mix(in srgb, currentColor 70%, transparent));
+    text-align: center;
+}

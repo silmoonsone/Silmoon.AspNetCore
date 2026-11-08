@@ -1,0 +1,204 @@
+.component-library-page {
+    display: grid;
+    gap: 1.25rem;
+    padding-bottom: 2rem;
+    scroll-behavior: smooth;
+}
+
+.component-library-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.component-library-heading h1 {
+    margin: .15rem 0 .35rem;
+    font-size: 1.75rem;
+}
+
+.component-library-heading p {
+    max-width: 56rem;
+    margin: 0;
+    color: var(--bs-secondary-color);
+}
+
+.component-test-index {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .25rem;
+    padding: .25rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: .625rem;
+    background: var(--bs-tertiary-bg);
+}
+
+.component-test-index a {
+    padding: .3rem .65rem;
+    border-radius: .45rem;
+    color: var(--bs-body-color);
+    font-size: .875rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.component-test-index a:hover,
+.component-test-index a:focus-visible {
+    background: var(--bs-body-bg);
+    color: var(--bs-primary);
+}
+
+.component-test-section {
+    display: grid;
+    gap: .65rem;
+    min-width: 0;
+    scroll-margin-top: 1rem;
+}
+
+.component-test-section-heading {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding-bottom: .4rem;
+    border-bottom: 1px solid var(--bs-border-color);
+}
+
+.component-test-section-heading span {
+    color: var(--bs-primary);
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.component-test-section-heading h2 {
+    margin: .1rem 0 0;
+    font-size: 1.1rem;
+}
+
+.component-test-section-heading p {
+    margin: 0;
+    color: var(--bs-secondary-color);
+    font-size: .875rem;
+    text-align: right;
+}
+
+.component-library-eyebrow {
+    color: var(--bs-primary);
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.legacy-flag-list {
+    padding: .75rem;
+    border: 1px dashed var(--bs-border-color);
+    border-radius: .375rem;
+}
+
+.component-library-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .75rem;
+}
+
+.component-library-grid ::deep .content-card-container,
+.component-library-grid ::deep .content-card {
+    height: 100%;
+}
+
+.component-library-grid ::deep .content-card {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+}
+
+.component-library-grid ::deep .content-card-heading,
+.data-grid-demo-list ::deep .content-card-heading {
+    gap: .65rem;
+    margin-bottom: .65rem;
+}
+
+.component-library-grid ::deep .content-card-icon,
+.data-grid-demo-list ::deep .content-card-icon {
+    flex-basis: 38px;
+    height: 38px;
+    border-radius: .55rem;
+    font-size: 1rem;
+}
+
+.component-library-grid ::deep .content-card-title,
+.data-grid-demo-list ::deep .content-card-title {
+    font-size: 1.2rem;
+}
+
+.component-library-grid ::deep .content-card-description,
+.data-grid-demo-list ::deep .content-card-description {
+    margin-bottom: .85rem;
+    font-size: .82rem;
+    line-height: 1.45;
+}
+
+.component-card-wide {
+    grid-column: 1 / -1;
+    min-width: 0;
+}
+
+.component-card-wide ::deep .content-card-container,
+.component-card-wide ::deep .content-card {
+    height: 100%;
+}
+
+.date-range-demo-trigger {
+    display: flex;
+    min-height: 2.5rem;
+    align-items: center;
+}
+
+.data-grid-demo-list {
+    display: grid;
+    gap: .75rem;
+}
+
+.data-grid-demo-list ::deep .content-card {
+    padding: 1rem;
+}
+
+.component-result {
+    min-height: 1.5rem;
+    margin-top: .5rem;
+    color: var(--bs-secondary-color);
+    font-size: .875rem;
+}
+
+@media (max-width: 900px) {
+    .component-library-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .component-test-section-heading {
+        display: grid;
+        gap: .35rem;
+    }
+
+    .component-test-section-heading p {
+        text-align: left;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .component-library-page {
+        gap: 1.5rem;
+    }
+
+    .component-library-heading {
+        display: grid;
+    }
+
+    .component-library-heading .badge {
+        justify-self: start;
+    }
+
+}

@@ -1,0 +1,218 @@
+﻿@implements IAsyncDisposable
+@using Microsoft.JSInterop
+@inject IJSRuntime Js
+
+<div @ref="PickerElement" class="tree-picker">
+    <button class="tree-picker-toggle" type="button" @onclick="TogglePicker" disabled="@Disabled" aria-expanded="@(IsOpen ? "true" : "false")">
+        <span class="tree-picker-value">
+            <i class="bi bi-folder2-open" aria-hidden="true"></i>
+            <span>@(Value.IsNullOrEmpty() ? Placeholder : Value)</span>
+        </span>
+        <i class="bi bi-chevron-down tree-picker-chevron" aria-hidden="true"></i>
+    </button>
+
+    @if (IsOpen)
+    {
+        var folderPaths = GetFolderPaths();
+        <div class="tree-picker-panel" popover="manual">
+            <div class="tree-picker-header">
+                <div>
+                    <strong>选择目录</strong>
+                    <div class="text-secondary small">目录由已保存的数据动态生成，也可为当前对象指定新目录。</div>
+                </div>
+                <button class="btn btn-sm btn-outline-secondary" type="button" data-tree-picker-close @onclick="ClosePicker" aria-label="关闭">
+                    <i class="bi bi-x-lg" aria-hidden="true"></i>
+                </button>
+            </div>
+
+            @if (!ErrorMessage.IsNullOrEmpty())
+            {
+                <div class="alert alert-danger py-2 px-3 mb-2" role="alert">@ErrorMessage</div>
+            }
+
+            <div class="tree-picker-tree" role="tree">
+                @foreach (var folder in GetVisibleFolders(folderPaths))
+                {
+                    var hasChildren = folderPaths.Any(x => GetParentFolder(x) == folder);
+                    var isExpanded = ExpandedFolders.Contains(folder);
+                    var isSelected = folder == Value;
+                    <div class="tree-picker-row @(isSelected ? "selected" : null)" style="--tree-depth: @GetDepth(folder);" role="treeitem" aria-selected="@(isSelected ? "true" : "false")" aria-expanded="@(hasChildren ? (isExpanded ? "true" : "false") : null)">
+                        @if (hasChildren)
+                        {
+                            <button class="tree-picker-expander" type="button" @onclick="() => ToggleFolder(folder)" aria-label="@(isExpanded ? "折叠" : "展开")">
+                                <i class="bi @(isExpanded ? "bi-chevron-down" : "bi-chevron-right")" aria-hidden="true"></i>
+                            </button>
+                        }
+                        else
+                        {
+                            <span class="tree-picker-expander"></span>
+                        }
+                        <button class="tree-picker-node" type="button" @onclick="() => SelectFolder(folder)">
+                            <i class="bi @(isExpanded || isSelected ? "bi-folder2-open" : "bi-folder2")" aria-hidden="true"></i>
+                            <span class="tree-picker-node-name">@GetFolderName(folder)</span>
+                            <span class="tree-picker-node-path">@folder</span>
+                        </button>
+                    </div>
+                }
+            </div>
+
+            @if (AllowCreate && !Value.IsNullOrEmpty())
+            {
+                <div class="tree-picker-create">
+                    <label class="form-label small mb-1" for="@CreateInputId">在 @Value 下指定子目录</label>
+                    <div class="input-group input-group-sm">
+                        <input id="@CreateInputId" class="form-control" type="text" @bind="NewFolderName" @bind:event="oninput" placeholder="输入一级名称" autocomplete="off" onkeydown="if (event.key === 'Enter') event.preventDefault();" />
+                        <button class="btn btn-outline-primary" type="button" @onclick="CreateFolder">
+                            <i class="bi bi-folder-plus me-1" aria-hidden="true"></i>新建
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public IReadOnlyCollection<string> Folders { get; set; } = Array.Empty<string>();
+    [Parameter] public string Value { get; set; }
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+    [Parameter] public string Placeholder { get; set; } = "请选择目录";
+    [Parameter] public bool AllowCreate { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+
+    HashSet<string> ExpandedFolders { get; set; } = new(StringComparer.Ordinal);
+    HashSet<string> AdditionalFolders { get; set; } = new(StringComparer.Ordinal);
+    string NewFolderName { get; set; }
+    string ErrorMessage { get; set; }
+    bool IsOpen { get; set; }
+    ElementReference PickerElement { get; set; }
+    IJSObjectReference JsModule { get; set; }
+    string CreateInputId { get; } = "treeCreate_" + Guid.NewGuid().ToString("N");
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Disabled) IsOpen = false;
+        var normalizedValue = NormalizeFolder(Value, "/");
+        if (Value != normalizedValue)
+        {
+            Value = normalizedValue;
+            await ValueChanged.InvokeAsync(Value);
+        }
+        AdditionalFolders.Add(Value);
+        ExpandSelectedPath();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        JsModule = await Js.InvokeAsync<IJSObjectReference>("import", "./_content/Silmoon.AspNetCore.Blazor/Components/TreePicker.razor.js?v=3");
+        await JsModule.InvokeVoidAsync("initialize", PickerElement);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (JsModule is null) return;
+        try
+        {
+            await JsModule.InvokeVoidAsync("dispose", PickerElement);
+            await JsModule.DisposeAsync();
+        }
+        catch (JSDisconnectedException) { }
+    }
+
+    void TogglePicker()
+    {
+        if (Disabled) return;
+        IsOpen = !IsOpen;
+        if (IsOpen) ExpandSelectedPath();
+    }
+    void ClosePicker() => IsOpen = false;
+    void ToggleFolder(string folder)
+    {
+        if (Disabled) return;
+        if (!ExpandedFolders.Add(folder)) ExpandedFolders.Remove(folder);
+    }
+    async Task SelectFolder(string folder)
+    {
+        if (Disabled) return;
+        Value = folder;
+        ExpandedFolders.Add(folder);
+        ErrorMessage = null;
+        await ValueChanged.InvokeAsync(Value);
+    }
+    async Task CreateFolder()
+    {
+        if (Disabled) return;
+        var folderName = NewFolderName?.Trim();
+        if (folderName.IsNullOrEmpty() || folderName.IndexOfAny('/', '\\', '*') >= 0 || folderName == "." || folderName == "..")
+        {
+            ErrorMessage = "目录名称无效。";
+            return;
+        }
+
+        var parentFolder = NormalizeFolder(Value, "/");
+        var folder = parentFolder == "/" ? $"/{folderName}/" : $"{parentFolder}{folderName}/";
+        folder = NormalizeFolder(folder, "/");
+        ExpandedFolders.Add(parentFolder);
+        AdditionalFolders.Add(folder);
+        Value = folder;
+        NewFolderName = null;
+        ErrorMessage = null;
+        await ValueChanged.InvokeAsync(Value);
+        ExpandSelectedPath();
+    }
+    HashSet<string> GetFolderPaths()
+    {
+        var result = new HashSet<string>(StringComparer.Ordinal) { "/" };
+        foreach (var folder in (Folders ?? Array.Empty<string>()).Concat(AdditionalFolders).Append(Value))
+        {
+            var normalizedFolder = NormalizeFolder(folder, "/");
+            if (!IsValidFolder(normalizedFolder)) continue;
+            var currentFolder = "/";
+            foreach (var level in normalizedFolder.GetFolderLevels())
+            {
+                currentFolder += level + "/";
+                result.Add(currentFolder);
+            }
+        }
+        return result;
+    }
+    IEnumerable<string> GetVisibleFolders(HashSet<string> folders)
+    {
+        yield return "/";
+        foreach (var folder in GetVisibleChildFolders("/", folders)) yield return folder;
+    }
+    IEnumerable<string> GetVisibleChildFolders(string parentFolder, HashSet<string> folders)
+    {
+        if (!ExpandedFolders.Contains(parentFolder)) yield break;
+        foreach (var folder in folders.Where(x => GetParentFolder(x) == parentFolder).OrderBy(GetFolderName, StringComparer.Ordinal))
+        {
+            yield return folder;
+            foreach (var childFolder in GetVisibleChildFolders(folder, folders)) yield return childFolder;
+        }
+    }
+    void ExpandSelectedPath()
+    {
+        var folder = NormalizeFolder(Value, "/");
+        while (!folder.IsNullOrEmpty())
+        {
+            ExpandedFolders.Add(folder);
+            folder = GetParentFolder(folder);
+        }
+    }
+    static string NormalizeFolder(string folder, string defaultFolder)
+    {
+        folder = folder?.Trim();
+        if (folder.IsNullOrEmpty()) return defaultFolder;
+        return folder.NormalizeFolder(separators: ['/', '\\']);
+    }
+    static bool IsValidFolder(string folder) => !folder.IsNullOrEmpty() && folder.StartsWith('/') && folder.EndsWith('/') && !folder.Contains('*') && !folder.Contains('\\') && !folder.GetFolderLevels().Any(x => x == "." || x == "..");
+    static string GetParentFolder(string folder)
+    {
+        if (folder == "/") return null;
+        var levels = folder.GetFolderLevels();
+        return levels.Length <= 1 ? "/" : $"/{string.Join('/', levels[..^1])}/";
+    }
+    static string GetFolderName(string folder) => folder == "/" ? "根目录" : folder.GetFolderLevels().LastOrDefault() ?? folder;
+    static int GetDepth(string folder) => folder == "/" ? 0 : folder.GetFolderLevels().Length;
+}

@@ -1,0 +1,154 @@
+﻿@using Microsoft.JSInterop
+@implements IAsyncDisposable
+@inject IJSRuntime Js
+
+<div @ref="PickerElement" class="date-range-picker" data-date-time-range-picker data-date-range-messages="@Messages">
+    <button class="date-range-trigger" type="button" title="@TriggerTitle" aria-label="@TriggerTitle" aria-haspopup="dialog" aria-controls="@PickerId" aria-expanded="false" data-date-range-open>
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M7 3v4m10-4v4M3 10h18M7 14h3m4 0h3m-10 4h3" /></svg>
+    </button>
+    <dialog id="@PickerId" class="date-range-dialog" aria-labelledby="@(PickerId + "-title")" aria-describedby="@(PickerId + "-hint")" data-date-range-dialog>
+        <div data-date-range-form>
+            <header class="date-range-header">
+                <h2 id="@(PickerId + "-title")">@T(IncludeTime ? "选择时间范围" : "选择日期范围")</h2>
+                <button class="date-range-close" type="button" aria-label="@T("取消并关闭")" data-date-range-cancel>×</button>
+            </header>
+            <div class="date-range-presets" role="group" aria-label="@T("快捷时间范围")">
+                <button type="button" data-date-range-preset="today">@T("今天")</button>
+                <button type="button" data-date-range-preset="yesterday">@T("昨天")</button>
+                <button type="button" data-date-range-preset="threeDays">@T("近三天")</button>
+                <button type="button" data-date-range-preset="thisWeek">@T("本周")</button>
+                <button type="button" data-date-range-preset="lastWeek">@T("上周")</button>
+                <button type="button" data-date-range-preset="thisMonth">@T("本月")</button>
+                <button type="button" data-date-range-preset="thirtyDays">@T("近30天")</button>
+                <button type="button" data-date-range-preset="lastMonth">@T("上月")</button>
+                <button type="button" data-date-range-preset="threeMonths">@T("三个月")</button>
+                <button type="button" data-date-range-preset="sixMonths">@T("半年")</button>
+                <button type="button" data-date-range-preset="oneYear">@T("一年")</button>
+                <button type="button" data-date-range-preset="all">@T("全部")</button>
+            </div>
+            <div class="date-range-fields">
+                <label for="@(PickerId + "-start")">@T(IncludeTime ? "开始时间" : "开始日期")<input id="@(PickerId + "-start")" type="@(IncludeTime ? "datetime-local" : "date")" step="@(IncludeTime ? "0.001" : "1")" min="@(IncludeTime ? "0001-01-01T00:00" : "0001-01-01")" max="@(IncludeTime ? "9999-12-31T23:59:59.999" : "9999-12-31")" data-date-range-start /></label>
+                <label for="@(PickerId + "-end")">@T(IncludeTime ? "结束时间" : "结束日期")<input id="@(PickerId + "-end")" type="@(IncludeTime ? "datetime-local" : "date")" step="@(IncludeTime ? "0.001" : "1")" min="@(IncludeTime ? "0001-01-01T00:00" : "0001-01-01")" max="@(IncludeTime ? "9999-12-31T23:59:59.999" : "9999-12-31")" data-date-range-end /></label>
+            </div>
+            <p id="@(PickerId + "-hint")" class="date-range-hint">@T(IncludeTime ? "按本机时区选择，包含结束时间；点击确定后生效。" : "按本机时区选择，包含开始与结束日期全天；点击确定后生效。")</p>
+            <p class="date-range-error" role="alert" data-date-range-error hidden></p>
+            <footer class="date-range-actions">
+                <button class="date-range-secondary" type="button" data-date-range-cancel>@T("取消")</button>
+                <button class="date-range-primary" type="button" data-date-range-apply>@T("确定")</button>
+            </footer>
+        </div>
+    </dialog>
+</div>
+
+@code {
+    [Parameter]
+    public bool IncludeTime { get; set; } = true;
+    [Parameter] public DateTimeRangeValue? Value { get; set; }
+    [Parameter] public EventCallback<DateTimeRangeValue?> ValueChanged { get; set; }
+    [Parameter] public bool JavaScriptManaged { get; set; }
+    [Parameter] public IReadOnlyDictionary<string, string>? Texts { get; set; }
+
+    string T(string text) => Texts is not null && Texts.TryGetValue(text, out var value) && !string.IsNullOrEmpty(value) ? value : text;
+    string TriggerTitle => T(IncludeTime ? "选择时间范围：{0}" : "选择日期范围：{0}").Replace("{0}", T("全部时段"));
+    static readonly string[] ClientMessageKeys =
+    [
+        "选择日期范围：{0}", "选择时间范围：{0}", "全部时段", "自定义",
+        "时间范围控件未加载或当前浏览器不支持页面对话框。",
+        "请选择有效的开始日期和结束日期。", "请选择有效的开始时间和结束时间。",
+        "结束日期不能早于开始日期。", "结束时间不能早于开始时间。",
+        "日期范围未应用，请重试。", "日期范围应用失败，请重试。"
+    ];
+    string? Messages => Texts is { Count: > 0 } texts
+        ? System.Text.Json.JsonSerializer.Serialize(ClientMessageKeys.Where(texts.ContainsKey).ToDictionary(key => key, T))
+        : null;
+    string PickerId { get; } = "date-range-" + Guid.NewGuid().ToString("N");
+    ElementReference PickerElement { get; set; }
+    IJSObjectReference? JsModule { get; set; }
+    IJSObjectReference? Picker { get; set; }
+    DotNetObjectReference<DateTimeRangePicker>? CallbackReference { get; set; }
+    SemaphoreSlim LifecycleLock { get; } = new(1, 1);
+    bool? InitialJavaScriptManaged { get; set; }
+    bool MountedIncludeTime { get; set; }
+    bool Applying { get; set; }
+    bool Disposed { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        if (InitialJavaScriptManaged.HasValue && InitialJavaScriptManaged != JavaScriptManaged) throw new InvalidOperationException("JavaScriptManaged cannot change on an existing picker. Use @key to recreate the component when changing ownership.");
+        InitialJavaScriptManaged = JavaScriptManaged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await LifecycleLock.WaitAsync();
+        try
+        {
+            if (Disposed || Applying) return;
+            if (JavaScriptManaged)
+            {
+                await DisposePickerAsync();
+                return;
+            }
+            JsModule ??= await Js.InvokeAsync<IJSObjectReference>("import", "./_content/Silmoon.AspNetCore.Blazor/Components/DateTimeRangePicker.razor.js?v=5");
+            if (Disposed) return;
+            var includeTime = IncludeTime;
+            if (Picker is not null && MountedIncludeTime != includeTime) await DisposePickerAsync();
+            if (Picker is null)
+            {
+                CallbackReference ??= DotNetObjectReference.Create(this);
+                Picker = await Js.InvokeAsync<IJSObjectReference>("DateTimeRangePicker.mountBlazor", PickerElement, CallbackReference);
+                MountedIncludeTime = includeTime;
+            }
+            if (!Applying) await Picker.InvokeVoidAsync("setValue", Value);
+        }
+        catch (JSDisconnectedException) { }
+        finally { LifecycleLock.Release(); }
+    }
+
+    [JSInvokable]
+    public async Task<bool> ApplyRangeAsync(DateTimeRangeValue? value)
+    {
+        if (Disposed || JavaScriptManaged || Applying) return false;
+        if (value is not null && value.StartTime > value.EndTime) return false;
+        if (value is not null) value = value with { StartTime = value.StartTime.ToUniversalTime(), EndTime = value.EndTime.ToUniversalTime() };
+        Applying = true;
+        try
+        {
+            await ValueChanged.InvokeAsync(value);
+            if (Disposed || JavaScriptManaged) return false;
+            Value = value;
+            return true;
+        }
+        finally
+        {
+            Applying = false;
+            if (!Disposed) await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    async ValueTask DisposePickerAsync()
+    {
+        if (Picker is null) return;
+        var picker = Picker;
+        Picker = null;
+        try { await picker.InvokeVoidAsync("dispose"); }
+        finally { await picker.DisposeAsync(); }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        Disposed = true;
+        await LifecycleLock.WaitAsync();
+        try
+        {
+            try { await DisposePickerAsync(); }
+            finally { if (JsModule is not null) await JsModule.DisposeAsync(); }
+        }
+        catch (JSDisconnectedException) { }
+        finally
+        {
+            CallbackReference?.Dispose();
+            LifecycleLock.Release();
+        }
+    }
+}

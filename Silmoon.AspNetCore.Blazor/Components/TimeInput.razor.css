@@ -1,0 +1,11 @@
+﻿input.valid.modified {
+    outline: none;
+}
+
+input.invalid,
+input.invalid:focus {
+    background-color: var(--silmoon-ui-danger-soft-bg, color-mix(in srgb, var(--bs-danger, #dc3545) 16%, Canvas)) !important;
+    border-color: var(--silmoon-ui-danger-soft-border, var(--bs-form-invalid-border-color, #dc3545)) !important;
+    box-shadow: 0 0 0 .2rem var(--silmoon-ui-danger-soft-bg, color-mix(in srgb, var(--bs-danger, #dc3545) 16%, Canvas)) !important;
+    outline: none !important;
+}

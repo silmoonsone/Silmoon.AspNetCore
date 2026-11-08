@@ -1,0 +1,122 @@
+﻿.site-confirm-dialog {
+    position: fixed;
+    box-sizing: border-box;
+    width: min(28rem, calc(100vw - 2rem));
+    max-height: calc(100dvh - 2rem);
+    margin: auto;
+    padding: 1.25rem;
+    overflow: auto;
+    border: 1px solid var(--silmoon-ui-border-color, var(--bs-border-color, color-mix(in srgb, CanvasText 25%, Canvas)));
+    border-radius: 0.75rem;
+    background: var(--silmoon-ui-bg-secondary, var(--bs-body-bg, Canvas));
+    color: var(--silmoon-ui-text-primary, var(--bs-body-color, CanvasText));
+    box-shadow: 0 1.5rem 4rem rgb(0 0 0 / 30%);
+    font-family: inherit;
+}
+
+.site-confirm-dialog::backdrop {
+    background: rgb(0 0 0 / 45%);
+}
+
+.site-confirm-dialog[data-dragged="true"] {
+    margin: 0;
+    right: auto;
+    bottom: auto;
+}
+
+.site-confirm-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: -1.25rem -1.25rem 1rem;
+    padding: 1.25rem 1.25rem 0;
+    cursor: default;
+    user-select: none;
+    touch-action: none;
+}
+
+.site-confirm-header h2 {
+    margin: 0;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.site-confirm-close {
+    flex: 0 0 auto;
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    border: 0;
+    border-radius: 0.25rem;
+    background: transparent;
+    color: var(--silmoon-ui-text-secondary, var(--bs-secondary-color, color-mix(in srgb, CanvasText 70%, Canvas)));
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.site-confirm-message {
+    margin: 0 0 1.25rem;
+    color: var(--silmoon-ui-text-secondary, var(--bs-secondary-color, color-mix(in srgb, CanvasText 70%, Canvas)));
+    font-size: 0.875rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.site-confirm-actions {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 0.625rem;
+}
+
+.site-confirm-button {
+    min-height: 2.25rem;
+    padding: 0.375rem 0.875rem;
+    border: 1px solid transparent;
+    border-radius: 0.375rem;
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.site-confirm-secondary {
+    border-color: var(--silmoon-ui-border-color, var(--bs-border-color, color-mix(in srgb, CanvasText 25%, Canvas)));
+    background: transparent;
+    color: var(--silmoon-ui-text-primary, var(--bs-body-color, CanvasText));
+}
+
+.site-confirm-primary {
+    background: var(--silmoon-ui-primary-color, var(--bs-primary, #06f));
+    color: #fff;
+}
+
+.site-confirm-alternative {
+    border-color: var(--silmoon-ui-primary-color, var(--bs-primary, #06f));
+    background: transparent;
+    color: var(--silmoon-ui-primary-color, var(--bs-primary, #06f));
+}
+
+.site-confirm-dialog[data-danger="true"] .site-confirm-primary {
+    background: var(--silmoon-ui-danger-color, var(--bs-danger, #dc3545));
+}
+
+.site-confirm-close:hover,
+.site-confirm-secondary:hover,
+.site-confirm-alternative:hover {
+    background: var(--silmoon-ui-table-row-hover-bg, rgb(127 127 127 / 12%));
+}
+
+.site-confirm-primary:hover {
+    filter: brightness(1.1);
+}
+
+.site-confirm-button:focus-visible,
+.site-confirm-close:focus-visible {
+    outline: 2px solid var(--silmoon-ui-primary-color, var(--bs-primary, #06f));
+    outline-offset: 3px;
+}

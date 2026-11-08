@@ -1,0 +1,35 @@
+﻿@inherits InputBase<TimeSpan>
+
+<input @attributes="AdditionalAttributes" class="@CssClass" type="text" maxlength="5" value="@CurrentValueAsString" @oninput="OnInput" />
+
+@code {
+    [Parameter] public bool AllowEndOfDay { get; set; }
+
+    protected override string FormatValueAsString(TimeSpan value)
+    {
+        if (AllowEndOfDay && value == TimeSpan.FromDays(1)) return "24:00";
+        if (value < TimeSpan.Zero || value >= TimeSpan.FromDays(1)) return null;
+        return $"{value.Hours:00}:{value.Minutes:00}";
+    }
+    protected override bool TryParseValueFromString(string value, out TimeSpan result, out string validationErrorMessage)
+    {
+        value = value?.Trim();
+        if (AllowEndOfDay && value == "24:00")
+        {
+            result = TimeSpan.FromDays(1);
+            validationErrorMessage = null;
+            return true;
+        }
+        var parts = value?.Split(':');
+        if (parts?.Length == 2 && parts[0].Length == 2 && parts[1].Length == 2 && parts[0].All(char.IsAsciiDigit) && parts[1].All(char.IsAsciiDigit) && int.TryParse(parts[0], out var hours) && int.TryParse(parts[1], out var minutes) && hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59)
+        {
+            result = new TimeSpan(hours, minutes, 0);
+            validationErrorMessage = null;
+            return true;
+        }
+        result = default;
+        validationErrorMessage = AllowEndOfDay ? "请输入 00:00 至 24:00 之间的时间。" : "请输入 00:00 至 23:59 之间的时间。";
+        return false;
+    }
+    void OnInput(ChangeEventArgs eventArgs) => CurrentValueAsString = eventArgs.Value?.ToString();
+}

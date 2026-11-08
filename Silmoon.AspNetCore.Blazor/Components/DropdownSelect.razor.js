@@ -146,7 +146,7 @@
         menu.style.margin = "0";
         menu.style.translate = "none";
         const maxWidth = Math.max(0, viewport.width - padding * 2) + "px";
-        menu.style.minWidth = `min(10rem, ${maxWidth})`;
+        menu.style.minWidth = root.dataset.jsManaged === "true" ? `min(${bounds.width}px, ${maxWidth})` : `min(10rem, ${maxWidth})`;
         menu.style.maxWidth = maxWidth;
         menu.style.maxHeight = `min(18rem, ${Math.max(0, viewport.height - padding * 2)}px)`;
         if (usePopover && !menu.matches(":popover-open")) menu.showPopover();
@@ -169,6 +169,47 @@
         revealFocusedOption(menu);
     }
 
+    function selectValue(root, value) {
+        const menu = root.querySelector(".dropdown-select-options");
+        let selected;
+        for (const option of menu.children) {
+            const active = option.dataset.value === value;
+            option.classList.toggle("active", active);
+            option.setAttribute("aria-pressed", String(active));
+            if (active) selected = option;
+        }
+        root.dataset.value = selected?.dataset.value ?? "";
+        const caption = selected?.querySelector("[data-dropdown-text]")?.textContent ?? root.dataset.placeholder ?? "";
+        const captionElement = root.querySelector("[data-dropdown-caption]");
+        captionElement.textContent = caption;
+        for (const name of ["lang", "dir"]) {
+            if (selected?.hasAttribute(name)) captionElement.setAttribute(name, selected.getAttribute(name));
+            else captionElement.removeAttribute(name);
+        }
+        root.querySelector("summary").setAttribute("aria-label", menu.getAttribute("aria-label") + ": " + caption);
+    }
+
+    // Static Razor hosts can manage the selection entirely in their page controller.
+    function bind(root) {
+        const trigger = root.querySelector("summary");
+        return {
+            get value() { return root.dataset.value ?? ""; },
+            set value(value) { selectValue(root, String(value ?? "")); },
+            set disabled(value) {
+                value = Boolean(value);
+                root.dataset.disabled = String(value);
+                trigger.setAttribute("aria-disabled", String(value));
+                trigger.tabIndex = value ? -1 : 0;
+                for (const option of root.querySelectorAll("button[data-dropdown-option]"))
+                    option.disabled = value || option.hasAttribute("data-option-disabled");
+                if (value && root.open) closeMenu(root, true);
+            },
+            close() { closeMenu(root, true); }
+        };
+    }
+
+    window.DropdownSelect = { bind };
+
     document.addEventListener("toggle", event => {
         const root = event.target;
         if (root.matches?.(selector)) {
@@ -190,6 +231,10 @@
         if (!option || option.disabled) return;
         closeMenu(root);
         if (option.tagName === "BUTTON") root.querySelector("summary").focus();
+        if (root.dataset.jsManaged === "true" && option.tagName === "BUTTON" && option.dataset.value !== root.dataset.value) {
+            selectValue(root, option.dataset.value);
+            root.dispatchEvent(new Event("change", { bubbles: true }));
+        }
     });
 
     document.addEventListener("keydown", event => {

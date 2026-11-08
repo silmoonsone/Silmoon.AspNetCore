@@ -1,0 +1,72 @@
+﻿@using Microsoft.JSInterop
+@implements IAsyncDisposable
+@inject IJSRuntime Js
+@inject NavigationManager Navigation
+
+<template @ref="TemplateElement" id="@Id" data-module-src="@ModuleUrl" data-permanent>
+    <dialog class="site-confirm-dialog" aria-labelledby="@(Id + "-title")" aria-describedby="@(Id + "-message")">
+        <header class="site-confirm-header">
+            <h2 id="@(Id + "-title")" data-confirm-title>确认操作</h2>
+            <button class="site-confirm-close" type="button" aria-label="@CloseLabel" data-confirm-cancel>×</button>
+        </header>
+        <p id="@(Id + "-message")" class="site-confirm-message" data-confirm-message></p>
+        <footer class="site-confirm-actions">
+            <button class="site-confirm-button site-confirm-secondary" type="button" data-confirm-cancel data-confirm-cancel-label autofocus>取消</button>
+            <button class="site-confirm-button site-confirm-alternative" type="button" data-confirm-alternative hidden></button>
+            <button class="site-confirm-button site-confirm-primary" type="button" data-confirm-accept>确认</button>
+        </footer>
+    </dialog>
+</template>
+<silmoon-blazor-module src="@ModuleUrl" hidden></silmoon-blazor-module>
+
+@code {
+    [Parameter] public string Id { get; set; } = "confirm-dialog-" + Guid.NewGuid().ToString("N");
+    [Parameter] public bool Draggable { get; set; } = true;
+    [Parameter] public string CloseLabel { get; set; } = "取消并关闭";
+
+    ElementReference TemplateElement { get; set; }
+    Task<IJSObjectReference>? ModuleTask { get; set; }
+    bool Disposed { get; set; }
+    string ModuleUrl => Navigation.ToAbsoluteUri("_content/Silmoon.AspNetCore.Blazor/Components/ConfirmDialog.razor.js?v=4").AbsoluteUri;
+
+    public async Task<bool> ConfirmAsync(string message, string title = "确认操作", string confirmText = "确认", string cancelText = "取消", bool danger = false)
+    {
+        await EnsureModuleAsync();
+        return await Js.InvokeAsync<bool>("SiteDialogs.confirm", CancellationToken.None, new { title, message, confirmText, cancelText, danger, draggable = Draggable }, TemplateElement);
+    }
+
+    public async Task<ConfirmDialogResult> ChooseAsync(string message, string alternativeText, string title = "确认操作", string confirmText = "确认", string cancelText = "取消", bool danger = false)
+    {
+        await EnsureModuleAsync();
+        var result = await Js.InvokeAsync<string?>("SiteDialogs.choose", CancellationToken.None, new { title, message, confirmText, alternativeText, cancelText, danger, draggable = Draggable }, TemplateElement);
+        return result switch { "confirm" => ConfirmDialogResult.Confirmed, "alternative" => ConfirmDialogResult.Alternative, _ => ConfirmDialogResult.Cancelled };
+    }
+
+    async Task EnsureModuleAsync()
+    {
+        ObjectDisposedException.ThrowIf(Disposed, this);
+        var loading = ModuleTask ??= Js.InvokeAsync<IJSObjectReference>("import", ModuleUrl).AsTask();
+        try { await loading; }
+        catch
+        {
+            if (ModuleTask == loading) ModuleTask = null;
+            throw;
+        }
+        ObjectDisposedException.ThrowIf(Disposed, this);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (Disposed) return;
+        Disposed = true;
+        if (ModuleTask is null) return;
+        try
+        {
+            var module = await ModuleTask;
+            try { await Js.InvokeVoidAsync("SiteDialogs.dismiss", Id); }
+            finally { await module.DisposeAsync(); }
+        }
+        catch (JSDisconnectedException) { }
+        catch (JSException) { }
+    }
+}

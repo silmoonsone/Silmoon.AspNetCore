@@ -1,0 +1,146 @@
+﻿.tree-picker {
+    position: relative;
+}
+
+.tree-picker-toggle {
+    width: 100%;
+    min-height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: .375rem .75rem;
+    color: var(--silmoon-ui-text-primary, var(--bs-body-color, CanvasText));
+    background: var(--silmoon-ui-interactive-bg, var(--bs-body-bg, Canvas));
+    border: 1px solid var(--silmoon-ui-border-color, var(--bs-border-color, color-mix(in srgb, CanvasText 25%, Canvas)));
+    border-radius: var(--silmoon-ui-border-radius, var(--bs-border-radius, .375rem));
+    text-align: left;
+}
+
+.tree-picker-toggle:focus {
+    border-color: var(--silmoon-ui-primary-color, var(--bs-primary, #0d6efd));
+    box-shadow: 0 0 0 .2rem var(--silmoon-ui-focus-ring-color, var(--bs-focus-ring-color, rgb(13 110 253 / .25)));
+    outline: 0;
+}
+
+.tree-picker-value {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tree-picker-value span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tree-picker-chevron {
+    color: var(--silmoon-ui-text-secondary, var(--bs-secondary-color, color-mix(in srgb, CanvasText 70%, Canvas)));
+}
+
+.tree-picker-panel {
+    position: fixed;
+    inset: auto;
+    margin: 0;
+    box-sizing: border-box;
+    overflow: auto;
+    padding: 12px;
+    color: var(--silmoon-ui-text-primary, var(--bs-body-color, CanvasText));
+    background: var(--silmoon-ui-interactive-bg, var(--bs-body-bg, Canvas));
+    border: 1px solid var(--silmoon-ui-border-color, var(--bs-border-color, color-mix(in srgb, CanvasText 25%, Canvas)));
+    border-radius: var(--silmoon-ui-card-border-radius, var(--bs-border-radius-lg, .5rem));
+    box-shadow: 0 14px 34px var(--silmoon-ui-shadow-color, rgb(0 0 0 / .2));
+}
+
+.tree-picker-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--silmoon-ui-border-color, var(--bs-border-color, color-mix(in srgb, CanvasText 25%, Canvas)));
+}
+
+.tree-picker-tree {
+    max-height: 300px;
+    overflow: auto;
+    padding: 8px 0;
+}
+
+.tree-picker-row {
+    display: flex;
+    align-items: center;
+    padding-left: calc(var(--tree-depth) * 18px);
+    border-radius: 8px;
+}
+
+.tree-picker-row:hover {
+    background: var(--silmoon-ui-interactive-bg-hover, color-mix(in srgb, CanvasText 8%, Canvas));
+}
+
+.tree-picker-row.selected {
+    background: var(--silmoon-ui-success-soft-bg, color-mix(in srgb, var(--bs-success, #198754) 16%, Canvas));
+}
+
+.tree-picker-expander {
+    width: 26px;
+    height: 30px;
+    flex: 0 0 26px;
+    display: inline-grid;
+    place-items: center;
+    padding: 0;
+    color: var(--silmoon-ui-text-secondary, var(--bs-secondary-color, color-mix(in srgb, CanvasText 70%, Canvas)));
+    background: transparent;
+    border: 0;
+}
+
+button.tree-picker-expander:hover {
+    color: var(--silmoon-ui-primary-color, var(--bs-primary, #0d6efd));
+}
+
+.tree-picker-node {
+    min-width: 0;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 8px;
+    color: inherit;
+    background: transparent;
+    border: 0;
+    text-align: left;
+}
+
+.tree-picker-node-name {
+    font-weight: 600;
+}
+
+.tree-picker-node-path {
+    min-width: 0;
+    margin-left: auto;
+    color: var(--silmoon-ui-text-secondary, var(--bs-secondary-color, color-mix(in srgb, CanvasText 70%, Canvas)));
+    font-size: .78rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tree-picker-create {
+    padding-top: 10px;
+    border-top: 1px solid var(--silmoon-ui-border-color, var(--bs-border-color, color-mix(in srgb, CanvasText 25%, Canvas)));
+}
+
+@media (max-width: 575.98px) {
+    .tree-picker-node-path {
+        display: none;
+    }
+}
+
+/* Keep icon-only controls visible in hosts without Bootstrap Icons. */
+@layer silmoon-components {
+    .bi-chevron-down::before { content: "▾"; font-style: normal; }
+    .bi-chevron-right::before { content: "▸"; font-style: normal; }
+    .bi-x-lg::before { content: "×"; font-style: normal; }
+}

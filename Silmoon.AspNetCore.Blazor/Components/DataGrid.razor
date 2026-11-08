@@ -1,0 +1,144 @@
+﻿@typeparam TItem
+@implements IAsyncDisposable
+@using Microsoft.JSInterop
+@inject IJSRuntime Js
+
+<div @key="JavaScriptManaged" class="data-grid @Class" data-grid data-single-select="@SingleSelect.ToString().ToLowerInvariant()" data-grid-selection-callback="@(OnSelectionChanged.HasDelegate ? "true" : null)" @attributes="AdditionalAttributes" @ref="Root">
+    @if (!string.IsNullOrWhiteSpace(FilterLabel))
+    {
+        <input class="data-grid-filter" type="search" aria-label="@FilterLabel" placeholder="@FilterLabel" data-grid-filter />
+    }
+    <div class="data-grid-scroll" data-grid-scroll>
+        <table aria-label="@Label" data-grid-table>
+            <thead><tr>@Header</tr></thead>
+            <tbody data-grid-body>
+                @if (!JavaScriptManaged && RowTemplate is not null)
+                {
+                    @foreach (var entry in DisplayRows)
+                    {
+                        <tr @key="entry.Key" data-grid-key="@entry.Key" data-grid-index="@entry.Index">@RowTemplate(entry.Item)</tr>
+                    }
+                }
+            </tbody>
+        </table>
+        @if (!string.IsNullOrWhiteSpace(EmptyFilterText))
+        {
+            <div class="data-grid-empty" data-grid-empty-filter role="status" hidden>@EmptyFilterText</div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Label { get; set; } = string.Empty;
+    [Parameter] public string? FilterLabel { get; set; }
+    [Parameter] public string? EmptyFilterText { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public bool SingleSelect { get; set; }
+    [Parameter] public bool JavaScriptManaged { get; set; }
+    [Parameter] public RenderFragment? Header { get; set; }
+    [Parameter] public IEnumerable<TItem> Items { get; set; } = [];
+    [Parameter] public Func<TItem, string>? RowKey { get; set; }
+    [Parameter] public RenderFragment<TItem>? RowTemplate { get; set; }
+    [Parameter] public EventCallback<DataGridRowEvent<TItem>> OnRowClick { get; set; }
+    [Parameter] public EventCallback<DataGridRowEvent<TItem>> OnRowDoubleClick { get; set; }
+    [Parameter] public EventCallback<string?> OnSelectionChanged { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    const string ModulePath = "./_content/Silmoon.AspNetCore.Blazor/Components/DataGrid.razor.js";
+    readonly SemaphoreSlim Lifecycle = new(1, 1);
+    ElementReference Root, MountedRoot;
+    bool Disposed;
+    IJSObjectReference? Module, Controller;
+    DotNetObjectReference<DataGrid<TItem>>? Reference;
+    Dictionary<string, int> ViewOrder = [];
+    IReadOnlyList<(TItem Item, string Key, int Index)> SourceRows = [];
+
+    IEnumerable<(TItem Item, string Key, int Index)> DisplayRows => ViewOrder.Count == 0 ? SourceRows :
+        SourceRows.OrderBy(row => ViewOrder.GetValueOrDefault(row.Key, int.MaxValue));
+
+    protected override void OnParametersSet()
+    {
+        if (JavaScriptManaged || RowTemplate is null)
+        {
+            SourceRows = [];
+            ViewOrder.Clear();
+            return;
+        }
+        SourceRows = Items.Select((item, index) => (item, RowKey?.Invoke(item) ?? index.ToString(System.Globalization.CultureInfo.InvariantCulture), index)).ToArray();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await Lifecycle.WaitAsync();
+        try
+        {
+            if (Disposed) return;
+            if (Controller is not null)
+            {
+                if (!JavaScriptManaged && Root.Equals(MountedRoot))
+                {
+                    await Controller.InvokeVoidAsync("refreshRows");
+                    return;
+                }
+                await ReleaseControllerAsync();
+            }
+            if (JavaScriptManaged) return;
+            Module ??= await Js.InvokeAsync<IJSObjectReference>("import", ModulePath);
+            if (Disposed || JavaScriptManaged) return;
+            Reference ??= DotNetObjectReference.Create(this);
+            MountedRoot = Root;
+            Controller = await Module.InvokeAsync<IJSObjectReference?>("mountBlazor", MountedRoot, Reference);
+        }
+        catch (JSDisconnectedException) { }
+        finally { Lifecycle.Release(); }
+    }
+
+    [JSInvokable]
+    public Task ApplyGridOrder(string[] keys)
+    {
+        if (Disposed || JavaScriptManaged) return Task.CompletedTask;
+        ViewOrder = keys.Select((key, index) => (key, index)).ToDictionary(pair => pair.key, pair => pair.index);
+        return InvokeAsync(StateHasChanged);
+    }
+
+    [JSInvokable]
+    public Task NotifyGridSelection(string? key) =>
+        Disposed || JavaScriptManaged ? Task.CompletedTask : OnSelectionChanged.InvokeAsync(key);
+
+    [JSInvokable]
+    public Task NotifyGridRow(bool doubleClick, string key, string? column, int rowIndex, int columnIndex)
+    {
+        var callback = doubleClick ? OnRowDoubleClick : OnRowClick;
+        if (!Disposed && !JavaScriptManaged && callback.HasDelegate)
+            foreach (var entry in SourceRows)
+                if (entry.Key == key)
+                    return callback.InvokeAsync(new DataGridRowEvent<TItem>(entry.Item, key, column, rowIndex, columnIndex));
+        return Task.CompletedTask;
+    }
+
+    async ValueTask ReleaseControllerAsync()
+    {
+        if (Controller is null) return;
+        var controller = Controller;
+        Controller = null;
+        try { await controller.InvokeVoidAsync("dispose"); }
+        finally { await controller.DisposeAsync(); }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        Disposed = true;
+        await Lifecycle.WaitAsync();
+        try
+        {
+            try { await ReleaseControllerAsync(); }
+            finally { if (Module is not null) await Module.DisposeAsync(); }
+        }
+        catch (JSDisconnectedException) { }
+        finally
+        {
+            Reference?.Dispose();
+            Lifecycle.Release();
+        }
+    }
+}

@@ -1,0 +1,114 @@
+﻿@typeparam TEnum where TEnum : struct, Enum
+@inherits InputBase<TEnum>
+@implements IAsyncDisposable
+@using Microsoft.JSInterop
+@inject IJSRuntime Js
+
+<div @ref="SelectElement" class="enum-select @(IsOpen ? "open" : null)">
+    <button @attributes="AdditionalAttributes" @ref="ToggleElement" id="@EffectiveId" class="enum-select-toggle @CssClass" type="button" disabled="@Disabled" aria-haspopup="listbox" aria-expanded="@(IsOpen ? "true" : "false")" aria-controls="@ListboxId" @onclick="TogglePicker">
+        <span class="enum-select-current">@GetDisplayName(CurrentValue)</span>
+        <i class="bi bi-chevron-down enum-select-chevron" aria-hidden="true"></i>
+    </button>
+
+    @if (IsOpen)
+    {
+        <div id="@ListboxId" class="enum-select-panel" popover="manual" role="listbox" aria-labelledby="@EffectiveId">
+            @foreach (var option in OptionValues)
+            {
+                var isSelected = EqualityComparer<TEnum>.Default.Equals(option, CurrentValue);
+                var description = GetDescription(option);
+                <button class="enum-select-option @(isSelected ? "selected" : null)" type="button" role="option" aria-selected="@(isSelected ? "true" : "false")" data-enum-select-option @onclick="() => SelectOption(option)">
+                    <span class="enum-select-option-copy">
+                        <span class="enum-select-option-name">@GetDisplayName(option)</span>
+                        @if (ShowDescriptions && !description.IsNullOrEmpty())
+                        {
+                            <span class="enum-select-option-description">@description</span>
+                        }
+                    </span>
+                    @if (isSelected)
+                    {
+                        <i class="bi bi-check-lg enum-select-option-check" aria-hidden="true"></i>
+                    }
+                </button>
+            }
+            <button type="button" hidden data-enum-select-close @onclick="ClosePicker">关闭</button>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string Id { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool ShowDescriptions { get; set; } = true;
+    [Parameter] public IReadOnlyCollection<TEnum> Options { get; set; }
+
+    bool IsOpen { get; set; }
+    bool RestoreFocus { get; set; }
+    ElementReference SelectElement { get; set; }
+    ElementReference ToggleElement { get; set; }
+    IJSObjectReference JsModule { get; set; }
+    string DefaultId { get; } = "enumSelectToggle_" + Guid.NewGuid().ToString("N");
+    string ListboxId { get; } = "enumSelect_" + Guid.NewGuid().ToString("N");
+    string EffectiveId => Id.IsNullOrEmpty() ? DefaultId : Id;
+    IEnumerable<TEnum> OptionValues => Options ?? Enum.GetValues<TEnum>();
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        if (Disabled) IsOpen = false;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            JsModule = await Js.InvokeAsync<IJSObjectReference>("import", "./_content/Silmoon.AspNetCore.Blazor/Components/EnumSelect.razor.js?v=2");
+            await JsModule.InvokeVoidAsync("initialize", SelectElement);
+        }
+        if (!RestoreFocus) return;
+        RestoreFocus = false;
+        await ToggleElement.FocusAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            if (JsModule is null) return;
+            await JsModule.InvokeVoidAsync("dispose", SelectElement);
+            await JsModule.DisposeAsync();
+        }
+        catch (JSDisconnectedException) { }
+        finally
+        {
+            // Blazor calls only IAsyncDisposable when both disposal interfaces exist.
+            ((IDisposable)this).Dispose();
+        }
+    }
+
+    void TogglePicker()
+    {
+        if (Disabled) return;
+        IsOpen = !IsOpen;
+    }
+    void ClosePicker() => IsOpen = false;
+    void SelectOption(TEnum option)
+    {
+        if (Disabled) return;
+        CurrentValue = option;
+        IsOpen = false;
+        RestoreFocus = true;
+    }
+    protected override bool TryParseValueFromString(string value, out TEnum result, out string validationErrorMessage)
+    {
+        if (Enum.TryParse(value, out result))
+        {
+            validationErrorMessage = null;
+            return true;
+        }
+        validationErrorMessage = $"无法解析 {typeof(TEnum).Name} 的值。";
+        return false;
+    }
+    static string GetDisplayName(TEnum value) => Enum.IsDefined(value) ? ((Enum)(object)value).GetDisplayName() : value.ToString();
+    static string GetDescription(TEnum value) => Enum.IsDefined(value) ? ((Enum)(object)value).GetDescription() : string.Empty;
+}

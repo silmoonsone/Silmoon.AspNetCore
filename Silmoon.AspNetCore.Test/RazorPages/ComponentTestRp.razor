@@ -1,40 +1,269 @@
 ﻿@page "/component-test"
 @rendermode InteractiveServer
-@using Silmoon.AspNetCore.Blazor
+@using System.ComponentModel.DataAnnotations
 @using Silmoon.AspNetCore.Blazor.Components
+@implements IAsyncDisposable
+@inject IJSRuntime Js
+@inject NavigationManager Navigation
 
-<BackBarComponent Title="TestComponentRp"></BackBarComponent>
+<PageTitle>ComponentTest</PageTitle>
 
-<hr />
+<div class="component-library-page">
+    <header class="component-library-heading">
+        <div>
+            <span class="component-library-eyebrow">Silmoon.AspNetCore.Blazor</span>
+            <h1>ComponentTest</h1>
+            <p>按组件逐项展示实际效果，并验证数据绑定、弹层定位、键盘操作和 JavaScript 互操作。</p>
+        </div>
+        <span class="badge text-bg-success">RCL Components</span>
+    </header>
 
-<div>@enumValue</div>
-<div>@startDate</div>
-<div>@endDate</div>
+    <nav class="component-test-index" aria-label="ComponentTest 页面导航">
+        <a href="/component-test#component-controls" data-enhance-nav="false">交互组件</a>
+        <a href="/component-test#component-data-grids" data-enhance-nav="false">数据表格</a>
+        <a href="/component-test#component-legacy-tests" data-enhance-nav="false">已有组件</a>
+    </nav>
 
-<hr />
-<DateSelectComponent @bind-StartDate="startDate" @bind-EndDate="endDate"></DateSelectComponent>
-<hr />
-<EnumFlagSimpleComponent @bind-Value="enumValue" IncludeZeroValue="true"></EnumFlagSimpleComponent>
-<hr />
-<EnumFlagListComponent @ref="flist" @bind-Value="enumValue">
-    <label class="form-check form-check-inline">
-        <input class="form-check-input"
-               type="checkbox"
-               value="@context.Enum"
-               @onchange="() => flist.ValueChangeHandler(context.Enum)"
-               checked="@enumValue.HasFlag(context.Enum)" />
-        <span class="form-check-label">@context.Enum.GetDisplayName()</span>
-    </label>
-</EnumFlagListComponent>
+    <section id="component-controls" class="component-test-section">
+        <header class="component-test-section-heading">
+            <div><span>Controls</span><h2>交互组件</h2></div>
+            <p>每张卡片对应一个组件，卡片主体即为组件的实际运行效果。</p>
+        </header>
+        <div class="component-library-grid">
+            <ContentCard Title="TimeInput" Brand="Input" Description="支持常规时间输入，并可将 24:00 表示为当天结束时间。" Icon="bi-clock-history">
+                <label class="form-label">结束时间</label>
+                <TimeInput @bind-Value="DemoForm.EndTime" AllowEndOfDay="true" class="form-control" aria-label="结束时间，允许24点" />
+                <div class="component-result" data-demo-time-value>绑定值：@FormatTime(DemoForm.EndTime)</div>
+            </ContentCard>
+
+            <ContentCard Title="EnumSelect&lt;TEnum&gt;" Brand="Input" Description="根据枚举成员生成选择列表，同时展示 Display 名称与说明。" Icon="bi-ui-checks">
+                <label class="form-label">处理状态</label>
+                <EnumSelect TEnum="DemoStatus" @bind-Value="DemoForm.Status" ShowDescriptions="true" aria-label="处理状态" />
+                <div class="component-result" data-demo-enum-value>绑定值：@DemoForm.Status</div>
+            </ContentCard>
+
+            <ContentCard Title="TreePicker" Brand="Picker" Description="从目录树选择路径，也可以在当前目录下创建一级子目录。" Icon="bi-folder2-open">
+                <label class="form-label">目录</label>
+                <TreePicker Folders="@TreeFolders" @bind-Value="SelectedFolder" AllowCreate="true" />
+                <div class="component-result" data-demo-folder-value>绑定值：@SelectedFolder</div>
+            </ContentCard>
+
+            <ContentCard Title="DateTimeRangePicker" Brand="Picker" Description="选择日期时间范围，并提供近 7 天、近 30 天等快捷选项。" Icon="bi-calendar-range">
+                <label class="form-label">日期时间范围</label>
+                <div class="date-range-demo-trigger"><DateTimeRangePicker @bind-Value="SelectedRange" /></div>
+                <div class="component-result" data-demo-range-value>@FormatRange(SelectedRange)</div>
+            </ContentCard>
+
+            <ContentCard Title="DropdownSelect&lt;TValue&gt;" Brand="Selection" Description="带图标和说明的单选下拉框，弹层默认从触发器左侧向右展开。" Icon="bi-menu-button-wide">
+                <label class="form-label">运行环境</label>
+                <DropdownSelect TValue="string" Items="@EnvironmentOptions" @bind-Value="SelectedEnvironment" Label="运行环境" Placeholder="选择环境" IconClass="bi bi-hdd-network" />
+                <div class="component-result" data-demo-select-value>绑定值：@SelectedEnvironment</div>
+            </ContentCard>
+
+            <ContentCard Title="DropdownMenu" Brand="Navigation" Description="支持禁用项、已选项和多级子菜单的操作菜单。" Icon="bi-three-dots">
+                <label class="form-label">操作菜单</label>
+                <DropdownMenu Items="@MenuItems" ItemSelected="OnMenuItemSelected" Label="打开操作菜单" TriggerText="操作" IconClass="bi bi-three-dots" />
+                <div class="component-result" data-demo-menu-value>@MenuStatus</div>
+            </ContentCard>
+
+            <div class="component-card-wide">
+                <ContentCard Title="ConfirmDialog" Brand="Dialog" Description="通过可等待的异步调用返回确认、取消或第三选项结果。" Icon="bi-question-circle">
+                    <div class="d-flex flex-wrap gap-2">
+                        <button class="btn btn-primary" type="button" @onclick="ShowConfirm">确认 / 取消</button>
+                        <button class="btn btn-outline-primary" type="button" @onclick="ShowChoice">三个选项</button>
+                    </div>
+                    <div class="component-result" role="status" data-demo-dialog-value>@DialogStatus</div>
+                    <ConfirmDialog @ref="Dialog" CloseLabel="关闭确认对话框" />
+                </ContentCard>
+            </div>
+        </div>
+    </section>
+
+    <section id="component-data-grids" class="component-test-section">
+        <header class="component-test-section-heading">
+            <div><span>Data</span><h2>数据表格</h2></div>
+            <p>同一个 DataGrid 分别展示 Blazor 渲染和 JavaScript 管理模式。</p>
+        </header>
+        <div class="data-grid-demo-list">
+            <ContentCard Title="DataGrid · Blazor" Brand="Data" Description="泛型 DataGrid 由 Blazor 渲染数据行，支持筛选、三态排序、单选和单双击回调。" Icon="bi-table">
+                <DataGrid TItem="DemoGridRow" Label="Blazor 数据表格" FilterLabel="筛选 Blazor 表格" EmptyFilterText="没有匹配的记录" Items="@GridRows" RowKey="row => row.Id.ToString()" SingleSelect="true" OnRowClick="OnGridRowClick" OnRowDoubleClick="OnGridRowDoubleClick" OnSelectionChanged="OnGridSelectionChanged">
+                    <Header>
+                        <th data-grid-column="id"><button type="button" data-grid-sort="id">编号</button></th>
+                        <th data-grid-column="name"><button type="button" data-grid-sort="name">名称</button></th>
+                        <th data-grid-column="score"><button type="button" data-grid-sort="score">分数</button></th>
+                    </Header>
+                    <RowTemplate Context="row">
+                        <td data-grid-value="@row.Id" data-grid-type="number">@row.Id</td>
+                        <td>@row.Name</td>
+                        <td data-grid-value="@row.Score" data-grid-type="number">@row.Score</td>
+                    </RowTemplate>
+                </DataGrid>
+                <div class="component-result" role="status" data-demo-grid-value>@GridStatus</div>
+            </ContentCard>
+
+            <ContentCard Title="DataGrid · JavaScript" Brand="Data" Description="泛型 DataGrid 保留相同外壳，由 JavaScript 提供数据行、筛选、排序和选择状态。" Icon="bi-code-square">
+                <div @ref="JsGridHost">
+                    <DataGrid TItem="DemoGridRow" Label="JavaScript 数据表格" FilterLabel="筛选 JavaScript 表格" EmptyFilterText="没有匹配的记录" SingleSelect="true" JavaScriptManaged="true" data-demo-js-grid="true">
+                        <Header>
+                            <th data-grid-column="id"><button type="button" data-grid-sort="id">编号</button></th>
+                            <th data-grid-column="name"><button type="button" data-grid-sort="name">名称</button></th>
+                            <th data-grid-column="score"><button type="button" data-grid-sort="score">分数</button></th>
+                        </Header>
+                    </DataGrid>
+                    <div class="component-result" role="status" data-demo-js-grid-value>等待 JavaScript 数据。</div>
+                </div>
+            </ContentCard>
+        </div>
+    </section>
+
+    <section id="component-legacy-tests" class="component-test-section">
+        <header class="component-test-section-heading">
+            <div><span>Existing</span><h2>已有组件</h2></div>
+            <p>不折叠，直接展示原测试页已有组件及其绑定结果。</p>
+        </header>
+        <div class="component-library-grid">
+            <ContentCard Title="BackBarComponent" Brand="Navigation" Description="显示带返回操作的页面标题栏。" Icon="bi-arrow-left">
+                <BackBarComponent Title="已有组件测试"></BackBarComponent>
+            </ContentCard>
+
+            <ContentCard Title="DateSelectComponent" Brand="Input" Description="使用快捷项选择开始日期和结束日期。" Icon="bi-calendar3">
+                <DateSelectComponent @bind-StartDate="LegacyStartDate" @bind-EndDate="LegacyEndDate"></DateSelectComponent>
+                <div class="component-result" data-demo-legacy-date>绑定值：@LegacyStartDate.ToString("yyyy-MM-dd") 至 @LegacyEndDate.ToString("yyyy-MM-dd")</div>
+            </ContentCard>
+
+            <ContentCard Title="EnumFlagSimpleComponent" Brand="Input" Description="以标准选择界面编辑带 Flags 特性的枚举值。" Icon="bi-ui-checks-grid">
+                <EnumFlagSimpleComponent @bind-Value="LegacyRoles" IncludeZeroValue="true"></EnumFlagSimpleComponent>
+                <div class="component-result">绑定值：@LegacyRoles</div>
+            </ContentCard>
+
+            <ContentCard Title="EnumFlagListComponent" Brand="Input" Description="通过自定义模板展示并编辑带 Flags 特性的枚举值。" Icon="bi-list-check">
+                <div class="legacy-flag-list">
+                    <EnumFlagListComponent @ref="LegacyFlagList" @bind-Value="LegacyRoles">
+                        <label class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" value="@context.Enum" @onchange="() => LegacyFlagList!.ValueChangeHandler(context.Enum)" checked="@LegacyRoles.HasFlag(context.Enum)" />
+                            <span class="form-check-label">@context.Enum.GetDisplayName()</span>
+                        </label>
+                    </EnumFlagListComponent>
+                </div>
+                <div class="component-result" data-demo-legacy-flags>绑定值：@LegacyRoles</div>
+            </ContentCard>
+        </div>
+    </section>
+</div>
 
 @code {
-    IdentityRole enumValue = IdentityRole.Admin | IdentityRole.User;
-    DateTime startDate = DateTime.Now;
-    DateTime endDate = DateTime.Now;
-    EnumFlagListComponent<IdentityRole> flist;
+    DemoInputModel DemoForm { get; } = new() { EndTime = new TimeSpan(23, 30, 0), Status = DemoStatus.Pending };
+    IdentityRole LegacyRoles { get; set; } = IdentityRole.Admin | IdentityRole.User;
+    DateTime LegacyStartDate { get; set; } = DateTime.Today.AddDays(-7);
+    DateTime LegacyEndDate { get; set; } = DateTime.Today;
+    EnumFlagListComponent<IdentityRole>? LegacyFlagList { get; set; }
+    IReadOnlyCollection<string> TreeFolders { get; } = ["/", "/产品/", "/产品/API/", "/产品/Web/", "/归档/", "/归档/2026/"];
+    string SelectedFolder { get; set; } = "/产品/API/";
+    DateTimeRangeValue? SelectedRange { get; set; }
+    string SelectedEnvironment { get; set; } = "production";
+    ConfirmDialog? Dialog { get; set; }
+    string DialogStatus { get; set; } = "尚未打开对话框。";
+    string MenuStatus { get; set; } = "尚未选择操作。";
+    string GridStatus { get; set; } = "尚未选择表格行。";
+    ElementReference JsGridHost;
+    Task<IJSObjectReference?>? GridMount;
+    bool Disposed;
 
-    protected override Task OnInitializedAsync()
+    IReadOnlyList<DropdownSelectOption<string>> EnvironmentOptions { get; } =
+    [
+        new() { Value = "development", Text = "开发环境", Description = "本机调试与快速迭代", IconClass = "bi bi-code-slash" },
+        new() { Value = "staging", Text = "预发布环境", Description = "发布前集成验证", IconClass = "bi bi-boxes" },
+        new() { Value = "production", Text = "生产环境", Description = "面向正式用户", IconClass = "bi bi-cloud-check" },
+        new() { Value = "retired", Text = "已停用环境", Disabled = true, IconClass = "bi bi-slash-circle" }
+    ];
+
+    IReadOnlyList<DropdownMenuItem> MenuItems { get; } =
+    [
+        new() { Key = "refresh", Text = "刷新数据", IconClass = "bi bi-arrow-clockwise" },
+        new()
+        {
+            Key = "export",
+            Text = "导出",
+            IconClass = "bi bi-box-arrow-up-right",
+            Children =
+            [
+                new() { Key = "export-csv", Text = "CSV", IconClass = "bi bi-filetype-csv" },
+                new() { Key = "export-json", Text = "JSON", IconClass = "bi bi-braces", Selected = true }
+            ]
+        },
+        new() { Key = "disabled", Text = "不可用操作", IconClass = "bi bi-lock", Disabled = true }
+    ];
+
+    IReadOnlyList<DemoGridRow> GridRows { get; } =
+    [
+        new(3, "Gamma", 72),
+        new(1, "Alpha", 96),
+        new(4, "Delta", 81),
+        new(2, "Beta", 88)
+    ];
+
+    async Task ShowConfirm()
     {
-        return base.OnInitializedAsync();
+        if (Dialog is null) return;
+        var confirmed = await Dialog.ConfirmAsync("确认继续执行当前操作吗？", "确认操作");
+        DialogStatus = confirmed ? "结果：已确认。" : "结果：已取消。";
     }
+
+    async Task ShowChoice()
+    {
+        if (Dialog is null) return;
+        var result = await Dialog.ChooseAsync("请选择处理方式。", "稍后处理", "三选项确认", "立即执行", "取消");
+        DialogStatus = "结果：" + result;
+    }
+
+    void OnMenuItemSelected(DropdownMenuItem item) => MenuStatus = $"已选择：{item.Text} ({item.Key})";
+    void OnGridSelectionChanged(string? key) => GridStatus = key is null ? "已清除选择。" : $"已选择行：{key}";
+    void OnGridRowClick(DataGridRowEvent<DemoGridRow> args) => GridStatus = $"单击：{args.Item.Name}，显示行号 {args.RowIndex + 1}";
+    void OnGridRowDoubleClick(DataGridRowEvent<DemoGridRow> args) => GridStatus = $"双击：{args.Item.Name}，显示行号 {args.RowIndex + 1}";
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+        => firstRender ? GridMount = MountGridAsync() : Task.CompletedTask;
+
+    async Task<IJSObjectReference?> MountGridAsync()
+    {
+        try
+        {
+            await using var module = await Js.InvokeAsync<IJSObjectReference>("import", Navigation.ToAbsoluteUri("RazorPages/ComponentTestRp.razor.js?v=2").AbsoluteUri);
+            return Disposed ? null : await module.InvokeAsync<IJSObjectReference?>("mountGrid", JsGridHost);
+        }
+        catch (JSDisconnectedException) { return null; }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        Disposed = true;
+        if (GridMount is null) return;
+        try
+        {
+            await using var grid = await GridMount;
+            if (grid is not null) await grid.InvokeVoidAsync("dispose");
+        }
+        catch (JSDisconnectedException) { }
+    }
+
+    static string FormatTime(TimeSpan value) => value == TimeSpan.FromDays(1) ? "24:00" : value.ToString(@"hh\:mm");
+    static string FormatRange(DateTimeRangeValue? value) => value is null ? "当前范围：全部" : $"{value.Label ?? "自定义"}：{value.StartTime.ToLocalTime():yyyy-MM-dd HH:mm} 至 {value.EndTime.ToLocalTime():yyyy-MM-dd HH:mm}";
+
+    sealed class DemoInputModel
+    {
+        public TimeSpan EndTime { get; set; }
+        public DemoStatus Status { get; set; }
+    }
+
+    enum DemoStatus
+    {
+        [Display(Name = "待处理", Description = "等待后台任务领取")]
+        Pending,
+        [Display(Name = "处理中", Description = "任务正在执行")]
+        Running,
+        [Display(Name = "已完成", Description = "任务已经成功完成")]
+        Completed
+    }
+
+    sealed record DemoGridRow(int Id, string Name, int Score);
 }

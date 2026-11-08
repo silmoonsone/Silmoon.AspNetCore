@@ -1,0 +1,173 @@
+﻿.date-range-picker {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+}
+
+.date-range-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 0.3rem;
+    background: transparent;
+    color: var(--silmoon-ui-text-secondary, var(--bs-secondary-color, color-mix(in srgb, CanvasText 70%, Canvas)));
+    cursor: pointer;
+}
+
+.date-range-trigger[data-filtered="true"] {
+    border-color: var(--silmoon-ui-primary-color, var(--bs-primary, #06f));
+    color: var(--silmoon-ui-primary-color, var(--bs-primary, #06f));
+    background: color-mix(in srgb, var(--silmoon-ui-primary-color, var(--bs-primary, #06f)) 10%, transparent);
+}
+
+.date-range-dialog {
+    box-sizing: border-box;
+    /* Keep native date/time controls in sync with the page theme, including auto mode. */
+    color-scheme: var(--silmoon-ui-control-color-scheme, inherit);
+    width: min(35rem, calc(100vw - 2rem));
+    max-height: calc(100dvh - 2rem);
+    margin: auto;
+    padding: 1.25rem;
+    overflow: auto;
+    border: 1px solid var(--silmoon-ui-border-color, var(--bs-border-color, color-mix(in srgb, CanvasText 25%, Canvas)));
+    border-radius: 0.75rem;
+    background: var(--silmoon-ui-bg-secondary, var(--bs-body-bg, Canvas));
+    color: var(--silmoon-ui-text-primary, var(--bs-body-color, CanvasText));
+    box-shadow: 0 1.5rem 4rem rgb(0 0 0 / 30%);
+    font-family: inherit;
+    font-size: 0.875rem;
+}
+
+.date-range-dialog::backdrop {
+    background: rgb(0 0 0 / 45%);
+}
+
+.date-range-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.date-range-header h2 {
+    margin: 0;
+    font-size: 1.0625rem;
+    font-weight: 600;
+}
+
+.date-range-close {
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    border: 0;
+    border-radius: 0.25rem;
+    background: transparent;
+    color: var(--silmoon-ui-text-secondary, var(--bs-secondary-color, color-mix(in srgb, CanvasText 70%, Canvas)));
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.date-range-presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    margin-bottom: 1rem;
+}
+
+.date-range-presets button,
+.date-range-actions button {
+    padding: 0.375rem 0.75rem;
+    border: 1px solid var(--silmoon-ui-border-color, var(--bs-border-color, color-mix(in srgb, CanvasText 25%, Canvas)));
+    border-radius: 0.375rem;
+    background: transparent;
+    color: var(--silmoon-ui-text-primary, var(--bs-body-color, CanvasText));
+    font: inherit;
+    cursor: pointer;
+}
+
+.date-range-presets button[aria-pressed="true"] {
+    border-color: var(--silmoon-ui-primary-color, var(--bs-primary, #06f));
+    background: color-mix(in srgb, var(--silmoon-ui-primary-color, var(--bs-primary, #06f)) 12%, transparent);
+    color: var(--silmoon-ui-primary-color, var(--bs-primary, #06f));
+}
+
+.date-range-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.875rem;
+}
+
+.date-range-fields label {
+    display: grid;
+    min-width: 0;
+    gap: 0.375rem;
+    font-weight: 600;
+}
+
+.date-range-fields input {
+    width: 100%;
+    min-width: 0;
+    padding: 0.5rem;
+    border: 1px solid var(--silmoon-ui-border-color, var(--bs-border-color, color-mix(in srgb, CanvasText 25%, Canvas)));
+    border-radius: 0.375rem;
+    background: var(--silmoon-ui-input-bg, var(--bs-body-bg, Field));
+    color: var(--silmoon-ui-text-primary, var(--bs-body-color, CanvasText));
+    font: inherit;
+    font-weight: 400;
+    box-sizing: border-box;
+}
+
+.date-range-hint {
+    margin: 0.75rem 0;
+    color: var(--silmoon-ui-text-secondary, var(--bs-secondary-color, color-mix(in srgb, CanvasText 70%, Canvas)));
+    font-size: 0.75rem;
+}
+
+.date-range-error {
+    margin: 0.75rem 0;
+    color: var(--silmoon-ui-danger-color, var(--bs-danger, #dc3545));
+}
+
+.date-range-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.625rem;
+    margin-top: 1rem;
+}
+
+.date-range-actions .date-range-primary {
+    border-color: var(--silmoon-ui-primary-color, var(--bs-primary, #06f));
+    background: var(--silmoon-ui-primary-color, var(--bs-primary, #06f));
+    color: #fff;
+    font-weight: 600;
+}
+
+.date-range-trigger:hover,
+.date-range-close:hover,
+.date-range-presets button:hover,
+.date-range-secondary:hover {
+    background: var(--silmoon-ui-table-row-hover-bg, rgb(127 127 127 / 12%));
+}
+
+.date-range-trigger:focus-visible,
+.date-range-dialog button:focus-visible,
+.date-range-dialog input:focus-visible {
+    outline: 2px solid var(--silmoon-ui-primary-color, var(--bs-primary, #06f));
+    outline-offset: 2px;
+}
+
+@media (max-width: 575px) {
+    .date-range-dialog {
+        padding: 1rem;
+    }
+
+    .date-range-fields {
+        grid-template-columns: 1fr;
+    }
+}

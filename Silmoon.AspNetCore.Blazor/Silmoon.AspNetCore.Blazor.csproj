@@ -10,15 +10,15 @@
   <PropertyGroup>
     <IsPackable>true</IsPackable>
     <PackageId>Silmoon.AspNetCore.Blazor</PackageId>
-    <Version>3.1.0</Version>
+    <Version>3.2.0</Version>
     <Authors>SILMOON</Authors>
     <Company>SILMOON LLC</Company>
-    <Description>Silmoon SDK</Description>
+    <Description>Reusable Blazor components and JavaScript interop for Silmoon.AspNetCore applications.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/silmoonsone/Silmoon.AspNetCore</PackageProjectUrl>
     <RepositoryUrl>https://github.com/silmoonsone/Silmoon.AspNetCore.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageTags>silmoon</PackageTags>
+    <PackageTags>silmoon;aspnetcore;blazor;razor-components</PackageTags>
     <PackageIcon>logo.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageOutputPath>..\packages_out</PackageOutputPath>
@@ -42,6 +42,10 @@
     <None Include="..\README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\README\BlazorComponents.md">
+      <Pack>True</Pack>
+      <PackagePath>docs\</PackagePath>
     </None>
   </ItemGroup>
 

@@ -1,4 +1,4 @@
-﻿namespace Silmoon.AspNetCore.Test.Components
+﻿namespace Silmoon.AspNetCore.Blazor.Components
 {
     public sealed class DropdownMenuItem
     {

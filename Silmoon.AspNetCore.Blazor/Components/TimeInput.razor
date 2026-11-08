@@ -1,6 +1,6 @@
 ﻿@inherits InputBase<TimeSpan>
 
-<input @attributes="AdditionalAttributes" class="@CssClass" type="text" maxlength="5" value="@CurrentValueAsString" @oninput="OnInput" />
+<input @attributes="AdditionalAttributes" class="@CssClass" type="text" maxlength="5" @bind="CurrentValueAsString" @bind:event="oninput" />
 
 @code {
     [Parameter] public bool AllowEndOfDay { get; set; }
@@ -31,5 +31,4 @@
         validationErrorMessage = AllowEndOfDay ? "请输入 00:00 至 24:00 之间的时间。" : "请输入 00:00 至 23:59 之间的时间。";
         return false;
     }
-    void OnInput(ChangeEventArgs eventArgs) => CurrentValueAsString = eventArgs.Value?.ToString();
 }

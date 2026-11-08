@@ -36,6 +36,23 @@ export function mount(root, options = {}, blazor = null) {
         return Array.from(body.children, row => rows.get(row)).filter(entry => entry && !entry.row.hidden);
     }
 
+    async function applyOrder(keys) {
+        let stream;
+        try {
+            const payload = new Blob([JSON.stringify(keys)]);
+            if (payload.size <= 16 * 1024) await blazor.invokeMethodAsync("ApplyGridOrder", keys);
+            else {
+                stream = DotNet.createJSStreamReference(payload);
+                await blazor.invokeMethodAsync("ApplyGridOrderStream", stream);
+            }
+        } catch (error) {
+            if (lastOrder === keys) lastOrder = null;
+            reportError(error);
+        } finally {
+            if (stream) DotNet.disposeJSObjectReference(stream);
+        }
+    }
+
     function setSelection(key) {
         if (selectedKey === key) return;
         const first = visibleRows()[0];
@@ -77,7 +94,7 @@ export function mount(root, options = {}, blazor = null) {
             if (!needsOrder) lastOrder = null;
             else if (!lastOrder || keys.some((key, index) => key !== lastOrder[index]) || keys.length !== lastOrder.length) {
                 lastOrder = keys;
-                invoke("ApplyGridOrder", keys);
+                applyOrder(keys);
             }
         } else {
             for (let index = 0; index < ordered.length; index++) {
@@ -179,10 +196,12 @@ export function mount(root, options = {}, blazor = null) {
         }
     }
 
+    function reportError(error) {
+        if (!events.signal.aborted && root.isConnected) console.error(error);
+    }
+
     function invoke(method, ...args) {
-        blazor.invokeMethodAsync(method, ...args).catch(error => {
-            if (!events.signal.aborted && root.isConnected) console.error(error);
-        });
+        blazor.invokeMethodAsync(method, ...args).catch(reportError);
     }
 
     function rowEvent(event, entry, doubleClick) {

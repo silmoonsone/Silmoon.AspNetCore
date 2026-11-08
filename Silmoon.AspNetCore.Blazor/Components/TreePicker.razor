@@ -81,7 +81,7 @@
     [Parameter] public bool Disabled { get; set; }
 
     HashSet<string> ExpandedFolders { get; set; } = new(StringComparer.Ordinal);
-    HashSet<string> AdditionalFolders { get; set; } = new(StringComparer.Ordinal);
+    HashSet<string> CreatedFolders { get; set; } = new(StringComparer.Ordinal);
     string NewFolderName { get; set; }
     string ErrorMessage { get; set; }
     bool IsOpen { get; set; }
@@ -98,7 +98,6 @@
             Value = normalizedValue;
             await ValueChanged.InvokeAsync(Value);
         }
-        AdditionalFolders.Add(Value);
         ExpandSelectedPath();
     }
 
@@ -134,7 +133,7 @@
     }
     async Task SelectFolder(string folder)
     {
-        if (Disabled) return;
+        if (Disabled || !GetFolderPaths().Contains(folder)) return;
         Value = folder;
         ExpandedFolders.Add(folder);
         ErrorMessage = null;
@@ -142,7 +141,7 @@
     }
     async Task CreateFolder()
     {
-        if (Disabled) return;
+        if (Disabled || !AllowCreate) return;
         var folderName = NewFolderName?.Trim();
         if (folderName.IsNullOrEmpty() || folderName.IndexOfAny('/', '\\', '*') >= 0 || folderName == "." || folderName == "..")
         {
@@ -154,7 +153,7 @@
         var folder = parentFolder == "/" ? $"/{folderName}/" : $"{parentFolder}{folderName}/";
         folder = NormalizeFolder(folder, "/");
         ExpandedFolders.Add(parentFolder);
-        AdditionalFolders.Add(folder);
+        CreatedFolders.Add(folder);
         Value = folder;
         NewFolderName = null;
         ErrorMessage = null;
@@ -164,7 +163,7 @@
     HashSet<string> GetFolderPaths()
     {
         var result = new HashSet<string>(StringComparer.Ordinal) { "/" };
-        foreach (var folder in (Folders ?? Array.Empty<string>()).Concat(AdditionalFolders).Append(Value))
+        foreach (var folder in (Folders ?? Array.Empty<string>()).Concat(CreatedFolders).Append(Value))
         {
             var normalizedFolder = NormalizeFolder(folder, "/");
             if (!IsValidFolder(normalizedFolder)) continue;

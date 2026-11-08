@@ -24,6 +24,13 @@
         return localValue(date) === normalized ? date : null;
     }
 
+    function utcValue(value) {
+        const iso = new Date(value).toISOString();
+        // DateTimeOffset can carry fractional seconds beyond the milliseconds supported by Date.
+        const fraction = typeof value === "string" ? /T\d{2}:\d{2}:\d{2}\.\d{3}(\d+)(?:Z|[+-]\d{2}:?\d{2})?$/i.exec(value) : null;
+        return fraction ? iso.slice(0, -1) + fraction[1].replace(/0+$/, "") + "Z" : iso;
+    }
+
     function presetRange(preset, now) {
         let start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         let nextDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
@@ -153,24 +160,34 @@
             }
         }
 
+        function readEndpoint(input, originalTime, endOfDay = false) {
+            const date = parseLocal(input.value, includeTime, endOfDay);
+            if (!date) return null;
+            // The same wall time can identify two instants during a clock rollback.
+            if (includeTime && originalTime && localValue(date) === localValue(new Date(originalTime))) return originalTime;
+            return date.toISOString();
+        }
+
         async function submit(event) {
             event.preventDefault();
             if (disposed || !dialog.open || disabledControls.length) return;
             let range = null;
             if (selectedPreset !== "all") {
-                const start = parseLocal(startInput.value, includeTime);
-                const end = parseLocal(endInput.value, includeTime, true);
-                if (!start || !end) {
+                const startTime = readEndpoint(startInput, draft?.startTime);
+                const endTime = readEndpoint(endInput, draft?.endTime, true);
+                if (!startTime || !endTime) {
                     showError(text(includeTime ? "请选择有效的开始时间和结束时间。" : "请选择有效的开始日期和结束日期。"));
-                    (!start ? startInput : endInput).focus();
+                    (!startTime ? startInput : endInput).focus();
                     return;
                 }
-                if (start > end) {
+                // Compare UTC ISO strings without the trailing Z so fractional digits retain their numeric order.
+                if (startTime.slice(0, -1) > endTime.slice(0, -1)) {
                     showError(text(includeTime ? "结束时间不能早于开始时间。" : "结束日期不能早于开始日期。"));
                     endInput.focus();
                     return;
                 }
-                range = { startTime: start.toISOString(), endTime: end.toISOString(), label: presets.find(button => button.dataset.dateRangePreset === selectedPreset)?.textContent.trim() || text("自定义") };
+                const label = draft && startTime === draft.startTime && endTime === draft.endTime ? draft.label : text("自定义");
+                range = { startTime, endTime, label };
             }
             if (!options.commitOnApply) {
                 close();
@@ -198,7 +215,7 @@
 
         function setValue(range) {
             if (disposed) return;
-            committed = range ? { ...range, startTime: new Date(range.startTime).toISOString(), endTime: new Date(range.endTime).toISOString() } : null;
+            committed = range ? { ...range, startTime: utcValue(range.startTime), endTime: utcValue(range.endTime) } : null;
             const label = committed ? (committed.label || text("自定义")) + " · " + localValue(new Date(committed.startTime), includeTime).replace("T", " ") + " — " + localValue(new Date(committed.endTime), includeTime).replace("T", " ") : text("全部时段");
             trigger.title = text(includeTime ? "选择时间范围：{0}" : "选择日期范围：{0}").replace("{0}", label);
             trigger.setAttribute("aria-label", trigger.title);

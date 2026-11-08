@@ -89,7 +89,7 @@
                 await DisposePickerAsync();
                 return;
             }
-            JsModule ??= await Js.InvokeAsync<IJSObjectReference>("import", "./_content/Silmoon.AspNetCore.Blazor/Components/DateTimeRangePicker.razor.js?v=5");
+            JsModule ??= await Js.InvokeAsync<IJSObjectReference>("import", "./_content/Silmoon.AspNetCore.Blazor/Components/DateTimeRangePicker.razor.js?v=6");
             if (Disposed) return;
             var includeTime = IncludeTime;
             if (Picker is not null && MountedIncludeTime != includeTime) await DisposePickerAsync();

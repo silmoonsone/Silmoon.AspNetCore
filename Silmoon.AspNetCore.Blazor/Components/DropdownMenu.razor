@@ -15,10 +15,10 @@
         <div class="dropdown-menu-viewport">
             @foreach (var panel in GetPanels(Items))
             {
-                <div id="@(MenuId + "-" + panel.Id)" data-dropdown-menu-panel="@panel.Id" hidden="@(panel.Id != "root")">
+                <div @key="(panel.Id, panel.Owner)" id="@(MenuId + "-" + panel.Id)" data-dropdown-menu-panel="@panel.Id" hidden="@(panel.Id != "root")">
                     @if (panel.ParentId is not null)
                     {
-                        <button class="dropdown-item dropdown-menu-back" type="button" data-dropdown-menu-back="@panel.ParentId" aria-label="@BackLabel"><i class="bi bi-chevron-left" aria-hidden="true"></i><span>@panel.Title</span></button>
+                        <button class="dropdown-item dropdown-menu-back" type="button" data-dropdown-menu-back="@panel.ParentId" aria-label="@BackLabel"><i class="bi bi-chevron-left" aria-hidden="true"></i><span>@panel.Owner?.Text</span></button>
                     }
                     @for (var index = 0; index < panel.Items.Count; index++)
                     {
@@ -42,7 +42,7 @@
         </div>
     </div>
 </silmoon-dropdown-menu>
-<silmoon-blazor-module src="@Navigation.ToAbsoluteUri("_content/Silmoon.AspNetCore.Blazor/Components/DropdownMenu.razor.js?v=4")" hidden></silmoon-blazor-module>
+<silmoon-blazor-module src="@Navigation.ToAbsoluteUri("_content/Silmoon.AspNetCore.Blazor/Components/DropdownMenu.razor.js?v=5")" hidden></silmoon-blazor-module>
 
 @code {
     [Parameter] public IReadOnlyList<DropdownMenuItem> Items { get; set; } = [];
@@ -68,14 +68,14 @@
         await ItemSelected.InvokeAsync(item);
     }
 
-    static IEnumerable<MenuPanel> GetPanels(IReadOnlyList<DropdownMenuItem> items, string id = "root", string? parentId = null, string? title = null)
+    static IEnumerable<MenuPanel> GetPanels(IReadOnlyList<DropdownMenuItem> items, string id = "root", string? parentId = null, DropdownMenuItem? owner = null)
     {
-        yield return new(id, parentId, title, items);
+        yield return new(id, parentId, owner, items);
         for (var index = 0; index < items.Count; index++)
         {
             var item = items[index];
             if (item.Children.Count == 0) continue;
-            foreach (var panel in GetPanels(item.Children, id + "-" + index, id, item.Text)) yield return panel;
+            foreach (var panel in GetPanels(item.Children, id + "-" + index, id, item)) yield return panel;
         }
     }
 
@@ -94,5 +94,5 @@
         }
     </text>;
 
-    sealed record MenuPanel(string Id, string? ParentId, string? Title, IReadOnlyList<DropdownMenuItem> Items);
+    sealed record MenuPanel(string Id, string? ParentId, DropdownMenuItem? Owner, IReadOnlyList<DropdownMenuItem> Items);
 }

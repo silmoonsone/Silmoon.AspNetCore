@@ -10,7 +10,7 @@
   <PropertyGroup>
     <IsPackable>true</IsPackable>
     <PackageId>Silmoon.AspNetCore.Blazor</PackageId>
-    <Version>3.2.0</Version>
+    <Version>3.2.1</Version>
     <Authors>SILMOON</Authors>
     <Company>SILMOON LLC</Company>
     <Description>Reusable Blazor components and JavaScript interop for Silmoon.AspNetCore applications.</Description>

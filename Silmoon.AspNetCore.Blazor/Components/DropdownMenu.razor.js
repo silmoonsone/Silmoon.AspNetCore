@@ -168,6 +168,10 @@
             state.frame = null;
             if (!root.isConnected || !menu.classList.contains("show")) { clearSurface(root); return; }
             if (toggle.disabled) { closeDisabled(root); return; }
+            if (!menu.contains(state.panel)) {
+                reset(root);
+                if (document.activeElement === document.body) toggle.focus({ preventScroll: true });
+            }
             const bounds = toggle.getBoundingClientRect();
             const viewport = viewportBounds();
             if (bounds.bottom <= viewport.top || bounds.top >= viewport.bottom || bounds.right <= viewport.left || bounds.left >= viewport.right) {

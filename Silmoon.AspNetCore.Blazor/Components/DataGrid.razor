@@ -44,10 +44,11 @@
     [Parameter] public EventCallback<string?> OnSelectionChanged { get; set; }
     [Parameter(CaptureUnmatchedValues = true)] public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
 
-    const string ModulePath = "./_content/Silmoon.AspNetCore.Blazor/Components/DataGrid.razor.js";
+    const string ModulePath = "./_content/Silmoon.AspNetCore.Blazor/Components/DataGrid.razor.js?v=2";
     readonly SemaphoreSlim Lifecycle = new(1, 1);
     ElementReference Root, MountedRoot;
     bool Disposed;
+    long OrderRevision { get; set; }
     IJSObjectReference? Module, Controller;
     DotNetObjectReference<DataGrid<TItem>>? Reference;
     Dictionary<string, int> ViewOrder = [];
@@ -60,6 +61,7 @@
     {
         if (JavaScriptManaged || RowTemplate is null)
         {
+            OrderRevision++;
             SourceRows = [];
             ViewOrder.Clear();
             return;
@@ -97,8 +99,22 @@
     public Task ApplyGridOrder(string[] keys)
     {
         if (Disposed || JavaScriptManaged) return Task.CompletedTask;
+        OrderRevision++;
         ViewOrder = keys.Select((key, index) => (key, index)).ToDictionary(pair => pair.key, pair => pair.index);
         return InvokeAsync(StateHasChanged);
+    }
+
+    [JSInvokable]
+    public async Task ApplyGridOrderStream(IJSStreamReference order)
+    {
+        if (Disposed || JavaScriptManaged) return;
+        var revision = ++OrderRevision;
+        // Each UTF-16 code unit can occupy six bytes as a JSON escape, plus quotes and a comma per key.
+        var maxBytes = 2 + SourceRows.Sum(row => 3L + 6L * row.Key.Length);
+        if (order.Length > maxBytes) return;
+        await using var stream = await order.OpenReadStreamAsync(maxBytes);
+        var keys = await System.Text.Json.JsonSerializer.DeserializeAsync<string[]>(stream);
+        if (revision == OrderRevision && keys is not null) await ApplyGridOrder(keys);
     }
 
     [JSInvokable]

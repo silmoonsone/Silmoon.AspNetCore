@@ -1,11 +1,11 @@
-# Silmoon.AspNetCore.Blazor 组件指南
+﻿# Silmoon.AspNetCore.Blazor 组件指南
 
-`Silmoon.AspNetCore.Blazor` 3.2.0 提供一组可复用的 Razor Class Library 组件，命名空间为 `Silmoon.AspNetCore.Blazor.Components`。
+本文对应仓库当前版本。`Silmoon.AspNetCore.Blazor` 提供的通用组件使用命名空间 `Silmoon.AspNetCore.Blazor.Components`。
 
 ## 安装与宿主配置
 
 ```powershell
-dotnet add package Silmoon.AspNetCore.Blazor --version 3.2.0
+dotnet add package Silmoon.AspNetCore.Blazor
 ```
 
 在 `_Imports.razor` 中引入命名空间：
@@ -34,7 +34,9 @@ dotnet add package Silmoon.AspNetCore.Blazor --version 3.2.0
              MaxWidth="480px"
              Centered="true"
              HeadingLevel="1">
-    <div>卡片主体</div>
+    <ChildContent>
+        <div>卡片主体</div>
+    </ChildContent>
     <FooterContent>卡片页脚</FooterContent>
 </ContentCard>
 ```
@@ -56,7 +58,7 @@ dotnet add package Silmoon.AspNetCore.Blazor --version 3.2.0
 }
 ```
 
-输入范围是 `00:00`–`23:59`，或在启用 `AllowEndOfDay` 时扩展到 `24:00`。
+控件在输入完整、有效的时间后更新绑定值。输入范围是 `00:00`–`23:59`，启用 `AllowEndOfDay` 时也接受 `24:00`。
 
 ## EnumSelect&lt;TEnum&gt;
 
@@ -99,7 +101,7 @@ dotnet add package Silmoon.AspNetCore.Blazor --version 3.2.0
 }
 ```
 
-`AllowCreate` 允许在当前目录下创建一级临时目录；创建结果会进入当前组件实例的目录集合并更新绑定值。使用 `Disabled` 可同时禁止选择和创建。
+目录树展示当前 `Folders`、绑定路径 `Value` 以及它们的上级目录。切换数据时，一起更新 `Folders` 和 `Value` 即可切换目录列表。`AllowCreate` 允许在选中目录下创建一级临时目录。只有通过控件手动创建的目录会额外保留在当前组件实例中。使用 `Disabled` 可同时禁止选择和创建。
 
 ## DateTimeRangePicker
 
@@ -113,7 +115,9 @@ dotnet add package Silmoon.AspNetCore.Blazor --version 3.2.0
 }
 ```
 
-`DateTimeRangeValue` 包含 `StartTime`、`EndTime` 和可选 `Label`。组件按照浏览器本地时区输入，应用后通过 UTC `DateTimeOffset` 返回。设置 `IncludeTime="false"` 可只选择日期。`Texts` 可替换内置界面文本。
+`DateTimeRangeValue` 包含 `StartTime`、`EndTime` 和可选 `Label`。组件按浏览器本地时区显示和输入，应用后返回 UTC `DateTimeOffset`。`Texts` 可替换内置界面文本。
+
+使用 `IncludeTime="true"` 编辑已有范围时，只改一端会保留另一端的原始时刻和精度，即使该时间位于夏令时回拨时重复出现的小时内。直接确认原范围也会保留其 `Label`。使用 `IncludeTime="false"` 时，所选范围覆盖完整的本地日期，从起始日的零点到结束日次日零点前一毫秒。
 
 ## DropdownSelect&lt;TValue&gt;
 
@@ -175,6 +179,8 @@ dotnet add package Silmoon.AspNetCore.Blazor --version 3.2.0
 ```
 
 `MenuWidth` 默认是 `12.5rem`，也可传入 CSS 长度或 `auto`。`AlignEnd`、`OpenUpward` 和 `EnhanceNavigation` 的行为与 `DropdownSelect` 一致。含 `Href` 的末级项目执行导航，不触发 `ItemSelected`。
+
+菜单展开期间，若父组件在同一个 `Items` 列表中删除或替换当前子菜单，控件会返回根菜单，可继续选择其他操作。
 
 ## ConfirmDialog
 
@@ -249,6 +255,8 @@ Blazor 管理模式由 Razor 模板提供表头和数据行。排序列需要 `d
 ```
 
 `RowKey` 应返回稳定且唯一的键。`DataGridRowEvent<TItem>` 提供当前数据项、键、列名、可见行号和列号。行内按钮、链接、输入框等交互元素不会触发行点击回调。
+
+在 Blazor Server 中，即使使用 GUID 等较长的行键，也可在默认 SignalR 消息大小限制下排序。宿主沿用上面的 `RowKey`、表头和行模板即可。
 
 JavaScript 管理模式设置 `JavaScriptManaged="true"`，然后导入模块并挂载真实的 `[data-grid]` 根元素：
 
